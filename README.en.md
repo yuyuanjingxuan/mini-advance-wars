@@ -2,11 +2,11 @@
 
 # ⚔️ Mini Advance Wars
 
-**Single-file turn-based strategy game · Inspired by GBA's Advance Wars**
+**Zero-dependency turn-based strategy game · Inspired by GBA's Advance Wars**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)](#-tech)
-[![Single File](https://img.shields.io/badge/code-single%20file-blue)](index.html)
+[![Vanilla JS](https://img.shields.io/badge/code-vanilla%20JS-blue)](index.html)
 [![Platform](https://img.shields.io/badge/platform-web%20%7C%20any%20browser-lightgrey)](#-getting-started)
 
 [简体中文](README.md) | **English**
@@ -15,7 +15,7 @@
 
 ---
 
-A single-file turn-based strategy game inspired by GBA's *Advance Wars*. Zero dependencies, zero installation — just open `index.html` and play!
+A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No frameworks, no build step — just open `index.html` and play!
 
 ## ✨ Features
 
@@ -28,8 +28,9 @@ A single-file turn-based strategy game inspired by GBA's *Advance Wars*. Zero de
 | 💥 **Combat system** | 90% hit chance, 12% crit (×1.5), 0.7× counterattack, damage scales with remaining HP |
 | ⬆️ **Leveling** | Gain XP from combat; level up grants +1 ATK, +1 DEF, +2 HP — enemies level up too! |
 | 🤖 **Enemy AI** | Heuristic AI evaluating damage, kills, terrain and danger; artillery keeps its distance |
-| 🔊 **Sound effects** | WebAudio chiptune SFX (mutable) |
+| 🔊 **Sound effects** | WebAudio chiptune SFX: start fanfare, attack, crit, destroy explosion, level-up, turn change, win/lose (mutable) |
 | 📜 **Battle log & unit cards** | Real-time combat log and detailed unit info panel |
+| 📖 **In-game help** | Unit stats table, color legend, terrain effects and combat rules |
 
 ## 🎮 How to Play
 
@@ -54,9 +55,9 @@ python -m http.server 8765
 
 ## 📦 Tech
 
-- Pure HTML + CSS + JavaScript in **one file** (~700 lines)
-- No frameworks, no dependencies, no build step
-- Runs in any modern browser
+- Pure HTML + CSS + JavaScript (**zero dependencies**, no frameworks, no build step)
+- Clean structure: `index.html` (page) + `css/style.css` (styles) + `js/config.js` (config) + `js/audio.js` (SFX) + `js/game.js` (logic)
+- Runs in any modern browser — double-click `index.html` works too (no ES modules / fetch, file:// friendly)
 
 ## 📄 License
 
