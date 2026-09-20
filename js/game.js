@@ -31,13 +31,14 @@ function tryCapture(u){
   const k=capKey(u.x,u.y);
   const cap=G.caps.get(k);
   if(cap&&cap.owner===u.side)return; // 已是本方城镇
-  const gain=u.hp*(u.type==='engineer'?2:1);
+  const gain=Math.round(u.hp*(CAP_MULT[u.type]||1)); // 占领速度倍率（工程师 1.5）
   const prog=(cap&&cap.owner!==u.side?0:cap?cap.prog:0)+gain;
   if(prog>=CAP_NEED){
     G.caps.set(k,{owner:u.side,prog:CAP_NEED});
     floatText(u.x,u.y,u.side==='P'?'🚩占领!':'⚠️失守','capture');
     SFX.capture();
     log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${u.side==='P'?'占领':'夺取'}了城镇 (${u.x},${u.y})！`,'level');
+    gainXp(u,8); // 占领成功 +8 经验（辅助单位的升级途径）
   }else{
     G.caps.set(k,{owner:u.side,prog});
     floatText(u.x,u.y,`占领 ${prog}/${CAP_NEED}`,'capprog');
@@ -53,6 +54,7 @@ function tryRepair(u){
     v.hp=Math.min(v.maxHp,v.hp+3);
     render();floatText(v.x,v.y,'+3','repair');SFX.repair();
     log(`🔧 ${sideName(u.side)} 工程师修理了 ${UNIT_TYPES[v.type].name}（+3 HP）`,'level');
+    gainXp(u,6); // 修理 +6 经验
     return; // 每回合只修一辆
   }
 }
@@ -65,6 +67,7 @@ function tryHeal(u){
     v.hp=Math.min(v.maxHp,v.hp+4);
     render();floatText(v.x,v.y,'+4','heal');SFX.heal();
     log(`⚕️ ${sideName(u.side)} 军医治疗了 ${UNIT_TYPES[v.type].name}（+4 HP）`,'level');
+    gainXp(u,6); // 治疗 +6 经验
     return; // 每回合只治一个
   }
 }
@@ -238,6 +241,8 @@ async function animateMove(u,path){
 // ================= 玩家操作 =================
 function select(u){G.sel=u;G.mode='selected';G.reach=bfsReach(u);SFX.select();render();showInfo(u);}
 function deselect(){G.sel=null;G.reach=null;G.mode='idle';render();}
+// 查看模式：点击敌军（或已行动单位）查看其移动/攻击范围，不能操作
+function viewUnit(u){G.sel=u;G.mode='view';G.reach=bfsReach(u);SFX.select();render();showInfo(u);}
 function waitUnit(){
   if(G.sel){G.sel.acted=true;log(`${UNIT_TYPES[G.sel.type].name} 待机。`,'dim');tryCapture(G.sel);tryRepair(G.sel);tryHeal(G.sel);}
   G.sel=null;G.reach=null;G.mode='idle';render();showInfo(null);
@@ -266,16 +271,17 @@ board.addEventListener('click',async e=>{
   const cellEl=e.target.closest('.cell');if(!cellEl)return;
   const x=+cellEl.dataset.x,y=+cellEl.dataset.y;
   const u=unitAt(x,y);
-  if(G.mode==='selected'||G.mode==='attack'){
+  if(G.mode==='selected'||G.mode==='attack'||G.mode==='view'){
     const sel=G.sel;
     if(u&&u.id===sel.id){deselect();showInfo(u);return;} // 再点一次=取消选择（可继续查看）
-    if(u&&u.side==='E'&&targetsFrom(sel,sel.x,sel.y).includes(u)){await playerAttack(sel,u);return;}
+    if(G.mode==='selected'&&u&&u.side==='E'&&targetsFrom(sel,sel.x,sel.y).includes(u)){await playerAttack(sel,u);return;}
     if(G.mode==='selected'&&G.reach.stoppable.has(x+','+y)&&(!u||u.id===sel.id)){await playerMove(sel,x,y);return;}
     if(u&&u.side==='P'&&!u.acted){select(u);return;}
+    if(u&&u.side==='E'){viewUnit(u);return;} // 点敌军=查看其范围
     deselect();return;
   }
   if(u&&u.side==='P'&&!u.acted)select(u);
-  else if(u)showInfo(u);
+  else if(u)viewUnit(u); // 敌军/已行动单位=查看模式
 });
 board.addEventListener('mousemove',e=>{
   if(!G)return;
@@ -389,11 +395,11 @@ function render(){
   if(!G)return;
   updateTop();
   const moveSet=G.reach?G.reach.stoppable:null;
-  // 选中时：攻击范围（从移动范围内任意落点可达的攻击格）
+  // 选中时：攻击范围（从移动范围内任意落点可达的攻击格）；view 模式同样显示
   let zoneSet=null,atkSet=null;
-  if(G.sel&&(G.mode==='selected'||G.mode==='attack')){
+  if(G.sel&&(G.mode==='selected'||G.mode==='attack'||G.mode==='view')){
     atkSet=new Set(targetsFrom(G.sel,G.sel.x,G.sel.y).map(t=>t.id));
-    if(G.mode==='selected'){
+    if(G.mode!=='attack'){
       zoneSet=new Set();
       const u=G.sel;
       const spots=G.mode==='selected'?[...G.reach.stoppable].map(k=>k.split(',').map(Number)):[[u.x,u.y]];
@@ -413,7 +419,7 @@ function render(){
     }
   }
   const waitBtn=$('#waitBtn');
-  if(waitBtn)waitBtn.style.display=(G.sel&&G.phase==='P'&&!G.busy&&!G.over)?'block':'none';
+  if(waitBtn)waitBtn.style.display=(G.sel&&G.mode==='selected'&&G.phase==='P'&&!G.busy&&!G.over)?'block':'none';
   // 移动路径预览：鼠标悬停在可停留格上时，显示从选中单位到该格的路径箭头
   let pathSet=null,pathDirs=null;
   if(G.sel&&G.mode==='selected'&&G.hover&&G.reach.stoppable.has(G.hover.x+','+G.hover.y)){
@@ -433,15 +439,14 @@ function render(){
     let cls='cell t-'+tk;
     const u=unitAt(x,y);
     const isSel=u&&G.sel&&u.id===G.sel.id;
-    if(isSel)cls+=' sel';
-    if(moveSet&&moveSet.has(x+','+y)&&!isSel)cls+=' mv';
+    if(isSel)cls+=' sel'+(G.mode==='view'?' view':'');
+    if(moveSet&&moveSet.has(x+','+y)&&!isSel)cls+=' mv'+(G.mode==='view'?' view':'');
     if(zoneSet&&zoneSet.has(x+','+y))cls+=' atkzone';
     if(atkSet&&u&&atkSet.has(u.id))cls+=' atk';
     if(pathSet&&pathSet.has(x+','+y)&&!isSel)cls+=' path';
     html+=`<div class="${cls}" data-x="${x}" data-y="${y}">`;
     if(tk==='city'){
       const cap=G.caps.get(capKey(x,y));
-      if(cap&&cap.owner)cls='';
       if(cap&&cap.owner)html+=`<span class="flag ${cap.owner==='P'?'fp':'fe'}"></span>`;
       if(cap&&cap.prog>0&&(!cap.owner||cap.prog<CAP_NEED))html+=`<i class="capbar"><b style="width:${Math.round(cap.prog/CAP_NEED*100)}%"></b></i>`;
     }

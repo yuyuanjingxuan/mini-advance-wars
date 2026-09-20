@@ -30,4 +30,5 @@ const DMG_MULT={
 };
 const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
 const HIT_CHANCE=0.9, CRIT_CHANCE=0.12, CRIT_MULT=1.5, COUNTER_MULT=0.7;
-const CAP_NEED=20; // 占领城镇所需进度（进度=单位当前 HP，工程师×2）
+const CAP_NEED=20; // 占领城镇所需进度（进度=单位当前 HP × 占领速度倍率）
+const CAP_MULT={infantry:1,engineer:1.5}; // 占领速度倍率（工程师 1.5 倍）

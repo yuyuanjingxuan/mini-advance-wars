@@ -69,10 +69,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .hpbar b.low{background:#ff5d5d}
 .lv{position:absolute;top:-8px;right:-8px;font-size:10px;font-style:normal;background:var(--gold);color:#5a3c00;border-radius:8px;padding:0 4px;font-weight:700;border:1px solid #b8860b;z-index:3;letter-spacing:.5px}
 .cell.mv::after{content:'';position:absolute;inset:0;background:rgba(90,170,255,.38);border:2px solid rgba(140,200,255,.75);border-radius:5px;pointer-events:none;z-index:4}
+/* 查看模式（敌军/已行动单位）：蓝格半透明，与可操作蓝格区分 */
+.cell.mv.view::after{background:rgba(90,170,255,.16);border-color:rgba(140,200,255,.35)}
 .cell.atkzone::after{content:'';position:absolute;inset:0;background:rgba(255,165,60,.35);border:2px dashed rgba(255,190,90,.8);border-radius:5px;pointer-events:none;z-index:4}
 .cell.atk::after{content:'';position:absolute;inset:0;background:rgba(255,80,80,.42);border:2px solid rgba(255,120,120,.85);border-radius:5px;pointer-events:none;z-index:4;animation:pulse .7s infinite alternate}
 @keyframes pulse{from{transform:scale(.9)}to{transform:scale(1)}}
 .cell.sel{outline:3px solid var(--gold);outline-offset:-1px;z-index:3}
+.cell.sel.view{outline-color:#e8f2ff}
 .float{position:absolute;left:50%;top:18%;transform:translateX(-50%);font-weight:800;font-size:14px;pointer-events:none;z-index:9;animation:floatUp 1.05s ease-out forwards;text-shadow:0 1px 3px #000;white-space:nowrap}
 .float.dmg{color:#ff6b6b}
 .float.crit{color:#ffb300;font-size:16px}

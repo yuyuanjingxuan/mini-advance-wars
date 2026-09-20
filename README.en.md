@@ -22,13 +22,14 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 | Feature | Description |
 |---|---|
 | 🗺️ **Adjustable map size** | 8×8 / 10×10 / 12×12, random 180°-symmetric maps with connectivity check |
-| 🪖 **4+2 unit types** | 🪖 Infantry · 🛡️ Heavy · 🚙 Recon · 🎯 Artillery (range 2-3, no counterattack) · 🔧 Engineer (2× capture + vehicle repair) · ⚕️ Medic (heals infantry) |
+| 🪖 **4+2 unit types** | 🪖 Infantry · 🛡️ Heavy · 🚙 Recon · 🎯 Artillery (range 2-3, no counterattack) · 🔧 Engineer (1.5× capture + vehicle repair) · ⚕️ Medic (heals infantry) |
 | ⚔️ **Type matchups** | Full damage multiplier table (heavy beats infantry, recon beats infantry but loses to heavy, etc.) |
 | 🌲 **Terrain effects** | 🌲 Forest +20% DEF · ⛰️ Mountain +40% DEF (slow) · 🌊 River impassable · 🏙️ City +30% DEF & heals 2 HP per turn |
-| 🚩 **City capture** | Advance Wars-style capture: only infantry/engineers can capture (engineer 2×), stand on a city and wait to build progress (progress = current HP, 20 to capture); captured cities fly your flag and can be taken back; capturing all cities also wins |
+| 🚩 **City capture** | Advance Wars-style capture: only infantry/engineers can capture (engineer 1.5×), stand on a city and wait to build progress (progress = current HP × multiplier, 20 to capture); captured cities fly your flag and can be taken back; capturing all cities also wins |
 | 🔧 **Support units** | Engineer auto-repairs adjacent vehicles +3 HP; medic auto-heals adjacent infantry/engineers +4 HP |
 | 💥 **Combat system** | 90% hit chance, 12% crit (×1.5), 0.7× counterattack, damage scales with remaining HP |
-| ⬆️ **Leveling** | Gain XP from combat; level up grants +1 ATK, +1 DEF, +2 HP (cap Lv.V, excess XP converts to healing) — enemies level up too! |
+| ⬆️ **Leveling** | Gain XP from combat (support units: capture +8, repair/heal +6); level up grants +1 ATK, +1 DEF, +2 HP (cap Lv.V, excess XP converts to healing) — enemies level up too! |
+| 🔍 **Inspect enemies** | Click an enemy unit to see its move range (translucent blue) and attack range (dashed orange) — know your enemy |
 | 🤖 **Enemy AI** | Heuristic AI evaluating damage, kills, terrain and danger; artillery keeps its distance |
 | �️ **Move path preview** | Hover to see the move path with direction arrows after selecting a unit |
 | 🔊 **Sound effects** | WebAudio chiptune SFX: start fanfare, per-unit attack/move sounds, crit, destroy explosion, level-up, capture, repair, heal, turn change, win/lose (mutable) |
