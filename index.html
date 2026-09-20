@@ -36,16 +36,17 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .t-water{background:#4a90d9}
 .t-city{background:#cfc8b8}
 .terr{font-size:calc(var(--cell)*.52);filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));z-index:1}
-.unit{position:relative;z-index:2;font-size:calc(var(--cell)*.55);line-height:1}
-.unit.p{filter:drop-shadow(0 0 4px rgba(77,163,255,.95)) drop-shadow(0 1px 2px rgba(0,0,0,.5))}
-.unit.e{filter:drop-shadow(0 0 4px rgba(255,93,93,.95)) drop-shadow(0 1px 2px rgba(0,0,0,.5))}
-.unit.acted{filter:grayscale(.85);opacity:.55}
+.unit{position:relative;z-index:2;font-size:calc(var(--cell)*.5);line-height:1;width:84%;height:84%;display:flex;align-items:center;justify-content:center;border-radius:50%;filter:drop-shadow(0 0 1px rgba(255,255,255,.9))}
+.unit.p{background:radial-gradient(circle at 32% 28%,#7db9ff,#1e63c8);border:2px solid #cfe6ff;box-shadow:0 0 8px rgba(77,163,255,.95),0 2px 4px rgba(0,0,0,.5)}
+.unit.e{background:radial-gradient(circle at 32% 28%,#ff9a9a,#c92f2a);border:2px solid #ffd4d4;box-shadow:0 0 8px rgba(255,93,93,.95),0 2px 4px rgba(0,0,0,.5)}
+.unit.acted{filter:grayscale(.85) drop-shadow(0 0 1px rgba(255,255,255,.9));opacity:.55}
 .hpbar{position:absolute;left:12%;right:12%;bottom:-3px;height:4px;background:rgba(0,0,0,.55);border-radius:2px;overflow:hidden;display:block}
 .hpbar b{display:block;height:100%;background:#5dd864}
 .hpbar b.mid{background:#ffd257}
 .hpbar b.low{background:#ff5d5d}
 .lv{position:absolute;top:-8px;right:-8px;font-size:10px;font-style:normal;background:var(--gold);color:#5a3c00;border-radius:8px;padding:0 4px;font-weight:700;border:1px solid #b8860b;z-index:3}
 .cell.mv::after{content:'';position:absolute;inset:0;background:rgba(90,170,255,.38);border:2px solid rgba(140,200,255,.75);border-radius:5px;pointer-events:none;z-index:4}
+.cell.atkzone::after{content:'';position:absolute;inset:0;background:rgba(255,165,60,.35);border:2px dashed rgba(255,190,90,.8);border-radius:5px;pointer-events:none;z-index:4}
 .cell.atk::after{content:'';position:absolute;inset:0;background:rgba(255,80,80,.42);border:2px solid rgba(255,120,120,.85);border-radius:5px;pointer-events:none;z-index:4;animation:pulse .7s infinite alternate}
 @keyframes pulse{from{transform:scale(.9)}to{transform:scale(1)}}
 .cell.sel{outline:3px solid var(--gold);outline-offset:-1px;z-index:3}
@@ -105,7 +106,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <div id="main">
   <div id="boardWrap"><div id="board"></div></div>
   <div id="side">
-    <div id="unitCard" class="card"><h3>单位</h3><div id="unitInfo">点击己方单位开始行动<br><span style="color:var(--dim);font-size:12px">点击任意单位可查看详情</span></div></div>
+    <div id="unitCard" class="card"><h3>单位</h3><div id="unitInfo">点击己方单位开始行动<br><span style="color:var(--dim);font-size:12px">点击任意单位可查看详情</span></div>
+      <button id="waitBtn" style="width:100%;margin-top:8px;display:none">⏳ 待机（原地结束行动）</button>
+    </div>
     <div class="card"><h3>地形</h3><div id="tileInfo">鼠标悬停查看地形</div></div>
     <div class="card"><h3>战报</h3><div id="log"></div></div>
   </div>
@@ -116,7 +119,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <h1>⚔️ 迷你高级战争</h1>
     <p class="sub">回合制战棋 · 致敬 GBA《高级战争》· 单文件即开即玩</p>
     <div class="help">
-      <p>🎯 <b>目标</b>：消灭全部敌军。点击己方单位 → 点<b>蓝格</b>移动 → 点<b>红格</b>攻击。</p>
+      <p>🎯 <b>目标</b>：消灭全部敌军。点击己方单位 → 点<b>蓝格</b>移动 → 点<b>红框敌人</b>攻击。</p>
+      <p>🟠<b>橙格</b>=攻击范围（虚线），🔵<b>蓝格</b>=移动范围。再点一次选中单位=取消选择；或点侧栏「⏳ 待机」原地结束行动。</p>
       <p>🌲森林 / ⛰️山地提供<b>防御加成</b>但移动缓慢，🌊河流无法通行，🏙️城镇在回合开始时回复 2 HP。</p>
       <p>💥 有命中与会心一击；⬆️ 战斗获得经验并<b>升级</b>——敌军同样会升级，速战速决！</p>
     </div>
@@ -366,6 +370,10 @@ async function animateMove(u,path){
 // ================= 玩家操作 =================
 function select(u){G.sel=u;G.mode='selected';G.reach=bfsReach(u);SFX.select();render();showInfo(u);}
 function deselect(){G.sel=null;G.reach=null;G.mode='idle';render();}
+function waitUnit(){
+  if(G.sel){G.sel.acted=true;log(`${UNIT_TYPES[G.sel.type].name} 待机。`,'dim');}
+  G.sel=null;G.reach=null;G.mode='idle';render();showInfo(null);
+}
 async function playerMove(u,x,y){
   G.busy=true;
   const path=pathTo(G.reach,x,y);
@@ -391,9 +399,9 @@ board.addEventListener('click',async e=>{
   const u=unitAt(x,y);
   if(G.mode==='selected'||G.mode==='attack'){
     const sel=G.sel;
+    if(u&&u.id===sel.id){deselect();showInfo(u);return;} // 再点一次=取消选择（可继续查看）
     if(u&&u.side==='E'&&targetsFrom(sel,sel.x,sel.y).includes(u)){await playerAttack(sel,u);return;}
     if(G.mode==='selected'&&G.reach.stoppable.has(x+','+y)&&(!u||u.id===sel.id)){await playerMove(sel,x,y);return;}
-    if(u&&u.id===sel.id){deselect();showInfo(u);return;}
     if(u&&u.side==='P'&&!u.acted){select(u);return;}
     deselect();return;
   }
@@ -498,7 +506,31 @@ function render(){
   if(!G)return;
   updateTop();
   const moveSet=G.reach?G.reach.stoppable:null;
-  const atkSet=(G.sel&&(G.mode==='selected'||G.mode==='attack'))?new Set(targetsFrom(G.sel,G.sel.x,G.sel.y).map(t=>t.id)):null;
+  // 选中时：攻击范围（从移动范围内任意落点可达的攻击格）
+  let zoneSet=null,atkSet=null;
+  if(G.sel&&(G.mode==='selected'||G.mode==='attack')){
+    atkSet=new Set(targetsFrom(G.sel,G.sel.x,G.sel.y).map(t=>t.id));
+    if(G.mode==='selected'){
+      zoneSet=new Set();
+      const u=G.sel;
+      const spots=G.mode==='selected'?[...G.reach.stoppable].map(k=>k.split(',').map(Number)):[[u.x,u.y]];
+      for(const[sx,sy]of spots){
+        for(let dy=-(u.maxR);dy<=u.maxR;dy++)for(let dx=-(u.maxR);dx<=u.maxR;dx++){
+          const d=Math.abs(dx)+Math.abs(dy);
+          if(d<u.minR||d>u.maxR)continue;
+          const tx=sx+dx,ty=sy+dy;
+          if(tx<0||ty<0||tx>=G.size||ty>=G.size)continue;
+          const occ=unitAt(tx,ty);
+          if(occ&&occ.side===u.side)continue;
+          zoneSet.add(tx+','+ty);
+        }
+      }
+      // 从攻击范围中去掉纯移动格（蓝橙不重叠，橙=只能打不能停）
+      for(const k of[...zoneSet])if(moveSet&&moveSet.has(k))zoneSet.delete(k);
+    }
+  }
+  const waitBtn=$('#waitBtn');
+  if(waitBtn)waitBtn.style.display=(G.sel&&G.phase==='P'&&!G.busy&&!G.over)?'block':'none';
   let html='';
   for(let y=0;y<G.size;y++)for(let x=0;x<G.size;x++){
     const tk=G.map[y][x],t=TERRAINS[tk];
@@ -507,6 +539,7 @@ function render(){
     const isSel=u&&G.sel&&u.id===G.sel.id;
     if(isSel)cls+=' sel';
     if(moveSet&&moveSet.has(x+','+y)&&!isSel)cls+=' mv';
+    if(zoneSet&&zoneSet.has(x+','+y))cls+=' atkzone';
     if(atkSet&&u&&atkSet.has(u.id))cls+=' atk';
     html+=`<div class="${cls}" data-x="${x}" data-y="${y}">`;
     if(t.emoji)html+=`<span class="terr">${t.emoji}</span>`;
@@ -592,6 +625,9 @@ document.querySelectorAll('#menu button[data-size]').forEach(b=>{
 });
 $('#endTurn').addEventListener('click',()=>{
   if(G&&!G.busy&&!G.over&&G.phase==='P')startEnemyPhase();
+});
+$('#waitBtn').addEventListener('click',()=>{
+  if(G&&G.sel&&!G.busy&&!G.over&&G.phase==='P')waitUnit();
 });
 $('#menuBtn').addEventListener('click',()=>{
   if(G&&!G.over&&!confirm('返回主菜单？当前进度将丢失'))return;
