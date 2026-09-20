@@ -6,6 +6,8 @@ const board=$('#board');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 // ================= 工具 =================
+const ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
+function roman(n){return ROMAN[n]||String(n);}
 function unitAt(x,y){return G.units.find(u=>u.x===x&&u.y===y)||null;}
 function terrAt(x,y){return TERRAINS[G.map[y][x]];}
 function manhattan(x1,y1,x2,y2){return Math.abs(x1-x2)+Math.abs(y1-y2);}
@@ -296,6 +298,8 @@ async function startEnemyPhase(){
       render();floatText(u.x,u.y,'+2','heal');
     }
   }
+  // 敌军 acted 标记清零（不带入我方回合，避免敌军显示"已行动"样式）
+  for(const u of G.units.filter(v=>v.side==='E'))u.acted=false;
   log(`—— 第 ${G.turn} 回合：我方行动 ——`,'phase');
   SFX.turn();
   render();updateTop();
@@ -349,13 +353,12 @@ function render(){
     if(zoneSet&&zoneSet.has(x+','+y))cls+=' atkzone';
     if(atkSet&&u&&atkSet.has(u.id))cls+=' atk';
     html+=`<div class="${cls}" data-x="${x}" data-y="${y}">`;
-    if(t.emoji)html+=`<span class="terr">${t.emoji}</span>`;
     if(u){
       const ratio=u.hp/u.maxHp;
       const hc=ratio>0.6?'':ratio>0.3?' mid':' low';
       html+=`<span class="unit ${u.side==='P'?'p':'e'}${u.acted?' acted':''}">${UNIT_TYPES[u.type].emoji}`
           +`<i class="hpbar"><b class="${hc.trim()}" style="width:${Math.round(ratio*100)}%"></b></i>`
-          +(u.level>1?`<em class="lv">${u.level}</em>`:'')
+          +(u.level>1?`<em class="lv">${roman(u.level)}</em>`:'')
           +`</span>`;
     }
     html+='</div>';
@@ -380,7 +383,7 @@ function showInfo(u){
       <span>攻击 <b>${u.atk}</b></span><span>防御 <b>${u.def}</b></span>
       <span>移动 <b>${u.move}</b></span><span>射程 <b>${u.minR===u.maxR?u.maxR:u.minR+'-'+u.maxR}</b></span>
     </div>
-    <div style="font-size:12px;color:var(--dim);margin-top:6px">${b.desc}<br>所在地形：${t.emoji||'🟩'} ${t.name}（防御+${Math.round(t.def*100)}%）${u.acted?'<br><b style="color:var(--dim)">已行动</b>':''}</div>`;
+    <div style="font-size:12px;color:var(--dim);margin-top:6px">${b.desc}<br>所在地形：${t.emoji||'🟩'} ${t.name}（防御+${Math.round(t.def*100)}%）${u.acted?`<br><b style="color:var(--dim)">已行动${u.side==='P'?'（灰显）':'（虚线框）'}</b>`:''}</div>`;
 }
 function log(msg,cls='info'){
   const el=$('#log');
