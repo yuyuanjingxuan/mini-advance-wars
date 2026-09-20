@@ -22,14 +22,17 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 | Feature | Description |
 |---|---|
 | 🗺️ **Adjustable map size** | 8×8 / 10×10 / 12×12, random 180°-symmetric maps with connectivity check |
-| 🪖 **4 unit types** | 🪖 Infantry · 🛡️ Heavy · 🚙 Recon · 🎯 Artillery (range 2-3, no counterattack) |
+| 🪖 **4+2 unit types** | 🪖 Infantry · 🛡️ Heavy · 🚙 Recon · 🎯 Artillery (range 2-3, no counterattack) · 🔧 Engineer (2× capture + vehicle repair) · ⚕️ Medic (heals infantry) |
 | ⚔️ **Type matchups** | Full damage multiplier table (heavy beats infantry, recon beats infantry but loses to heavy, etc.) |
 | 🌲 **Terrain effects** | 🌲 Forest +20% DEF · ⛰️ Mountain +40% DEF (slow) · 🌊 River impassable · 🏙️ City +30% DEF & heals 2 HP per turn |
+| 🚩 **City capture** | Advance Wars-style capture: only infantry/engineers can capture (engineer 2×), stand on a city and wait to build progress (progress = current HP, 20 to capture); captured cities fly your flag and can be taken back; capturing all cities also wins |
+| 🔧 **Support units** | Engineer auto-repairs adjacent vehicles +3 HP; medic auto-heals adjacent infantry/engineers +4 HP |
 | 💥 **Combat system** | 90% hit chance, 12% crit (×1.5), 0.7× counterattack, damage scales with remaining HP |
-| ⬆️ **Leveling** | Gain XP from combat; level up grants +1 ATK, +1 DEF, +2 HP — enemies level up too! |
+| ⬆️ **Leveling** | Gain XP from combat; level up grants +1 ATK, +1 DEF, +2 HP (cap Lv.V, excess XP converts to healing) — enemies level up too! |
 | 🤖 **Enemy AI** | Heuristic AI evaluating damage, kills, terrain and danger; artillery keeps its distance |
-| 🔊 **Sound effects** | WebAudio chiptune SFX: start fanfare, attack, crit, destroy explosion, level-up, turn change, win/lose (mutable) |
-| 📜 **Battle log & unit cards** | Real-time combat log and detailed unit info panel |
+| �️ **Move path preview** | Hover to see the move path with direction arrows after selecting a unit |
+| 🔊 **Sound effects** | WebAudio chiptune SFX: start fanfare, per-unit attack/move sounds, crit, destroy explosion, level-up, capture, repair, heal, turn change, win/lose (mutable) |
+| 📜 **Battle log & unit cards** | Real-time combat log (player blue / enemy red) and detailed unit info panel |
 | 📖 **In-game help** | Unit stats table, color legend, terrain effects and combat rules |
 
 ## 🎮 How to Play

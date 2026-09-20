@@ -40,6 +40,23 @@ button:disabled{opacity:.45;cursor:not-allowed}
   linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
   linear-gradient(#5d6779,#5d6779) 56% 38%/30% 60% no-repeat,
   #cfc8b8}
+/* 城镇归属旗帜（左上角，高级战争式） */
+.flag{position:absolute;left:6%;top:6%;width:34%;height:44%;z-index:3;pointer-events:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
+.flag::before{content:'';position:absolute;left:0;top:0;bottom:0;width:12%;background:#5a4632;border-radius:1px}
+.flag::after{content:'';position:absolute;left:12%;top:0;width:88%;height:62%;clip-path:polygon(0 0,100% 12%,0 24%);border-radius:1px}
+.flag.fp::after{background:#4da3ff}
+.flag.fe::after{background:#ff5d5d}
+/* 占领进度条（城镇格顶部，不与单位 HP 条重叠） */
+.capbar{position:absolute;left:10%;right:12%;top:2px;height:4px;background:rgba(0,0,0,.5);border-radius:2px;overflow:hidden;display:block;z-index:3;pointer-events:none}
+.capbar b{display:block;height:100%;background:var(--gold)}
+/* 移动路径预览：路径格高亮 + 方向箭头 */
+.cell.path::after{content:'';position:absolute;inset:0;background:rgba(120,220,160,.4);border:2px solid rgba(150,240,180,.8);border-radius:5px;pointer-events:none;z-index:4}
+.arrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:0;height:0;z-index:5;pointer-events:none;filter:drop-shadow(0 0 2px rgba(0,0,0,.6))}
+.arrow.a-r{border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid #eafff2}
+.arrow.a-l{border-top:7px solid transparent;border-bottom:7px solid transparent;border-right:11px solid #eafff2}
+.arrow.a-d{border-left:7px solid transparent;border-right:7px solid transparent;border-top:11px solid #eafff2}
+.arrow.a-u{border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:11px solid #eafff2}
+.arrow.a-end{width:12px;height:12px;border-radius:50%;background:#eafff2;border:2px solid #4da3ff}
 .unit{position:relative;z-index:2;font-size:calc(var(--cell)*.5);line-height:1;width:80%;height:80%;display:flex;align-items:center;justify-content:center;border-radius:50%;filter:drop-shadow(0 0 1px rgba(255,255,255,.9))}
 .unit.p{background:radial-gradient(circle at 32% 28%,#7db9ff,#1e63c8);border:2px solid #cfe6ff;box-shadow:0 0 8px rgba(77,163,255,.95),0 2px 4px rgba(0,0,0,.5)}
 .unit.e{background:radial-gradient(circle at 32% 28%,#ff9a9a,#c92f2a);border:2px solid #ffd4d4;box-shadow:0 0 8px rgba(255,93,93,.95),0 2px 4px rgba(0,0,0,.5)}
@@ -62,6 +79,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .float.miss{color:#cfd8e3}
 .float.levelup{color:var(--gold)}
 .float.heal{color:#69e07a}
+.float.capture{color:#7de0ff;font-size:15px}
+.float.capprog{color:#ffd257;font-size:12px}
+.float.maxheal{color:#69e07a}
+.float.repair{color:#ffb36b}
 @keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-26px)}}
 #side{width:270px;display:flex;flex-direction:column;gap:12px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
@@ -86,6 +107,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 #log .kill{color:#ffb36b}
 #log .level{color:var(--gold)}
 #log .phase{color:var(--blue);font-weight:700;margin-top:4px}
+/* 战报敌我着色 */
+#log .p{color:#7db9ff}
+#log .e{color:#ff8a8a}
 .overlay{position:fixed;inset:0;background:rgba(8,12,18,.78);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:50}
 .overlay.hidden{display:none}
 .dialog{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px 32px;max-width:560px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.6);max-height:90vh;overflow-y:auto}

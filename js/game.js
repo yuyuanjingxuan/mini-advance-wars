@@ -20,6 +20,54 @@ function calcDamage(att,dfd,fromX,fromY,luck=1){
   const raw=att.atk*mult*(att.hp/att.maxHp)*(1-dterr.def)*luck;
   return Math.max(1,Math.round(raw-dfd.def));
 }
+// ================= 城镇占领（高级战争式：站上去待机积累进度，进度=当前 HP） =================
+// G.caps: Map('x,y' -> {owner:'P'|'E', prog})，初始中立
+function capKey(x,y){return x+','+y;}
+function capAt(x,y){return G.caps?G.caps.get(capKey(x,y))||null:null;}
+// 单位在城镇上待机/移动结束：积累占领进度（进度 = 单位当前 HP，工程师×2；仅步兵/工程师可占领）
+function tryCapture(u){
+  if(G.map[u.y][u.x]!=='city')return;
+  if(!CAPTURERS.includes(u.type))return; // 只有步兵/工程师能占领
+  const k=capKey(u.x,u.y);
+  const cap=G.caps.get(k);
+  if(cap&&cap.owner===u.side)return; // 已是本方城镇
+  const gain=u.hp*(u.type==='engineer'?2:1);
+  const prog=(cap&&cap.owner!==u.side?0:cap?cap.prog:0)+gain;
+  if(prog>=CAP_NEED){
+    G.caps.set(k,{owner:u.side,prog:CAP_NEED});
+    floatText(u.x,u.y,u.side==='P'?'🚩占领!':'⚠️失守','capture');
+    SFX.capture();
+    log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${u.side==='P'?'占领':'夺取'}了城镇 (${u.x},${u.y})！`,'level');
+  }else{
+    G.caps.set(k,{owner:u.side,prog});
+    floatText(u.x,u.y,`占领 ${prog}/${CAP_NEED}`,'capprog');
+    log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} 占领进度 ${prog}/${CAP_NEED}`,'dim');
+  }
+}
+// 工程师修理相邻载具（+3 HP）
+function tryRepair(u){
+  if(u.type!=='engineer')return;
+  for(const v of G.units){
+    if(v.side!==u.side||!VEHICLES.includes(v.type)||v.hp>=v.maxHp)continue;
+    if(manhattan(u.x,u.y,v.x,v.y)!==1)continue;
+    v.hp=Math.min(v.maxHp,v.hp+3);
+    render();floatText(v.x,v.y,'+3','repair');SFX.repair();
+    log(`🔧 ${sideName(u.side)} 工程师修理了 ${UNIT_TYPES[v.type].name}（+3 HP）`,'level');
+    return; // 每回合只修一辆
+  }
+}
+// 军医治疗相邻步兵/工程师（+4 HP）
+function tryHeal(u){
+  if(u.type!=='medic')return;
+  for(const v of G.units){
+    if(v.side!==u.side||!['infantry','engineer'].includes(v.type)||v.hp>=v.maxHp)continue;
+    if(manhattan(u.x,u.y,v.x,v.y)!==1)continue;
+    v.hp=Math.min(v.maxHp,v.hp+4);
+    render();floatText(v.x,v.y,'+4','heal');SFX.heal();
+    log(`⚕️ ${sideName(u.side)} 军医治疗了 ${UNIT_TYPES[v.type].name}（+4 HP）`,'level');
+    return; // 每回合只治一个
+  }
+}
 
 // ================= 地图生成（180° 对称 + 连通性校验） =================
 function genMap(size){
@@ -32,7 +80,7 @@ function genMap(size){
     }
     for(let y=0;y<size;y++)for(let x=half;x<size;x++)m[y][x]=m[size-1-y][size-1-x];
     // 出生点强制平原
-    const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2]];
+    const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[1,size-3]];
     for(const[x,y]of spawns){m[y][x]='plain';m[size-1-y][size-1-x]='plain';}
     // 城镇：每方后方 1 个 + 中路 1 对
     const cities=[[2,size-3],[size-3,2]];
@@ -100,10 +148,12 @@ function pathTo(reach,x,y){
 async function doAttack(att,dfd){
   G.busy=true;
   log(`${sideName(att.side)} ${UNIT_TYPES[att.type].name} 攻击 ${sideName(dfd.side)} ${UNIT_TYPES[dfd.type].name}！`,'info');
+  SFX.attack(att.type);
   await resolveHit(att,dfd,1);
   if(!G.over&&dfd.hp>0&&canCounter(dfd,att)){
     await sleep(260);
     log(`${UNIT_TYPES[dfd.type].name} 反击！`,'dim');
+    SFX.attack(dfd.type);
     await resolveHit(dfd,att,COUNTER_MULT);
   }
   checkEnd();
@@ -143,18 +193,29 @@ function gainXp(u,n){
   u.xp+=n;
   let need=30+(u.level-1)*10;
   while(u.xp>=need){
-    u.xp-=need;u.level++;
-    u.atk+=1;u.def+=1;u.maxHp+=2;u.hp=Math.min(u.maxHp,u.hp+3);
-    render();
-    floatText(u.x,u.y,'⬆️ Lv'+u.level,'levelup');SFX.level();
-    log(`⬆️ ${sideName(u.side)} ${UNIT_TYPES[u.type].name} 升到 Lv.${u.level}！（攻+1 防+1 HP+2）`,'level');
+    u.xp-=need;
+    if(u.level<5){ // 等级上限 V
+      u.level++;
+      u.atk+=1;u.def+=1;u.maxHp+=2;u.hp=Math.min(u.maxHp,u.hp+3);
+      render();
+      floatText(u.x,u.y,'⬆️ Lv'+u.level,'levelup');SFX.level();
+      log(`⬆️ ${sideName(u.side)} ${UNIT_TYPES[u.type].name} 升到 Lv.${u.level}！（攻+1 防+1 HP+2）`,'level');
+    }else{ // 满级：经验转为 HP 恢复
+      u.hp=Math.min(u.maxHp,u.hp+3);
+      render();
+      floatText(u.x,u.y,'+3','maxheal');SFX.maxheal();
+      log(`✚ ${sideName(u.side)} ${UNIT_TYPES[u.type].name} 已满级，经验转为恢复 3 HP`,'dim');
+    }
     need=30+(u.level-1)*10;
   }
 }
 function checkEnd(){
   const p=G.units.some(u=>u.side==='P');
   const e=G.units.some(u=>u.side==='E');
-  if(!e||!p){G.over=true;showResult(!e);}
+  if(!e||!p){G.over=true;showResult(!e);return;}
+  // 占领胜利：占领全部城镇（至少 1 座）也可获胜
+  const cities=[...G.caps.keys()];
+  if(cities.length&&cities.every(k=>G.caps.get(k).owner==='P')){G.over=true;showResult(true);}
 }
 
 // ================= 特效 =================
@@ -178,16 +239,17 @@ async function animateMove(u,path){
 function select(u){G.sel=u;G.mode='selected';G.reach=bfsReach(u);SFX.select();render();showInfo(u);}
 function deselect(){G.sel=null;G.reach=null;G.mode='idle';render();}
 function waitUnit(){
-  if(G.sel){G.sel.acted=true;log(`${UNIT_TYPES[G.sel.type].name} 待机。`,'dim');}
+  if(G.sel){G.sel.acted=true;log(`${UNIT_TYPES[G.sel.type].name} 待机。`,'dim');tryCapture(G.sel);tryRepair(G.sel);tryHeal(G.sel);}
   G.sel=null;G.reach=null;G.mode='idle';render();showInfo(null);
 }
 async function playerMove(u,x,y){
   G.busy=true;
   const path=pathTo(G.reach,x,y);
   G.reach=null;G.mode='idle';render();
-  SFX.move();
+  SFX.move(u.type);
   await animateMove(u,path);
   G.busy=false;
+  tryCapture(u);tryRepair(u);tryHeal(u);
   const ts=targetsFrom(u,u.x,u.y);
   if(ts.length){G.mode='attack';G.sel=u;render();showInfo(u);}
   else{u.acted=true;G.sel=null;render();showInfo(u);}
@@ -219,7 +281,15 @@ board.addEventListener('mousemove',e=>{
   if(!G)return;
   const c=e.target.closest('.cell');if(!c)return;
   const x=+c.dataset.x,y=+c.dataset.y,t=terrAt(x,y);
-  $('#tileInfo').innerHTML=`<b>${t.emoji||'🟩'} ${t.name}</b><br>防御加成 +${Math.round(t.def*100)}% ｜ 移动消耗 ${t.cost===Infinity?'不可通行':t.cost}`;
+  // 路径预览：悬停格变化时重渲染（仅选中状态下）
+  const hv=G.hover;
+  if(!G.hover||G.hover.x!==x||G.hover.y!==y){
+    G.hover={x,y};
+    if(G.sel&&G.mode==='selected')render();
+  }
+  const cap=capAt(x,y);
+  const capTxt=cap?(cap.owner?`｜${cap.owner==='P'?'🚩我方':'⚠️敌军'}占领`+(cap.prog<CAP_NEED?`（进度 ${cap.prog}/${CAP_NEED}）`:''):(cap.prog>0?`｜占领中 ${cap.prog}/${CAP_NEED}`:'｜中立')):'';
+  $('#tileInfo').innerHTML=`<b>${t.emoji||'🟩'} ${t.name}</b><br>防御加成 +${Math.round(t.def*100)}% ｜ 移动消耗 ${t.cost===Infinity?'不可通行':t.cost}${G.map[y][x]==='city'?capTxt:''}`;
 });
 
 // ================= 敌方 AI =================
@@ -265,7 +335,7 @@ async function aiAct(u){
   if(plan){
     if(plan.x!==u.x||plan.y!==u.y){
       const path=pathTo(plan.reach,plan.x,plan.y);
-      SFX.move();
+      SFX.move(u.type);
       await animateMove(u,path);
     }
     const t=plan.target;
@@ -273,6 +343,7 @@ async function aiAct(u){
       await doAttack(u,t);
     }
   }
+  tryCapture(u);tryRepair(u);tryHeal(u);
   u.acted=true;G.sel=null;
   render();
 }
@@ -289,11 +360,12 @@ async function startEnemyPhase(){
     if(G.over)return;
     await sleep(220);
   }
-  // 新回合：我方城内回血
+  // 新回合：本方城镇回血（只有己方占领的城镇才回血）
   G.turn++;G.phase='P';G.busy=false;
   for(const u of G.units.filter(v=>v.side==='P')){
     u.acted=false;
-    if(G.map[u.y][u.x]==='city'&&u.hp<u.maxHp){
+    const cap=capAt(u.x,u.y);
+    if(G.map[u.y][u.x]==='city'&&cap&&cap.owner==='P'&&u.hp<u.maxHp){
       u.hp=Math.min(u.maxHp,u.hp+2);
       render();floatText(u.x,u.y,'+2','heal');
     }
@@ -342,6 +414,19 @@ function render(){
   }
   const waitBtn=$('#waitBtn');
   if(waitBtn)waitBtn.style.display=(G.sel&&G.phase==='P'&&!G.busy&&!G.over)?'block':'none';
+  // 移动路径预览：鼠标悬停在可停留格上时，显示从选中单位到该格的路径箭头
+  let pathSet=null,pathDirs=null;
+  if(G.sel&&G.mode==='selected'&&G.hover&&G.reach.stoppable.has(G.hover.x+','+G.hover.y)){
+    const p=pathTo(G.reach,G.hover.x,G.hover.y);
+    pathSet=new Set(p.map(([px,py])=>px+','+py));
+    pathDirs=new Map();
+    for(let i=0;i<p.length;i++){
+      const[px,py]=p[i];
+      let d='end';
+      if(i<p.length-1){const[nx,ny]=p[i+1];d=nx>px?'r':nx<px?'l':ny>py?'d':'u';}
+      pathDirs.set(px+','+py,d);
+    }
+  }
   let html='';
   for(let y=0;y<G.size;y++)for(let x=0;x<G.size;x++){
     const tk=G.map[y][x],t=TERRAINS[tk];
@@ -352,7 +437,14 @@ function render(){
     if(moveSet&&moveSet.has(x+','+y)&&!isSel)cls+=' mv';
     if(zoneSet&&zoneSet.has(x+','+y))cls+=' atkzone';
     if(atkSet&&u&&atkSet.has(u.id))cls+=' atk';
+    if(pathSet&&pathSet.has(x+','+y)&&!isSel)cls+=' path';
     html+=`<div class="${cls}" data-x="${x}" data-y="${y}">`;
+    if(tk==='city'){
+      const cap=G.caps.get(capKey(x,y));
+      if(cap&&cap.owner)cls='';
+      if(cap&&cap.owner)html+=`<span class="flag ${cap.owner==='P'?'fp':'fe'}"></span>`;
+      if(cap&&cap.prog>0&&(!cap.owner||cap.prog<CAP_NEED))html+=`<i class="capbar"><b style="width:${Math.round(cap.prog/CAP_NEED*100)}%"></b></i>`;
+    }
     if(u){
       const ratio=u.hp/u.maxHp;
       const hc=ratio>0.6?'':ratio>0.3?' mid':' low';
@@ -361,6 +453,7 @@ function render(){
           +(u.level>1?`<em class="lv">${roman(u.level)}</em>`:'')
           +`</span>`;
     }
+    if(pathDirs&&pathDirs.has(x+','+y))html+=`<span class="arrow a-${pathDirs.get(x+','+y)}"></span>`;
     html+='</div>';
   }
   board.innerHTML=html;
@@ -388,6 +481,11 @@ function showInfo(u){
 function log(msg,cls='info'){
   const el=$('#log');
   const d=document.createElement('div');
+  // 战报敌我着色：消息以"我方"开头用蓝色，以"敌军"开头用红色
+  if(cls==='info'||cls==='dim'||cls==='level'||cls==='kill'){
+    if(msg.startsWith('我方'))cls='p';
+    else if(msg.startsWith('敌军'))cls='e';
+  }
   d.className=cls;d.textContent=msg;
   el.appendChild(d);
   el.scrollTop=el.scrollHeight;
@@ -401,14 +499,19 @@ function makeUnit(side,type,x,y){
 }
 function newGame(size){
   const map=genMap(size);
-  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false};
+  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map()};
   uid=0;
-  const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2]];
-  const types=['infantry','heavy','recon','infantry','artillery'];
+  const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3]];
+  const types=['infantry','heavy','recon','infantry','artillery','engineer'];
   spawns.forEach((p,i)=>{
     G.units.push(makeUnit('P',types[i],p[0],p[1]));
     G.units.push(makeUnit('E',types[i],size-1-p[0],size-1-p[1]));
   });
+  // 军医：双方各 1 名，放在出生点附近
+  G.units.push(makeUnit('P','medic',1,size-3));
+  G.units.push(makeUnit('E','medic',size-2,2));
+  // 初始城镇全部中立
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(map[y][x]==='city')G.caps.set(capKey(x,y),{owner:null,prog:0});
   board.style.setProperty('--n',size);
   board.style.setProperty('--cell',(size<=8?54:size<=10?46:38)+'px');
   $('#menu').classList.add('hidden');
