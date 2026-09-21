@@ -9,10 +9,10 @@ const TERRAINS={
   hq:      {name:'总部', emoji:'🚩', cost:1, def:0.4 },
   factory: {name:'工厂', emoji:'🏭', cost:1, def:0.3 },
 };
-// 可占领的建筑（城镇/工厂，共用占领进度机制；总部不可占领）
-const CAPTURABLE=['city','factory'];
+// 可占领的建筑（城镇/工厂/总部，共用占领进度机制；总部开局中立，任一方占领敌方总部即获胜，己方总部被占即战败）
+const CAPTURABLE=['city','factory','hq'];
 // 每兵种地形移动力（参考高级战争：步兵/机甲步行、履带、轮胎）
-// 步兵：森林 1 山地 2；工程师（机甲化）：山地 1；履带（重装/坦克/火炮）：森林 2 不可入山地；
+// 步兵/重装/军医：森林 1 山地 2；工程师（机甲化）：山地 1；履带（坦克/火炮）：森林 2 不可入山地；
 // 轮胎（侦察车/火箭炮）：平原 2 森林 3 不可入山地；河流对所有地面单位不可通行
 const MOVE_COST={
   infantry:{plain:1,forest:1,mountain:2,water:Infinity,city:1,factory:1,hq:1},
@@ -38,8 +38,8 @@ const UNIT_TYPES={
 const VEHICLES=['recon','artillery','tank','rocket'];
 // 间接打击单位：移动后不能开火、不反击
 const NO_MOVE_FIRE=['artillery','rocket'];
-// 可占领建筑的单位
-const CAPTURERS=['infantry','engineer'];
+// 可占领建筑的单位（步兵/重装/工程师）
+const CAPTURERS=['infantry','heavy','engineer'];
 // 克制倍率：DMG_MULT[攻击方][防守方]
 const DMG_MULT={
   infantry:{infantry:1.0, heavy:0.55, recon:0.9,  artillery:1.0, engineer:0.9, medic:1.0, tank:0.35, rocket:0.9},
@@ -54,7 +54,7 @@ const DMG_MULT={
 const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
 const HIT_CHANCE=0.9, CRIT_CHANCE=0.12, CRIT_MULT=1.5, COUNTER_MULT=0.7;
 const CAP_NEED=20; // 占领城镇所需进度（进度=单位当前 HP × 占领速度倍率）
-const CAP_MULT={infantry:1,engineer:1.5}; // 占领速度倍率（工程师 1.5 倍）
+const CAP_MULT={infantry:1,heavy:1,engineer:1.5}; // 占领速度倍率（工程师 1.5 倍）
 // 火炮规则：移动后不能开火，只能原地待机开火
 const ARTILLERY_MOVE_FIRE=false;
 // ================= 经济与生产（参考高级战争：占城→收入→工厂造兵） =================

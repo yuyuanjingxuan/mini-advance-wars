@@ -366,12 +366,9 @@ function checkEnd(){
   for(const[k,cap]of G.caps){
     const[x,y]=k.split(',').map(Number);
     if(G.map[y][x]!=='hq'||!cap.owner)continue;
-    if(cap.owner==='P'&&x>Math.floor(G.size/2)-1){G.over=true;showResult(true);return;}
-    if(cap.owner==='E'&&x<Math.floor(G.size/2)){G.over=true;showResult(false);return;}
+    if(cap.owner==='P'&&x>Math.floor(G.size/2)-1){G.over=true;showResult(true,'hq');return;}
+    if(cap.owner==='E'&&x<Math.floor(G.size/2)){G.over=true;showResult(false,'hq');return;}
   }
-  // 占领胜利：占领全部建筑（至少 1 座）也可获胜
-  const caps=[...G.caps.keys()];
-  if(caps.length&&caps.every(k=>G.caps.get(k).owner==='P')){G.over=true;showResult(true);}
 }
 
 // ================= 特效 =================
@@ -719,12 +716,12 @@ function newGame(size){
   BGM.start('P'); // 开局播放我方主题 BGM
   render();showInfo(null);
 }
-function showResult(win){
+function showResult(win,how){
   G.busy=true;G.resultWin=win;
   BGM.stop(); // 结束时停止 BGM
   win?SFX.win():SFX.lose();
   $('#resultTitle').textContent=win?T('winTitle'):T('loseTitle');
-  $('#resultText').textContent=win?T('winText')(G.turn):T('loseText')(G.turn);
+  $('#resultText').textContent=win?T('winText')(G.turn,how):T('loseText')(G.turn,how);
   $('#overlay').classList.remove('hidden');
 }
 function toMenu(){
