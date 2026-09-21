@@ -11,7 +11,7 @@ function roman(n){return ROMAN[n]||String(n);}
 function unitAt(x,y){return G.units.find(u=>u.x===x&&u.y===y)||null;}
 function terrAt(x,y){return TERRAINS[G.map[y][x]];}
 function manhattan(x1,y1,x2,y2){return Math.abs(x1-x2)+Math.abs(y1-y2);}
-function sideName(s){return s==='P'?'我方':'敌军';}
+function sideName(s){return s==='P'?T('sideP'):T('sideE');}
 function inRange(u,x,y,tx,ty){const d=manhattan(x,y,tx,ty);return d>=u.minR&&d<=u.maxR;}
 function targetsFrom(u,x,y){return G.units.filter(t=>t.side!==u.side&&inRange(u,x,y,t.x,t.y));}
 function calcDamage(att,dfd,fromX,fromY,luck=1){
@@ -24,7 +24,7 @@ function calcDamage(att,dfd,fromX,fromY,luck=1){
 // G.caps: Map('x,y' -> {owner:'P'|'E', prog})，初始中立
 function capKey(x,y){return x+','+y;}
 function capAt(x,y){return G.caps?G.caps.get(capKey(x,y))||null:null;}
-// 单位在城镇上待机/移动结束：积累占领进度（进度 = 单位当前 HP，工程师×2；仅步兵/工程师可占领）
+// 单位在城镇上待机/移动结束：积累占领进度（进度 = 单位当前 HP，工程师×1.5；仅步兵/工程师可占领）
 function tryCapture(u){
   if(G.map[u.y][u.x]!=='city')return;
   if(!CAPTURERS.includes(u.type))return; // 只有步兵/工程师能占领
@@ -35,17 +35,27 @@ function tryCapture(u){
   const prog=(cap&&cap.owner!==u.side?0:cap?cap.prog:0)+gain;
   if(prog>=CAP_NEED){
     G.caps.set(k,{owner:u.side,prog:CAP_NEED});
-    floatText(u.x,u.y,u.side==='P'?'🚩占领!':'⚠️失守','capture');
+    floatText(u.x,u.y,u.side==='P'?T('capFloatP'):T('capFloatE'),'capture');
     SFX.capture();
-    log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${u.side==='P'?'占领':'夺取'}了城镇 (${u.x},${u.y})！`,'level');
+    log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${u.side==='P'?T('capVerb'):T('takeVerb')} (${u.x},${u.y})！`,'level');
     gainXp(u,8); // 占领成功 +8 经验（辅助单位的升级途径）
   }else{
-    G.caps.set(k,{owner:u.side,prog});
-    floatText(u.x,u.y,`占领 ${prog}/${CAP_NEED}`,'capprog');
-    log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} 占领进度 ${prog}/${CAP_NEED}`,'dim');
+    G.caps.set(k,{owner:u.side,prog,by:u.id});
+    floatText(u.x,u.y,`${T('prog')} ${prog}/${CAP_NEED}`,'capprog');
+    log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${T('prog')} ${prog}/${CAP_NEED}`,'dim');
   }
 }
-// 工程师修理相邻载具（+3 HP）
+// 离开城镇：占领进度清零（fx,fy = 单位出发格；中立/被夺回中的城镇恢复 0）
+function resetCaptureOnLeave(u,fx,fy){
+  if(G.map[fy][fx]!=='city')return; // 出发格不是城镇，无需处理
+  const k=capKey(fx,fy);
+  const cap=G.caps.get(k);
+  if(cap&&cap.prog>0&&cap.prog<CAP_NEED&&cap.by===u.id){
+    G.caps.set(k,{owner:cap.owner,prog:0});
+    log(T('leaveLog')(u.type),'dim');
+  }
+}
+// 工程师修理相邻载具（+3 HP）；原地待机也可修理
 function tryRepair(u){
   if(u.type!=='engineer')return;
   for(const v of G.units){
@@ -53,12 +63,12 @@ function tryRepair(u){
     if(manhattan(u.x,u.y,v.x,v.y)!==1)continue;
     v.hp=Math.min(v.maxHp,v.hp+3);
     render();floatText(v.x,v.y,'+3','repair');SFX.repair();
-    log(`🔧 ${sideName(u.side)} 工程师修理了 ${UNIT_TYPES[v.type].name}（+3 HP）`,'level');
+    log(T('repairLog')(u.side,v.type),'level');
     gainXp(u,6); // 修理 +6 经验
     return; // 每回合只修一辆
   }
 }
-// 军医治疗相邻步兵/工程师（+4 HP）
+// 军医治疗相邻步兵/工程师（+4 HP）；原地待机也可治疗
 function tryHeal(u){
   if(u.type!=='medic')return;
   for(const v of G.units){
@@ -66,7 +76,7 @@ function tryHeal(u){
     if(manhattan(u.x,u.y,v.x,v.y)!==1)continue;
     v.hp=Math.min(v.maxHp,v.hp+4);
     render();floatText(v.x,v.y,'+4','heal');SFX.heal();
-    log(`⚕️ ${sideName(u.side)} 军医治疗了 ${UNIT_TYPES[v.type].name}（+4 HP）`,'level');
+    log(T('healLog')(u.side,v.type),'level');
     gainXp(u,6); // 治疗 +6 经验
     return; // 每回合只治一个
   }
@@ -150,12 +160,12 @@ function pathTo(reach,x,y){
 // ================= 战斗 =================
 async function doAttack(att,dfd){
   G.busy=true;
-  log(`${sideName(att.side)} ${UNIT_TYPES[att.type].name} 攻击 ${sideName(dfd.side)} ${UNIT_TYPES[dfd.type].name}！`,'info');
+  log(T('atkLog')(att,dfd),'info');
   SFX.attack(att.type);
   await resolveHit(att,dfd,1);
   if(!G.over&&dfd.hp>0&&canCounter(dfd,att)){
     await sleep(260);
-    log(`${UNIT_TYPES[dfd.type].name} 反击！`,'dim');
+    log(T('counter'),'dim');
     SFX.attack(dfd.type);
     await resolveHit(dfd,att,COUNTER_MULT);
   }
@@ -169,7 +179,7 @@ function canCounter(d,att){
 async function resolveHit(a,d,counterMult){
   if(Math.random()>HIT_CHANCE){
     floatText(d.x,d.y,'MISS','miss');SFX.miss();
-    log('……被闪避了！','dim');
+    log(T('dodged'),'dim');
     return;
   }
   const crit=Math.random()<CRIT_CHANCE;
@@ -183,13 +193,13 @@ async function resolveHit(a,d,counterMult){
   await sleep(320);
   gainXp(a,8);
   if(d.hp<=0){
-    log(`💥 ${sideName(a.side)} ${UNIT_TYPES[a.type].name} 击毁了 ${sideName(d.side)} ${UNIT_TYPES[d.type].name}！`,'kill');
+    log(T('killLog')(a,d),'kill');
     SFX.destroy();
     gainXp(a,25);
     G.units=G.units.filter(u=>u.id!==d.id);
     render();
   }else{
-    log(`${UNIT_TYPES[d.type].name} 剩余 ${d.hp}/${d.maxHp} HP`,'dim');
+    log(T('remain')(d.type,d.hp),'dim');
   }
 }
 function gainXp(u,n){
@@ -202,12 +212,12 @@ function gainXp(u,n){
       u.atk+=1;u.def+=1;u.maxHp+=2;u.hp=Math.min(u.maxHp,u.hp+3);
       render();
       floatText(u.x,u.y,'⬆️ Lv'+u.level,'levelup');SFX.level();
-      log(`⬆️ ${sideName(u.side)} ${UNIT_TYPES[u.type].name} 升到 Lv.${u.level}！（攻+1 防+1 HP+2）`,'level');
+      log(T('lvlUp')(u.side,u.type,u.level),'level');
     }else{ // 满级：经验转为 HP 恢复
       u.hp=Math.min(u.maxHp,u.hp+3);
       render();
       floatText(u.x,u.y,'+3','maxheal');SFX.maxheal();
-      log(`✚ ${sideName(u.side)} ${UNIT_TYPES[u.type].name} 已满级，经验转为恢复 3 HP`,'dim');
+      log(T('maxLvl')(u.side,u.type),'dim');
     }
     need=30+(u.level-1)*10;
   }
@@ -244,19 +254,23 @@ function deselect(){G.sel=null;G.reach=null;G.mode='idle';render();}
 // 查看模式：点击敌军（或已行动单位）查看其移动/攻击范围，不能操作
 function viewUnit(u){G.sel=u;G.mode='view';G.reach=bfsReach(u);SFX.select();render();showInfo(u);}
 function waitUnit(){
-  if(G.sel){G.sel.acted=true;log(`${UNIT_TYPES[G.sel.type].name} 待机。`,'dim');tryCapture(G.sel);tryRepair(G.sel);tryHeal(G.sel);}
+  if(G.sel){G.sel.acted=true;log(T('waitLog')(G.sel.type),'dim');tryCapture(G.sel);tryRepair(G.sel);tryHeal(G.sel);}
   G.sel=null;G.reach=null;G.mode='idle';render();showInfo(null);
 }
 async function playerMove(u,x,y){
   G.busy=true;
+  const fx=u.x,fy=u.y; // 记录出发格（用于离开城镇时清零占领进度）
   const path=pathTo(G.reach,x,y);
   G.reach=null;G.mode='idle';render();
   SFX.move(u.type);
   await animateMove(u,path);
   G.busy=false;
+  resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
   tryCapture(u);tryRepair(u);tryHeal(u);
   const ts=targetsFrom(u,u.x,u.y);
-  if(ts.length){G.mode='attack';G.sel=u;render();showInfo(u);}
+  // 火炮移动后不能开火，只能原地待机开火
+  const canFire=!(u.type==='artillery'&&!ARTILLERY_MOVE_FIRE);
+  if(ts.length&&canFire){G.mode='attack';G.sel=u;render();showInfo(u);}
   else{u.acted=true;G.sel=null;render();showInfo(u);}
 }
 async function playerAttack(a,d){
@@ -294,8 +308,8 @@ board.addEventListener('mousemove',e=>{
     if(G.sel&&G.mode==='selected')render();
   }
   const cap=capAt(x,y);
-  const capTxt=cap?(cap.owner?`｜${cap.owner==='P'?'🚩我方':'⚠️敌军'}占领`+(cap.prog<CAP_NEED?`（进度 ${cap.prog}/${CAP_NEED}）`:''):(cap.prog>0?`｜占领中 ${cap.prog}/${CAP_NEED}`:'｜中立')):'';
-  $('#tileInfo').innerHTML=`<b>${t.emoji||'🟩'} ${t.name}</b><br>防御加成 +${Math.round(t.def*100)}% ｜ 移动消耗 ${t.cost===Infinity?'不可通行':t.cost}${G.map[y][x]==='city'?capTxt:''}`;
+  const capTxt=cap?(cap.owner?`｜${cap.owner==='P'?T('myFlag'):T('enFlag')}`+(cap.prog<CAP_NEED?`（${T('prog')} ${cap.prog}/${CAP_NEED}）`:''):(cap.prog>0?`｜${T('capturing')} ${cap.prog}/${CAP_NEED}`:`｜${T('neutral')}`)):'';
+  $('#tileInfo').innerHTML=`<b>${t.emoji||'🟩'} ${t.name}</b><br>${T('defBonus')} +${Math.round(t.def*100)}% ｜ ${T('moveCost')} ${t.cost===Infinity?T('impassable'):t.cost}${G.map[y][x]==='city'?capTxt:''}`;
 });
 
 // ================= 敌方 AI =================
@@ -339,13 +353,17 @@ async function aiAct(u){
   await sleep(200);
   const plan=aiPlan(u);
   if(plan){
+    const fx=u.x,fy=u.y; // 记录出发格
     if(plan.x!==u.x||plan.y!==u.y){
       const path=pathTo(plan.reach,plan.x,plan.y);
       SFX.move(u.type);
       await animateMove(u,path);
+      resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
     }
     const t=plan.target;
-    if(t&&t.hp>0&&G.units.includes(t)&&inRange(u,u.x,u.y,t.x,t.y)){
+    // 火炮移动后不能开火，只能原地开火
+    const canFire=!(u.type==='artillery'&&!ARTILLERY_MOVE_FIRE&&(plan.x!==u.x||plan.y!==u.y));
+    if(t&&t.hp>0&&G.units.includes(t)&&inRange(u,u.x,u.y,t.x,t.y)&&canFire){
       await doAttack(u,t);
     }
   }
@@ -356,7 +374,7 @@ async function aiAct(u){
 async function startEnemyPhase(){
   G.phase='E';G.busy=true;deselect();
   render();updateTop();
-  log(`—— 第 ${G.turn} 回合：敌方行动 ——`,'phase');
+  log(T('phaseLog')(G.turn,T('phaseE')),'phase');
   SFX.turn();
   await sleep(450);
   for(const u of G.units.filter(v=>v.side==='E')){
@@ -378,7 +396,7 @@ async function startEnemyPhase(){
   }
   // 敌军 acted 标记清零（不带入我方回合，避免敌军显示"已行动"样式）
   for(const u of G.units.filter(v=>v.side==='E'))u.acted=false;
-  log(`—— 第 ${G.turn} 回合：我方行动 ——`,'phase');
+  log(T('phaseLog')(G.turn,T('phaseP')),'phase');
   SFX.turn();
   render();updateTop();
 }
@@ -387,7 +405,7 @@ async function startEnemyPhase(){
 function updateTop(){
   $('#turnNum').textContent=G.turn;
   const pl=$('#phaseLabel');
-  pl.textContent=G.phase==='P'?'我方行动':'敌方行动';
+  pl.textContent=G.phase==='P'?T('phaseP'):T('phaseE');
   pl.className='phase '+(G.phase==='P'?'p':'e');
   $('#endTurn').disabled=G.phase!=='P'||G.busy||G.over;
 }
@@ -437,6 +455,14 @@ function render(){
   for(let y=0;y<G.size;y++)for(let x=0;x<G.size;x++){
     const tk=G.map[y][x],t=TERRAINS[tk];
     let cls='cell t-'+tk;
+    // 城镇三色：中立/我方/敌军
+    let hasCapbar=false;
+    if(tk==='city'){
+      const c0=G.caps.get(capKey(x,y));
+      cls+=c0&&c0.owner?(c0.owner==='P'?' cap-p':' cap-e'):' cap-neutral';
+      if(c0&&c0.prog>0&&(!c0.owner||c0.prog<CAP_NEED))hasCapbar=true;
+    }
+    if(hasCapbar)cls+=' has-capbar';
     const u=unitAt(x,y);
     const isSel=u&&G.sel&&u.id===G.sel.id;
     if(isSel)cls+=' sel'+(G.mode==='view'?' view':'');
@@ -448,6 +474,7 @@ function render(){
     if(tk==='city'){
       const cap=G.caps.get(capKey(x,y));
       if(cap&&cap.owner)html+=`<span class="flag ${cap.owner==='P'?'fp':'fe'}"></span>`;
+      else if(cap&&cap.prog>0)html+=`<span class="flag fc"></span>`; // 占领中：灰色旗
       if(cap&&cap.prog>0&&(!cap.owner||cap.prog<CAP_NEED))html+=`<i class="capbar"><b style="width:${Math.round(cap.prog/CAP_NEED*100)}%"></b></i>`;
     }
     if(u){
@@ -466,7 +493,7 @@ function render(){
 function showInfo(u){
   const el=$('#unitInfo');
   if(!u){
-    el.innerHTML='点击己方单位开始行动<br><span style="color:var(--dim);font-size:12px">点击任意单位可查看详情</span>';
+    el.innerHTML=T('unitHint')+'<br><span style="color:var(--dim);font-size:12px">'+T('unitHint2')+'</span>';
     return;
   }
   const b=UNIT_TYPES[u.type],t=terrAt(u.x,u.y);
@@ -478,18 +505,18 @@ function showInfo(u){
     <div style="font-size:12px;color:var(--dim)">HP ${u.hp}/${u.maxHp}　经验 ${u.xp}/${30+(u.level-1)*10}</div>
     <div class="statbar"><b class="${hc}" style="width:${Math.round(ratio*100)}%"></b></div>
     <div class="stats">
-      <span>攻击 <b>${u.atk}</b></span><span>防御 <b>${u.def}</b></span>
-      <span>移动 <b>${u.move}</b></span><span>射程 <b>${u.minR===u.maxR?u.maxR:u.minR+'-'+u.maxR}</b></span>
+      <span>${T('thAtk')} <b>${u.atk}</b></span><span>${T('thDef')} <b>${u.def}</b></span>
+      <span>${T('thMove')} <b>${u.move}</b></span><span>${T('thRange')} <b>${u.minR===u.maxR?u.maxR:u.minR+'-'+u.maxR}</b></span>
     </div>
-    <div style="font-size:12px;color:var(--dim);margin-top:6px">${b.desc}<br>所在地形：${t.emoji||'🟩'} ${t.name}（防御+${Math.round(t.def*100)}%）${u.acted?`<br><b style="color:var(--dim)">已行动${u.side==='P'?'（灰显）':'（虚线框）'}</b>`:''}</div>`;
+    <div style="font-size:12px;color:var(--dim);margin-top:6px">${b.desc}<br>${T('onTerrain')}：${t.emoji||'🟩'} ${t.name}（+${Math.round(t.def*100)}%）${u.acted?`<br><b style="color:var(--dim)">${u.side==='P'?T('actedP'):T('actedE')}</b>`:''}</div>`;
 }
 function log(msg,cls='info'){
   const el=$('#log');
   const d=document.createElement('div');
   // 战报敌我着色：消息以"我方"开头用蓝色，以"敌军"开头用红色
   if(cls==='info'||cls==='dim'||cls==='level'||cls==='kill'){
-    if(msg.startsWith('我方'))cls='p';
-    else if(msg.startsWith('敌军'))cls='e';
+    if(msg.startsWith('我方')||msg.startsWith(T('sideP')))cls='p';
+    else if(msg.startsWith('敌军')||msg.startsWith(T('sideE')))cls='e';
   }
   d.className=cls;d.textContent=msg;
   el.appendChild(d);
@@ -522,15 +549,15 @@ function newGame(size){
   $('#menu').classList.add('hidden');
   $('#overlay').classList.add('hidden');
   $('#log').innerHTML='';
-  log('⚔️ 战斗开始！消灭所有敌军即可获胜。','phase');
+  log(T('startLog'),'phase');
   SFX.start();
   render();showInfo(null);
 }
 function showResult(win){
-  G.busy=true;
+  G.busy=true;G.resultWin=win;
   win?SFX.win():SFX.lose();
-  $('#resultTitle').textContent=win?'🎉 胜利！':'💀 战败……';
-  $('#resultText').textContent=win?`历经 ${G.turn} 回合消灭了全部敌军！`:`我军全灭于第 ${G.turn} 回合，再接再厉！`;
+  $('#resultTitle').textContent=win?T('winTitle'):T('loseTitle');
+  $('#resultText').textContent=win?T('winText')(G.turn):T('loseText')(G.turn);
   $('#overlay').classList.remove('hidden');
 }
 function toMenu(){
@@ -549,8 +576,12 @@ $('#waitBtn').addEventListener('click',()=>{
   if(G&&G.sel&&!G.busy&&!G.over&&G.phase==='P')waitUnit();
 });
 $('#menuBtn').addEventListener('click',()=>{
-  if(G&&!G.over&&!confirm('返回主菜单？当前进度将丢失'))return;
+  if(G&&!G.over&&!confirm(T('backConfirm')))return;
   toMenu();
+});
+// 语言切换按钮（主菜单）
+document.querySelectorAll('.langBtn').forEach(b=>{
+  b.addEventListener('click',()=>setLang(b.dataset.lang));
 });
 $('#againBtn').addEventListener('click',()=>newGame(G.size));
 $('#toMenuBtn').addEventListener('click',toMenu);
@@ -567,3 +598,5 @@ $('#helpClose').addEventListener('click',()=>{
 $('#menuHelpBtn').addEventListener('click',()=>{
   $('#helpDialog').classList.remove('hidden');
 });
+// 启动时应用静态文案（默认中文）
+applyStaticTexts();

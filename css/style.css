@@ -40,15 +40,32 @@ button:disabled{opacity:.45;cursor:not-allowed}
   linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
   linear-gradient(#5d6779,#5d6779) 56% 38%/30% 60% no-repeat,
   #cfc8b8}
-/* 城镇归属旗帜（左上角，高级战争式） */
+/* 城镇归属底色：中立米白 / 我方淡蓝 / 敌军淡红（三色区分） */
+.cell.t-city.cap-neutral{background:
+  linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
+  linear-gradient(#5d6779,#5d6779) 56% 38%/30% 60% no-repeat,
+  #cfc8b8}
+.cell.t-city.cap-p{background:
+  linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
+  linear-gradient(#5d6779,#5d6779) 56% 38%/30% 60% no-repeat,
+  #9ec4e8}
+.cell.t-city.cap-e{background:
+  linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
+  linear-gradient(#5d6779,#5d6779) 56% 38%/30% 60% no-repeat,
+  #e8a3a0}
+/* 占领归属旗帜（左上角，高级战争式）；占领中（未完成）用灰色旗 */
 .flag{position:absolute;left:6%;top:6%;width:34%;height:44%;z-index:3;pointer-events:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
 .flag::before{content:'';position:absolute;left:0;top:0;bottom:0;width:12%;background:#5a4632;border-radius:1px}
 .flag::after{content:'';position:absolute;left:12%;top:0;width:88%;height:62%;clip-path:polygon(0 0,100% 12%,0 24%);border-radius:1px}
 .flag.fp::after{background:#4da3ff}
 .flag.fe::after{background:#ff5d5d}
+.flag.fc::after{background:#9aa5b1}
 /* 占领进度条（城镇格顶部，不与单位 HP 条重叠） */
 .capbar{position:absolute;left:10%;right:12%;top:2px;height:4px;background:rgba(0,0,0,.5);border-radius:2px;overflow:hidden;display:block;z-index:3;pointer-events:none}
 .capbar b{display:block;height:100%;background:var(--gold)}
+/* 有占领条时单位 HP 条下移，避免重叠被盖 */
+.cell .unit .hpbar{bottom:-3px}
+.cell.has-capbar .unit .hpbar{bottom:auto;top:calc(50% + 8px)}
 /* 移动路径预览：路径格高亮 + 方向箭头 */
 .cell.path::after{content:'';position:absolute;inset:0;background:rgba(120,220,160,.4);border:2px solid rgba(150,240,180,.8);border-radius:5px;pointer-events:none;z-index:4}
 .arrow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:0;height:0;z-index:5;pointer-events:none;filter:drop-shadow(0 0 2px rgba(0,0,0,.6))}

@@ -22,11 +22,11 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 | Feature | Description |
 |---|---|
 | 🗺️ **Adjustable map size** | 8×8 / 10×10 / 12×12, random 180°-symmetric maps with connectivity check |
-| 🪖 **4+2 unit types** | 🪖 Infantry · 🛡️ Heavy · 🚙 Recon · 🎯 Artillery (range 2-3, no counterattack) · 🔧 Engineer (1.5× capture + vehicle repair) · ⚕️ Medic (heals infantry) |
+| 🪖 **4+2 unit types** | 🪖 Infantry · 🛡️ Heavy · 🚙 Recon · 💣 Artillery (range 2-3, cannot fire after moving) · 🔧 Engineer (1.5× capture + vehicle repair) · ⚕️ Medic (heals infantry) |
 | ⚔️ **Type matchups** | Full damage multiplier table (heavy beats infantry, recon beats infantry but loses to heavy, etc.) |
 | 🌲 **Terrain effects** | 🌲 Forest +20% DEF · ⛰️ Mountain +40% DEF (slow) · 🌊 River impassable · 🏙️ City +30% DEF & heals 2 HP per turn |
-| 🚩 **City capture** | Advance Wars-style capture: only infantry/engineers can capture (engineer 1.5×), stand on a city and wait to build progress (progress = current HP × multiplier, 20 to capture); captured cities fly your flag and can be taken back; capturing all cities also wins |
-| 🔧 **Support units** | Engineer auto-repairs adjacent vehicles +3 HP; medic auto-heals adjacent infantry/engineers +4 HP |
+| 🚩 **City capture** | Advance Wars-style capture: only infantry/engineers can capture (engineer 1.5×), stand on a city and wait to build progress (progress = current HP × multiplier, 20 to capture, progress resets when leaving); captured cities fly your flag and can be taken back; capturing all cities also wins |
+| 🔧 **Support units** | Engineer auto-repairs adjacent vehicles +3 HP (waiting in place works too); medic auto-heals adjacent infantry/engineers +4 HP (waiting in place works too); both have very low ATK (engineer 2 / medic 1) |
 | 💥 **Combat system** | 90% hit chance, 12% crit (×1.5), 0.7× counterattack, damage scales with remaining HP |
 | ⬆️ **Leveling** | Gain XP from combat (support units: capture +8, repair/heal +6); level up grants +1 ATK, +1 DEF, +2 HP (cap Lv.V, excess XP converts to healing) — enemies level up too! |
 | 🔍 **Inspect enemies** | Click an enemy unit to see its move range (translucent blue) and attack range (dashed orange) — know your enemy |
@@ -34,6 +34,7 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 | �️ **Move path preview** | Hover to see the move path with direction arrows after selecting a unit |
 | 🔊 **Sound effects** | WebAudio chiptune SFX: start fanfare, per-unit attack/move sounds, crit, destroy explosion, level-up, capture, repair, heal, turn change, win/lose (mutable) |
 | 📜 **Battle log & unit cards** | Real-time combat log (player blue / enemy red) and detailed unit info panel |
+| 🌐 **Bilingual UI** | Choose 中文/English in the main menu (default Chinese); the whole UI translates instantly |
 | 📖 **In-game help** | Unit stats table, color legend, terrain effects and combat rules |
 
 ## 🎮 How to Play
@@ -42,7 +43,7 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 2. Click your unit → click a **blue tile** to move → click a **red tile** to attack
 3. Click **End Turn** when done; the enemy AI then acts
 
-> 💡 Forest/mountains grant defense bonuses but slow movement; cities heal 2 HP per turn; artillery has range 2-3 but cannot counterattack up close.
+> 💡 Forest/mountains grant defense bonuses but slow movement; cities heal 2 HP per turn; artillery has range 2-3 but cannot fire after moving — it must wait in place to fire.
 
 ## 🚀 Getting Started
 
@@ -60,7 +61,7 @@ python -m http.server 8765
 ## 📦 Tech
 
 - Pure HTML + CSS + JavaScript (**zero dependencies**, no frameworks, no build step)
-- Clean structure: `index.html` (page) + `css/style.css` (styles) + `js/config.js` (config) + `js/audio.js` (SFX) + `js/game.js` (logic)
+- Clean structure: `index.html` (page) + `css/style.css` (styles) + `js/config.js` (config) + `js/i18n.js` (i18n) + `js/audio.js` (SFX) + `js/game.js` (logic)
 - Runs in any modern browser — double-click `index.html` works too (no ES modules / fetch, file:// friendly)
 
 ## 📄 License
