@@ -40,6 +40,37 @@ button:disabled{opacity:.45;cursor:not-allowed}
   linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
   linear-gradient(#5d6779,#5d6779) 56% 38%/30% 60% no-repeat,
   #cfc8b8}
+/* 总部：深色堡垒 + 金色旗帜（被占领直接战败的关键建筑） */
+.t-hq{background:
+  linear-gradient(#8a93a8,#8a93a8) 50% 62%/56% 44% no-repeat,
+  linear-gradient(#6b7488,#6b7488) 50% 40%/34% 30% no-repeat,
+  #b8a888}
+.t-hq::before{content:'';position:absolute;left:14%;top:8%;width:12%;height:34%;background:#5a4632;border-radius:1px;z-index:1}
+.t-hq::after{content:'';position:absolute;left:26%;top:8%;width:26%;height:18%;clip-path:polygon(0 0,100% 18%,0 36%);background:var(--gold);z-index:1}
+/* 工厂：厂房 + 烟囱（可修理驻守载具） */
+.t-factory{background:
+  linear-gradient(#8d7a5e,#8d7a5e) 12% 18%/16% 40% no-repeat,
+  linear-gradient(#a08a68,#a08a68) 30% 46%/62% 46% no-repeat,
+  repeating-linear-gradient(90deg,transparent 0 8%,#6e5c42 8% 12%) 30% 58%/62% 26% no-repeat,
+  #c9bfa8}
+/* 侧栏地形小图标：与棋盘 CSS 地形同款色块（统一显示，不再用 emoji） */
+.tchip{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:2px}
+.tchip.t-plain{background:#7cbf5e}
+.tchip.t-forest{background:radial-gradient(circle at 30% 30%,#2e6238 0 30%,transparent 32%),radial-gradient(circle at 70% 65%,#356e40 0 28%,transparent 30%),#4f8f57}
+.tchip.t-mountain{background:linear-gradient(160deg,#c2a377,#a98c60);position:relative;overflow:hidden}
+.tchip.t-mountain::before{content:'';position:absolute;inset:20% 12% 8%;clip-path:polygon(50% 0,100% 100%,0 100%);background:#75603f}
+.tchip.t-water{background:repeating-linear-gradient(175deg,transparent 0 3px,rgba(255,255,255,.25) 3px 4px),#4a90d9}
+.tchip.t-city{background:linear-gradient(#79839a,#79839a) 20% 25%/24% 50% no-repeat,linear-gradient(#5d6779,#5d6779) 55% 40%/28% 58% no-repeat,#cfc8b8}
+.tchip.t-hq{background:linear-gradient(#8a93a8,#8a93a8) 50% 60%/56% 44% no-repeat,linear-gradient(#6b7488,#6b7488) 50% 36%/34% 30% no-repeat,#b8a888}
+.tchip.t-factory{background:linear-gradient(#8d7a5e,#8d7a5e) 14% 20%/16% 40% no-repeat,linear-gradient(#a08a68,#a08a68) 32% 48%/60% 44% no-repeat,#c9bfa8}
+/* 单位 CSS 图标（无 emoji 兵种）：火炮（土炮）与坦克 */
+.uicon{display:inline-block;width:72%;height:72%;position:relative;filter:drop-shadow(0 1px 1px rgba(0,0,0,.45))}
+/* 土炮：炮管 + 炮架 + 轮子（老式火炮造型） */
+.uicon.cannon::before{content:'';position:absolute;left:8%;top:30%;width:70%;height:22%;background:linear-gradient(180deg,#4a4f5c,#2e323c);border-radius:2px 3px 3px 2px;transform:rotate(-18deg);transform-origin:left center}
+.uicon.cannon::after{content:'';position:absolute;left:22%;bottom:6%;width:34%;height:34%;border:3px solid #3a3f4a;border-radius:50%;background:radial-gradient(circle at 40% 40%,#6a7080,#3a3f4a)}
+/* 坦克：车体 + 履带 + 炮塔炮管 */
+.uicon.tank::before{content:'';position:absolute;left:6%;bottom:10%;width:88%;height:34%;background:#3a3f4a;border-radius:4px;box-shadow:inset 0 -3px 0 #23262e}
+.uicon.tank::after{content:'';position:absolute;left:30%;top:12%;width:40%;height:30%;background:#4a505e;border-radius:3px;box-shadow:14px 6px 0 -2px #3a3f4a}
 /* 城镇归属底色：中立米白 / 我方淡蓝 / 敌军淡红（三色区分） */
 .cell.t-city.cap-neutral{background:
   linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
@@ -108,7 +139,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
 .card h3{font-size:13px;color:var(--dim);margin-bottom:8px;letter-spacing:1px}
 #unitCard .uhead{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-#unitCard .uemoji{font-size:34px}
+#unitCard .uemoji{font-size:34px;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px}
+#unitCard .uemoji .uicon{width:100%;height:100%}
 #unitCard .uname{font-weight:700}
 #unitCard .uside{font-size:12px;padding:1px 8px;border-radius:8px;margin-left:6px}
 #unitCard .uside.p{background:rgba(77,163,255,.2);color:var(--blue)}

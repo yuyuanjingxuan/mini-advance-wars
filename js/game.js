@@ -24,9 +24,9 @@ function calcDamage(att,dfd,fromX,fromY,luck=1){
 // G.caps: Map('x,y' -> {owner:'P'|'E', prog})，初始中立
 function capKey(x,y){return x+','+y;}
 function capAt(x,y){return G.caps?G.caps.get(capKey(x,y))||null:null;}
-// 单位在城镇上待机/移动结束：积累占领进度（进度 = 单位当前 HP，工程师×1.5；仅步兵/工程师可占领）
+// 单位在建筑上待机/移动结束：积累占领进度（进度 = 单位当前 HP，工程师×1.5；仅步兵/工程师可占领）
 function tryCapture(u){
-  if(G.map[u.y][u.x]!=='city')return;
+  if(!CAPTURABLE.includes(G.map[u.y][u.x]))return;
   if(!CAPTURERS.includes(u.type))return; // 只有步兵/工程师能占领
   const k=capKey(u.x,u.y);
   const cap=G.caps.get(k);
@@ -45,9 +45,9 @@ function tryCapture(u){
     log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${T('prog')} ${prog}/${CAP_NEED}`,'dim');
   }
 }
-// 离开城镇：占领进度清零（fx,fy = 单位出发格；中立/被夺回中的城镇恢复 0）
+// 离开建筑：占领进度清零（fx,fy = 单位出发格；中立/被夺回中的建筑恢复 0）
 function resetCaptureOnLeave(u,fx,fy){
-  if(G.map[fy][fx]!=='city')return; // 出发格不是城镇，无需处理
+  if(!CAPTURABLE.includes(G.map[fy][fx]))return; // 出发格不是可占领建筑，无需处理
   const k=capKey(fx,fy);
   const cap=G.caps.get(k);
   if(cap&&cap.prog>0&&cap.prog<CAP_NEED&&cap.by===u.id){
@@ -82,29 +82,71 @@ function tryHeal(u){
   }
 }
 
-// ================= 地图生成（180° 对称 + 连通性校验） =================
+// ================= 地图生成（地理化：山脉山脊 + 河流浅滩 + 森林集群，180° 对称 + 连通性校验） =================
 function genMap(size){
   for(let attempt=0;attempt<80;attempt++){
     const m=Array.from({length:size},()=>Array(size).fill('plain'));
     const half=Math.ceil(size/2);
-    for(let y=0;y<size;y++)for(let x=0;x<half;x++){
-      const r=Math.random();
-      m[y][x]=r<0.14?'forest':r<0.22?'mountain':r<0.30?'water':'plain';
+    // --- 山脉：从地图一侧向另一侧随机游走形成山脊（地理上山脉成脉状而非散点） ---
+    const ridges=size>=10?2:1;
+    for(let r=0;r<ridges;r++){
+      let rx=Math.floor(Math.random()*half*0.4), ry=Math.floor(Math.random()*size*0.3);
+      const len=Math.floor(size*0.55+Math.random()*size*0.3);
+      for(let i=0;i<len;i++){
+        if(rx>=0&&rx<half&&ry>=0&&ry<size)m[ry][rx]='mountain';
+        // 山脊走向：偏向水平延伸，偶尔上下起伏、分叉出小支脉
+        const dir=Math.random();
+        if(dir<0.55)rx++;
+        else if(dir<0.75)ry+=Math.random()<0.5?1:-1;
+        else if(dir<0.85){rx++;ry+=Math.random()<0.5?1:-1;}
+        if(Math.random()<0.12&&ry+1<size)m[ry+1][Math.min(rx,half-1)]='mountain'; // 支脉
+        ry=Math.max(0,Math.min(size-1,ry));
+      }
     }
+    // --- 河流：从上边缘流向右边缘的连通水线，中途留 1-2 处浅滩（可通行）保证两岸可达 ---
+    {
+      let wx=Math.floor(Math.random()*half*0.6+half*0.2), wy=0;
+      let fords=1+Math.floor(Math.random()*2), fordAt=[];
+      for(let i=0;i<fords;i++)fordAt.push(Math.floor(size*(0.3+0.4*Math.random())));
+      while(wy<size){
+        if(wx>=0&&wx<half){
+          m[wy][wx]=fordAt.includes(wy)?'plain':'water';
+          if(fordAt.includes(wy)&&wx+1<half)m[wy][wx+1]='plain'; // 浅滩加宽
+        }
+        wy++;
+        if(Math.random()<0.45)wx+=Math.random()<0.5?1:-1; // 河道蜿蜒
+        wx=Math.max(0,Math.min(half-1,wx));
+      }
+    }
+    // --- 森林：以种子点向外生长成片（林地集群，符合植被成片分布） ---
+    const blobs=Math.floor(size*0.5);
+    for(let b=0;b<blobs;b++){
+      const bx=Math.floor(Math.random()*half), by=Math.floor(Math.random()*size);
+      const n=2+Math.floor(Math.random()*4);
+      let cx=bx,cy=by;
+      for(let i=0;i<n;i++){
+        if(cx>=0&&cx<half&&cy>=0&&cy<size&&m[cy][cx]==='plain')m[cy][cx]='forest';
+        const[dx,dy]=DIRS[Math.floor(Math.random()*4)];
+        cx+=dx;cy+=dy;
+      }
+    }
+    // --- 180° 镜像对称（双方地图完全一致，公平） ---
     for(let y=0;y<size;y++)for(let x=half;x<size;x++)m[y][x]=m[size-1-y][size-1-x];
-    // 出生点强制平原
+    // --- 出生点强制平原 ---
     const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[1,size-3]];
     for(const[x,y]of spawns){m[y][x]='plain';m[size-1-y][size-1-x]='plain';}
-    // 城镇：每方后方 1 个 + 中路 1 对
-    const cities=[[2,size-3],[size-3,2]];
-    if(size%2===1)cities.push([(size-1)/2,(size-1)/2]);
-    for(const[x,y]of cities){if(m[y][x]==='water')m[y][x]='plain';m[y][x]='city';}
+    // --- 建筑：每方后方 1 总部 + 1 工厂，中路 1 对城镇，奇数尺寸加中心城镇 ---
+    const builds=[[2,size-3,'city'],[size-3,2,'city'],[1,size-2,'hq'],[size-2,1,'hq'],[3,size-2,'factory'],[size-2,3,'factory']];
+    if(size%2===1)builds.push([(size-1)/2,(size-1)/2,'city']);
+    for(const[x,y,t]of builds){if(m[y][x]==='water')m[y][x]='plain';m[y][x]=t;}
     if(connected(m,size))return m;
   }
-  // 兜底：全平原 + 角落森林
+  // 兜底：全平原 + 角落森林 + 基础建筑
   const m=Array.from({length:size},()=>Array(size).fill('plain'));
   m[1][1]='forest';m[size-2][size-2]='forest';
   m[2][size-3]='city';m[size-3][2]='city';
+  m[1][size-2]='hq';m[size-2][1]='hq';
+  m[3][size-2]='factory';m[size-2][3]='factory';
   return m;
 }
 function connected(m,size){
@@ -122,9 +164,10 @@ function connected(m,size){
   return seen[0][size-1];
 }
 
-// ================= 寻路（Dijkstra，含地形消耗） =================
+// ================= 寻路（Dijkstra，每兵种地形移动力不同，参考高级战争） =================
 function bfsReach(u){
   const size=G.size,start=u.x+','+u.y;
+  const costs=MOVE_COST[u.type]||{}; // 每兵种移动力表
   const dist=new Map([[start,0]]),parent=new Map(),pq=[[0,u.x,u.y]];
   while(pq.length){
     pq.sort((a,b)=>a[0]-b[0]);
@@ -133,11 +176,12 @@ function bfsReach(u){
     for(const[dx,dy]of DIRS){
       const nx=x+dx,ny=y+dy;
       if(nx<0||ny<0||nx>=size||ny>=size)continue;
-      const t=TERRAINS[G.map[ny][nx]];
-      if(t.cost===Infinity)continue;
+      const tk=G.map[ny][nx];
+      const cost=costs[tk]!==undefined?costs[tk]:TERRAINS[tk].cost;
+      if(cost===Infinity)continue;
       const occ=unitAt(nx,ny);
       if(occ&&occ.side!==u.side)continue; // 敌军挡路
-      const nc=c+t.cost;
+      const nc=c+cost;
       if(nc>u.move)continue;
       const k=nx+','+ny;
       if(!dist.has(k)||nc<dist.get(k)){dist.set(k,nc);parent.set(k,x+','+y);pq.push([nc,nx,ny]);}
@@ -173,7 +217,7 @@ async function doAttack(att,dfd){
   G.busy=false;
 }
 function canCounter(d,att){
-  if(d.type==='artillery')return false; // 火炮不反击
+  if(NO_MOVE_FIRE.includes(d.type))return false; // 火炮/火箭炮不反击
   return inRange(d,d.x,d.y,att.x,att.y);
 }
 async function resolveHit(a,d,counterMult){
@@ -226,9 +270,16 @@ function checkEnd(){
   const p=G.units.some(u=>u.side==='P');
   const e=G.units.some(u=>u.side==='E');
   if(!e||!p){G.over=true;showResult(!e);return;}
-  // 占领胜利：占领全部城镇（至少 1 座）也可获胜
-  const cities=[...G.caps.keys()];
-  if(cities.length&&cities.every(k=>G.caps.get(k).owner==='P')){G.over=true;showResult(true);}
+  // 总部占领：占领敌方总部直接获胜，己方总部被占直接战败
+  for(const[k,cap]of G.caps){
+    const[x,y]=k.split(',').map(Number);
+    if(G.map[y][x]!=='hq'||!cap.owner)continue;
+    if(cap.owner==='P'&&x>Math.floor(G.size/2)-1){G.over=true;showResult(true);return;}
+    if(cap.owner==='E'&&x<Math.floor(G.size/2)){G.over=true;showResult(false);return;}
+  }
+  // 占领胜利：占领全部建筑（至少 1 座）也可获胜
+  const caps=[...G.caps.keys()];
+  if(caps.length&&caps.every(k=>G.caps.get(k).owner==='P')){G.over=true;showResult(true);}
 }
 
 // ================= 特效 =================
@@ -268,8 +319,8 @@ async function playerMove(u,x,y){
   resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
   tryCapture(u);tryRepair(u);tryHeal(u);
   const ts=targetsFrom(u,u.x,u.y);
-  // 火炮移动后不能开火，只能原地待机开火
-  const canFire=!(u.type==='artillery'&&!ARTILLERY_MOVE_FIRE);
+  // 间接打击单位（火炮/火箭炮）移动后不能开火，只能原地待机开火
+  const canFire=!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE;
   if(ts.length&&canFire){G.mode='attack';G.sel=u;render();showInfo(u);}
   else{u.acted=true;G.sel=null;render();showInfo(u);}
 }
@@ -309,7 +360,15 @@ board.addEventListener('mousemove',e=>{
   }
   const cap=capAt(x,y);
   const capTxt=cap?(cap.owner?`｜${cap.owner==='P'?T('myFlag'):T('enFlag')}`+(cap.prog<CAP_NEED?`（${T('prog')} ${cap.prog}/${CAP_NEED}）`:''):(cap.prog>0?`｜${T('capturing')} ${cap.prog}/${CAP_NEED}`:`｜${T('neutral')}`)):'';
-  $('#tileInfo').innerHTML=`<b>${t.emoji||'🟩'} ${t.name}</b><br>${T('defBonus')} +${Math.round(t.def*100)}% ｜ ${T('moveCost')} ${t.cost===Infinity?T('impassable'):t.cost}${G.map[y][x]==='city'?capTxt:''}`;
+  // 地形小图标：与棋盘 CSS 地形同款色块（统一显示，不再用 emoji）
+  const chip=`<i class="tchip t-${G.map[y][x]}"></i>`;
+  // 若选中单位，显示该兵种在此地形的移动力
+  let mvTxt='';
+  if(G.sel&&MOVE_COST[G.sel.type]&&MOVE_COST[G.sel.type][G.map[y][x]]!==undefined){
+    const mc=MOVE_COST[G.sel.type][G.map[y][x]];
+    mvTxt=` ｜ ${G.sel.type==='?'?'':T('moveCost')} ${mc===Infinity?T('impassable'):mc}`;
+  }
+  $('#tileInfo').innerHTML=`<b>${chip} ${t.name}</b><br>${T('defBonus')} +${Math.round(t.def*100)}%${mvTxt}${CAPTURABLE.includes(G.map[y][x])?capTxt:''}`;
 });
 
 // ================= 敌方 AI =================
@@ -336,8 +395,8 @@ function aiPlan(u){
     }
   }
   if(best)return best;
-  // 无攻击机会：向最近玩家推进（火炮保持距离 ~3）
-  const ideal=u.type==='artillery'?3:0;
+  // 无攻击机会：向最近玩家推进（火炮保持距离 ~3，火箭炮保持距离 ~4）
+  const ideal=u.type==='rocket'?4:u.type==='artillery'?3:0;
   let mv=null;
   for(const k of reach.stoppable){
     const[x,y]=k.split(',').map(Number);
@@ -361,8 +420,8 @@ async function aiAct(u){
       resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
     }
     const t=plan.target;
-    // 火炮移动后不能开火，只能原地开火
-    const canFire=!(u.type==='artillery'&&!ARTILLERY_MOVE_FIRE&&(plan.x!==u.x||plan.y!==u.y));
+    // 间接打击单位（火炮/火箭炮）移动后不能开火，只能原地开火
+    const canFire=!(NO_MOVE_FIRE.includes(u.type)&&!ARTILLERY_MOVE_FIRE&&(plan.x!==u.x||plan.y!==u.y));
     if(t&&t.hp>0&&G.units.includes(t)&&inRange(u,u.x,u.y,t.x,t.y)&&canFire){
       await doAttack(u,t);
     }
@@ -373,6 +432,7 @@ async function aiAct(u){
 }
 async function startEnemyPhase(){
   G.phase='E';G.busy=true;deselect();
+  BGM.setSide('E'); // 敌方回合切换为敌方主题
   render();updateTop();
   log(T('phaseLog')(G.turn,T('phaseE')),'phase');
   SFX.turn();
@@ -384,12 +444,13 @@ async function startEnemyPhase(){
     if(G.over)return;
     await sleep(220);
   }
-  // 新回合：本方城镇回血（只有己方占领的城镇才回血）
+  // 新回合：本方建筑回血（只有己方占领的建筑才回血）
   G.turn++;G.phase='P';G.busy=false;
+  BGM.setSide('P'); // 我方回合切换回我方主题
   for(const u of G.units.filter(v=>v.side==='P')){
     u.acted=false;
     const cap=capAt(u.x,u.y);
-    if(G.map[u.y][u.x]==='city'&&cap&&cap.owner==='P'&&u.hp<u.maxHp){
+    if(CAPTURABLE.includes(G.map[u.y][u.x])&&cap&&cap.owner==='P'&&u.hp<u.maxHp){
       u.hp=Math.min(u.maxHp,u.hp+2);
       render();floatText(u.x,u.y,'+2','heal');
     }
@@ -480,7 +541,9 @@ function render(){
     if(u){
       const ratio=u.hp/u.maxHp;
       const hc=ratio>0.6?'':ratio>0.3?' mid':' low';
-      html+=`<span class="unit ${u.side==='P'?'p':'e'}${u.acted?' acted':''}">${UNIT_TYPES[u.type].emoji}`
+      const b=UNIT_TYPES[u.type];
+      const icon=b.icon?`<i class="uicon ${b.icon}"></i>`:b.emoji;
+      html+=`<span class="unit ${u.side==='P'?'p':'e'}${u.acted?' acted':''}">${icon}`
           +`<i class="hpbar"><b class="${hc.trim()}" style="width:${Math.round(ratio*100)}%"></b></i>`
           +(u.level>1?`<em class="lv">${roman(u.level)}</em>`:'')
           +`</span>`;
@@ -498,8 +561,9 @@ function showInfo(u){
   }
   const b=UNIT_TYPES[u.type],t=terrAt(u.x,u.y);
   const ratio=u.hp/u.maxHp,hc=ratio>0.6?'':ratio>0.3?'mid':'low';
+  const uicon=b.icon?`<i class="uicon ${b.icon}"></i>`:b.emoji;
   el.innerHTML=`
-    <div class="uhead"><span class="uemoji">${b.emoji}</span>
+    <div class="uhead"><span class="uemoji">${uicon}</span>
       <span><span class="uname">${b.name}</span><span class="uside ${u.side==='P'?'p':'e'}">${sideName(u.side)} Lv.${u.level}</span></span>
     </div>
     <div style="font-size:12px;color:var(--dim)">HP ${u.hp}/${u.maxHp}　经验 ${u.xp}/${30+(u.level-1)*10}</div>
@@ -533,8 +597,8 @@ function newGame(size){
   const map=genMap(size);
   G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map()};
   uid=0;
-  const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3]];
-  const types=['infantry','heavy','recon','infantry','artillery','engineer'];
+  const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[2,size-1],[3,size-1]];
+  const types=['infantry','heavy','recon','infantry','artillery','engineer','tank','rocket'];
   spawns.forEach((p,i)=>{
     G.units.push(makeUnit('P',types[i],p[0],p[1]));
     G.units.push(makeUnit('E',types[i],size-1-p[0],size-1-p[1]));
@@ -542,8 +606,8 @@ function newGame(size){
   // 军医：双方各 1 名，放在出生点附近
   G.units.push(makeUnit('P','medic',1,size-3));
   G.units.push(makeUnit('E','medic',size-2,2));
-  // 初始城镇全部中立
-  for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(map[y][x]==='city')G.caps.set(capKey(x,y),{owner:null,prog:0});
+  // 初始建筑全部中立
+  for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(CAPTURABLE.includes(map[y][x]))G.caps.set(capKey(x,y),{owner:null,prog:0});
   board.style.setProperty('--n',size);
   board.style.setProperty('--cell',(size<=8?54:size<=10?46:38)+'px');
   $('#menu').classList.add('hidden');
@@ -551,16 +615,19 @@ function newGame(size){
   $('#log').innerHTML='';
   log(T('startLog'),'phase');
   SFX.start();
+  BGM.start('P'); // 开局播放我方主题 BGM
   render();showInfo(null);
 }
 function showResult(win){
   G.busy=true;G.resultWin=win;
+  BGM.stop(); // 结束时停止 BGM
   win?SFX.win():SFX.lose();
   $('#resultTitle').textContent=win?T('winTitle'):T('loseTitle');
   $('#resultText').textContent=win?T('winText')(G.turn):T('loseText')(G.turn);
   $('#overlay').classList.remove('hidden');
 }
 function toMenu(){
+  BGM.stop(); // 返回菜单停止 BGM
   $('#overlay').classList.add('hidden');
   $('#menu').classList.remove('hidden');
 }
@@ -588,6 +655,7 @@ $('#toMenuBtn').addEventListener('click',toMenu);
 $('#sndBtn').addEventListener('click',()=>{
   muted=!muted;
   $('#sndBtn').textContent=muted?'🔇':'🔊';
+  BGM.refresh(); // 同步 BGM 静音状态
 });
 $('#helpBtn').addEventListener('click',()=>{
   $('#helpDialog').classList.remove('hidden');
