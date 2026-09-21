@@ -209,9 +209,24 @@ function genMap(size){
     }
     // --- 180° 镜像对称（双方地图完全一致，公平） ---
     for(let y=0;y<size;y++)for(let x=half;x<size;x++)m[y][x]=m[size-1-y][size-1-x];
-    // --- 出生点强制平原 ---
-    const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[1,size-3]];
+    // --- 出生点强制平原（与 newGame 的 8 个出生点完全一致，含镜像） ---
+    const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[2,size-1],[3,size-1]];
     for(const[x,y]of spawns){m[y][x]='plain';m[size-1-y][size-1-x]='plain';}
+    // --- 出生点周边清障：保证载具（不可入山地/水）出生后能移动，不被地形卡死 ---
+    // 每个出生点周围 1 格内的山地/水都改为平原，确保所有兵种（含履带/轮胎）都有出路
+    // 军医出生点 (1,size-3)/(size-2,2) 也纳入清障保护
+    const clearPts=spawns.concat([[1,size-3],[size-2,2]]);
+    for(const[x,y]of clearPts){
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+        const nx=x+dx,ny=y+dy;
+        if(nx<0||ny<0||nx>=size||ny>=size)continue;
+        if(m[ny][nx]==='mountain'||m[ny][nx]==='water')m[ny][nx]='plain';
+        // 镜像侧同步清障
+        const mx=size-1-x+dx,my=size-1-y+dy;
+        if(mx<0||my<0||mx>=size||my>=size)continue;
+        if(m[my][mx]==='mountain'||m[my][mx]==='water')m[my][mx]='plain';
+      }
+    }
     // --- 建筑：每方后方 1 总部 + 1 工厂，中路 1 对城镇，奇数尺寸加中心城镇 ---
     const builds=[[2,size-3,'city'],[size-3,2,'city'],[1,size-2,'hq'],[size-2,1,'hq'],[3,size-2,'factory'],[size-2,3,'factory']];
     if(size%2===1)builds.push([(size-1)/2,(size-1)/2,'city']);
