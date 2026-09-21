@@ -82,6 +82,83 @@ function tryHeal(u){
   }
 }
 
+// ================= 经济与生产（参考高级战争：占城→收入→工厂造兵） =================
+function countOwned(side){
+  let n=0;
+  for(const[,cap]of G.caps)if(cap.owner===side)n++;
+  return n;
+}
+function updateFunds(){
+  const el=$('#fundsNum');
+  if(el&&G)el.textContent=G.funds.P;
+}
+function collectIncome(side){
+  const n=countOwned(side);
+  if(!n)return;
+  const inc=n*INCOME_PER;
+  G.funds[side]+=inc;
+  log(T('incomeLog')(inc,n),'dim');
+}
+// AI 建造：敌方回合结束时在己方空工厂造兵（新单位下回合行动）
+function aiBuild(){
+  if(G.units.filter(u=>u.side==='E').length>=MAX_SIDE_UNITS)return;
+  const factories=[];
+  for(let y=0;y<G.size;y++)for(let x=0;x<G.size;x++){
+    if(G.map[y][x]!=='factory')continue;
+    const cap=capAt(x,y);
+    if(cap&&cap.owner==='E'&&!unitAt(x,y))factories.push({x,y});
+  }
+  for(const f of factories){
+    const mine=G.units.filter(u=>u.side==='E');
+    const cnt=t=>mine.filter(u=>u.type===t).length;
+    let pick=null;
+    if(cnt('infantry')<2&&G.funds.E>=UNIT_COSTS.infantry)pick='infantry';
+    else{
+      const prefs=['tank','artillery','heavy','recon','rocket','infantry','engineer','medic'];
+      const afford=prefs.filter(t=>UNIT_COSTS[t]<=G.funds.E);
+      if(afford.length)pick=afford[Math.floor(Math.random()*Math.min(3,afford.length))];
+    }
+    if(!pick)continue;
+    G.funds.E-=UNIT_COSTS[pick];
+    const u=makeUnit('E',pick,f.x,f.y);
+    u.acted=true;
+    G.units.push(u);
+    log(T('buildLog')('E',pick),'e');
+  }
+  updateFunds();
+}
+// 玩家生产：点击己方空工厂打开生产菜单（新单位当回合待机，同高级战争）
+let prodFactory=null;
+function openProdMenu(x,y){
+  prodFactory={x,y};
+  $('#prodFunds').textContent=T('prodFunds')(G.funds.P);
+  const list=$('#prodList');
+  list.innerHTML='';
+  for(const k of Object.keys(UNIT_TYPES)){
+    const b=UNIT_TYPES[k],cost=UNIT_COSTS[k];
+    const btn=document.createElement('button');
+    btn.className='prodbtn';
+    btn.disabled=G.funds.P<cost;
+    const icon=b.icon?`<i class="uicon ${b.icon}"></i>`:b.emoji;
+    btn.innerHTML=`<span class="picon">${icon}</span><span class="pname">${b.name}</span><span class="pcost">💰${cost}</span>`;
+    btn.addEventListener('click',()=>buyUnit(k));
+    list.appendChild(btn);
+  }
+  $('#prodDialog').classList.remove('hidden');
+}
+function buyUnit(type){
+  if(!prodFactory||!G||G.funds.P<UNIT_COSTS[type])return;
+  G.funds.P-=UNIT_COSTS[type];
+  const u=makeUnit('P',type,prodFactory.x,prodFactory.y);
+  u.acted=true; // 当回合待机
+  G.units.push(u);
+  SFX.repair();
+  log(T('buildLog')('P',type),'p');
+  $('#prodDialog').classList.add('hidden');
+  prodFactory=null;
+  updateFunds();render();
+}
+
 // ================= 地图生成（地理化：山脉山脊 + 河流浅滩 + 森林集群，180° 对称 + 连通性校验） =================
 function genMap(size){
   for(let attempt=0;attempt<80;attempt++){
@@ -345,6 +422,10 @@ board.addEventListener('click',async e=>{
     if(u&&u.side==='E'){viewUnit(u);return;} // 点敌军=查看其范围
     deselect();return;
   }
+  if(!u&&G.map[y][x]==='factory'){
+    const cap=capAt(x,y);
+    if(cap&&cap.owner==='P'){openProdMenu(x,y);return;} // 点击己方空工厂：生产单位
+  }
   if(u&&u.side==='P'&&!u.acted)select(u);
   else if(u)viewUnit(u); // 敌军/已行动单位=查看模式
 });
@@ -368,7 +449,9 @@ board.addEventListener('mousemove',e=>{
     const mc=MOVE_COST[G.sel.type][G.map[y][x]];
     mvTxt=` ｜ ${G.sel.type==='?'?'':T('moveCost')} ${mc===Infinity?T('impassable'):mc}`;
   }
-  $('#tileInfo').innerHTML=`<b>${chip} ${t.name}</b><br>${T('defBonus')} +${Math.round(t.def*100)}%${mvTxt}${CAPTURABLE.includes(G.map[y][x])?capTxt:''}`;
+  let prodHint='';
+  if(G.map[y][x]==='factory'&&cap&&cap.owner==='P'&&!unitAt(x,y)&&G.phase==='P'&&!G.busy)prodHint=`｜<b>${T('prodHint')}</b>`;
+  $('#tileInfo').innerHTML=`<b>${chip} ${t.name}</b><br>${T('defBonus')} +${Math.round(t.def*100)}%${mvTxt}${CAPTURABLE.includes(G.map[y][x])?capTxt:''}${prodHint}`;
 });
 
 // ================= 敌方 AI =================
@@ -436,6 +519,7 @@ async function startEnemyPhase(){
   render();updateTop();
   log(T('phaseLog')(G.turn,T('phaseE')),'phase');
   SFX.turn();
+  collectIncome('E');updateFunds(); // 敌方建筑收入
   await sleep(450);
   for(const u of G.units.filter(v=>v.side==='E')){
     if(u.hp<=0||G.over)continue;
@@ -444,9 +528,11 @@ async function startEnemyPhase(){
     if(G.over)return;
     await sleep(220);
   }
+  aiBuild(); // 敌方回合结束：在己方空工厂造兵（下回合行动）
   // 新回合：本方建筑回血（只有己方占领的建筑才回血）
   G.turn++;G.phase='P';G.busy=false;
   BGM.setSide('P'); // 我方回合切换回我方主题
+  collectIncome('P');updateFunds(); // 我方建筑收入
   for(const u of G.units.filter(v=>v.side==='P')){
     u.acted=false;
     const cap=capAt(u.x,u.y);
@@ -472,7 +558,7 @@ function updateTop(){
 }
 function render(){
   if(!G)return;
-  updateTop();
+  updateTop();updateFunds();
   const moveSet=G.reach?G.reach.stoppable:null;
   // 选中时：攻击范围（从移动范围内任意落点可达的攻击格）；view 模式同样显示
   let zoneSet=null,atkSet=null;
@@ -516,9 +602,9 @@ function render(){
   for(let y=0;y<G.size;y++)for(let x=0;x<G.size;x++){
     const tk=G.map[y][x],t=TERRAINS[tk];
     let cls='cell t-'+tk;
-    // 城镇三色：中立/我方/敌军
+    // 建筑三色：中立/我方/敌军（城镇/工厂/总部统一显示归属）
     let hasCapbar=false;
-    if(tk==='city'){
+    if(CAPTURABLE.includes(tk)){
       const c0=G.caps.get(capKey(x,y));
       cls+=c0&&c0.owner?(c0.owner==='P'?' cap-p':' cap-e'):' cap-neutral';
       if(c0&&c0.prog>0&&(!c0.owner||c0.prog<CAP_NEED))hasCapbar=true;
@@ -532,7 +618,7 @@ function render(){
     if(atkSet&&u&&atkSet.has(u.id))cls+=' atk';
     if(pathSet&&pathSet.has(x+','+y)&&!isSel)cls+=' path';
     html+=`<div class="${cls}" data-x="${x}" data-y="${y}">`;
-    if(tk==='city'){
+    if(CAPTURABLE.includes(tk)){
       const cap=G.caps.get(capKey(x,y));
       if(cap&&cap.owner)html+=`<span class="flag ${cap.owner==='P'?'fp':'fe'}"></span>`;
       else if(cap&&cap.prog>0)html+=`<span class="flag fc"></span>`; // 占领中：灰色旗
@@ -595,7 +681,7 @@ function makeUnit(side,type,x,y){
 }
 function newGame(size){
   const map=genMap(size);
-  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map()};
+  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS}};
   uid=0;
   const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[2,size-1],[3,size-1]];
   const types=['infantry','heavy','recon','infantry','artillery','engineer','tank','rocket'];
@@ -662,6 +748,10 @@ $('#helpBtn').addEventListener('click',()=>{
 });
 $('#helpClose').addEventListener('click',()=>{
   $('#helpDialog').classList.add('hidden');
+});
+$('#prodClose').addEventListener('click',()=>{
+  $('#prodDialog').classList.add('hidden');
+  prodFactory=null;
 });
 $('#menuHelpBtn').addEventListener('click',()=>{
   $('#helpDialog').classList.remove('hidden');

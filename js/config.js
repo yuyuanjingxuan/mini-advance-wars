@@ -26,7 +26,7 @@ const MOVE_COST={
 };
 const UNIT_TYPES={
   infantry:{name:'步兵',  emoji:'🪖', hp:10, atk:5, def:1, move:3, minR:1, maxR:1, desc:'多面手，擅长山地作战，可占领建筑'},
-  heavy:  {name:'重装兵', emoji:'🛡️', hp:10, atk:7, def:3, move:4, minR:1, maxR:1, desc:'高攻高防的近战主力（履带，不可入山地）'},
+  heavy:  {name:'重装兵', emoji:'🛡️', hp:10, atk:7, def:3, move:4, minR:1, maxR:1, desc:'高攻高防主力，克制载具（履带，不可入山地）'},
   recon:  {name:'侦察车', emoji:'🚙', hp:10, atk:6, def:0, move:6, minR:1, maxR:1, desc:'高速突袭，但装甲薄弱（轮胎，不可入山地）'},
   artillery:{name:'火炮', emoji:'', icon:'cannon', hp:10, atk:7, def:1, move:2, minR:2, maxR:3, desc:'远程轰击，移动后不能开火（履带）'},
   engineer:{name:'工程师', emoji:'🔧', hp:10, atk:2, def:1, move:3, minR:1, maxR:1, desc:'占领速度×1.5，山地行军最快，修理相邻载具（+3 HP）'},
@@ -43,7 +43,7 @@ const CAPTURERS=['infantry','engineer'];
 // 克制倍率：DMG_MULT[攻击方][防守方]
 const DMG_MULT={
   infantry:{infantry:1.0, heavy:0.55, recon:0.9,  artillery:1.0, engineer:0.9, medic:1.0, tank:0.35, rocket:0.9},
-  heavy:   {infantry:1.3, heavy:1.0,  recon:1.2,  artillery:1.3, engineer:1.2, medic:1.3, tank:0.7,  rocket:1.2},
+  heavy:   {infantry:1.3, heavy:1.0,  recon:1.5,  artillery:1.5, engineer:1.2, medic:1.3, tank:0.9,  rocket:1.5},
   recon:   {infantry:1.2, heavy:0.5,  recon:1.0,  artillery:1.2, engineer:1.1, medic:1.2, tank:0.4,  rocket:1.2},
   artillery:{infantry:1.2,heavy:1.3,  recon:1.2,  artillery:1.0, engineer:1.1, medic:1.2, tank:1.2,  rocket:1.3},
   engineer:{infantry:0.5, heavy:0.3,  recon:0.4,  artillery:0.5, engineer:1.0, medic:0.8, tank:0.2,  rocket:0.5},
@@ -57,3 +57,11 @@ const CAP_NEED=20; // 占领城镇所需进度（进度=单位当前 HP × 占�
 const CAP_MULT={infantry:1,engineer:1.5}; // 占领速度倍率（工程师 1.5 倍）
 // 火炮规则：移动后不能开火，只能原地待机开火
 const ARTILLERY_MOVE_FIRE=false;
+// ================= 经济与生产（参考高级战争：占城→收入→工厂造兵） =================
+const START_FUNDS=300;   // 初始资金
+const INCOME_PER=50;     // 每座己方建筑每回合收入
+const MAX_SIDE_UNITS=12; // 每方单位上限（防止无限爆兵）
+const UNIT_COSTS={ // 单位造价（参考高级战争比例缩放）
+  infantry:100, engineer:120, medic:120, recon:180,
+  heavy:220, artillery:280, tank:320, rocket:400,
+};

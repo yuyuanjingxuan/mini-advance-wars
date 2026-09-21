@@ -189,3 +189,35 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .utable td:first-child{text-align:left;white-space:nowrap}
 .utable td:last-child{text-align:left;color:var(--dim)}
 .help h4{color:var(--text);font-size:13px;margin:10px 0 4px;letter-spacing:1px}
+/* ================= 经济与生产 ================= */
+/* 顶栏资金显示 */
+.funds{font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,210,87,.12);border:1px solid rgba(255,210,87,.4);border-radius:10px;padding:3px 10px}
+/* 工厂归属底色（与城镇同款三色：我方淡蓝/敌军淡红） */
+.cell.t-factory.cap-p{background:
+  linear-gradient(#8d7a5e,#8d7a5e) 12% 18%/16% 40% no-repeat,
+  linear-gradient(#a08a68,#a08a68) 30% 46%/62% 46% no-repeat,
+  repeating-linear-gradient(90deg,transparent 0 8%,#6e5c42 8% 12%) 30% 58%/62% 26% no-repeat,
+  #9ec4e8}
+.cell.t-factory.cap-e{background:
+  linear-gradient(#8d7a5e,#8d7a5e) 12% 18%/16% 40% no-repeat,
+  linear-gradient(#a08a68,#a08a68) 30% 46%/62% 46% no-repeat,
+  repeating-linear-gradient(90deg,transparent 0 8%,#6e5c42 8% 12%) 30% 58%/62% 26% no-repeat,
+  #e8a3a0}
+/* 总部归属底色 */
+.cell.t-hq.cap-p{background:
+  linear-gradient(#8a93a8,#8a93a8) 50% 62%/56% 44% no-repeat,
+  linear-gradient(#6b7488,#6b7488) 50% 40%/34% 30% no-repeat,
+  #9ec4e8}
+.cell.t-hq.cap-e{background:
+  linear-gradient(#8a93a8,#8a93a8) 50% 62%/56% 44% no-repeat,
+  linear-gradient(#6b7488,#6b7488) 50% 40%/34% 30% no-repeat,
+  #e8a3a0}
+/* 生产菜单对话框 */
+#prodDialog .dialog{max-width:440px}
+#prodList{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.prodbtn{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 12px}
+.prodbtn .picon{width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.prodbtn .picon .uicon{width:100%;height:100%}
+.prodbtn .pname{flex:1;font-weight:600}
+.prodbtn .pcost{color:var(--gold);font-weight:700}
+.prodbtn:disabled{opacity:.4}

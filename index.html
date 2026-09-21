@@ -11,6 +11,7 @@
   <span class="title">⚔️ 迷你高级战争</span>
   <span id="phaseLabel" class="phase p">我方行动</span>
   <span>第 <b id="turnNum">1</b> 回合</span>
+  <span class="funds">💰 <b id="fundsNum">300</b></span>
   <span class="spacer"></span>
   <button id="sndBtn" title="音效开关">🔊</button>
   <button id="helpBtn" title="单位与规则说明">❓ 帮助</button>
@@ -35,13 +36,14 @@
     <p class="sub">回合制战棋 · 致敬 GBA《高级战争》· 零依赖即开即玩</p>
     <p style="margin-bottom:10px"><span style="font-size:13px;color:var(--dim)">🌐 Language:</span> <button class="langBtn primary" data-lang="zh" style="padding:4px 12px;font-size:13px">中文</button> <button class="langBtn" data-lang="en" style="padding:4px 12px;font-size:13px">English</button></p>
     <div class="help">
-      <p>🪖 <b>6+2 种兵种</b>：🪖步兵 · 🛡️重装兵 · 🚙侦察车 · 火炮 · 🔧工程师（占领×1.5+修理）· ⚕️军医（治疗）· 坦克 · 🚀火箭炮</p>
+      <p>🪖 <b>8 种兵种</b>：🪖步兵（多面手·可占领）· 🛡️重装兵（高攻高防·克制载具）· 🚙侦察车（高速突袭）· 火炮（射程 2-3）· 🔧工程师（占领×1.5+修理）· ⚕️军医（治疗）· 坦克（突击主力）· 🚀火箭炮（射程 3-5）</p>
       <p>💣 <b>目标</b>：消灭全部敌军，或占领全部建筑（城镇/工厂/总部）。占领敌方<b>总部</b>直接获胜！点击己方单位 → 点<b>蓝格</b>移动 → 点<b>红框敌人</b>攻击。</p>
       <p>🟠<b>橙格</b>=攻击范围（虚线），🔵<b>蓝格</b>=移动范围。再点一次选中单位=取消选择；或点侧栏「⏳ 待机」原地结束行动。</p>
       <p>🌲森林 / ⛰️山地提供<b>防御加成</b>但移动缓慢，🌊河流无法通行，🏙️城镇/🏭工厂/🚩总部在回合开始时回复 2 HP。<b>每个兵种在不同地形的移动力不同</b>（参考高级战争）：步兵擅长山地，履带单位不能进山，轮胎单位怕森林。</p>
       <p>🚩<b>占领建筑</b>：只有步兵/工程师能占领（工程师 1.5 倍速度），站上建筑待机积累进度（进度=当前 HP×倍率，满 20 占领，<b>离开进度清零</b>）。占领全部建筑也可获胜！敌军同样会占领，被夺走的建筑不再为你回血。</p>
       <p>🖱️ 选中单位后，鼠标悬停会显示<b>移动路径箭头</b>（绿格+箭头指示方向）；点击敌军可查看其<b>移动/攻击范围</b>。</p>
       <p>💥 有命中与会心一击；⬆️ 战斗获得经验并<b>升级</b>——敌军同样会升级，速战速决！🎵 对战有 BGM：我方明快进行曲，敌方紧张小调。</p>
+      <p>💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！</p>
     </div>
     <p style="margin:16px 0 4px">选择地图规模（随机对称地图）：</p>
     <div class="sizes">
@@ -62,7 +64,7 @@
       <table class="utable">
         <tr><th>单位</th><th>HP</th><th>攻</th><th>防</th><th>移动</th><th>射程</th><th>特性</th></tr>
         <tr><td>🪖 步兵</td><td>10</td><td>5</td><td>1</td><td>3</td><td>1</td><td>多面手，可占领建筑，山地移动力好</td></tr>
-        <tr><td>🛡️ 重装兵</td><td>10</td><td>7</td><td>3</td><td>4</td><td>1</td><td>高攻高防的近战主力（履带，不可入山地）</td></tr>
+        <tr><td>🛡️ 重装兵</td><td>10</td><td>7</td><td>3</td><td>4</td><td>1</td><td>高攻高防的近战主力，克制载具（履带，不可入山地）</td></tr>
         <tr><td>🚙 侦察车</td><td>10</td><td>6</td><td>0</td><td>6</td><td>1</td><td>高速突袭，装甲薄弱（轮胎，不可入山地）</td></tr>
         <tr><td><i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i> 火炮</td><td>10</td><td>7</td><td>1</td><td>2</td><td>2-3</td><td>远程轰击，移动后不能开火（履带）</td></tr>
         <tr><td>🔧 工程师</td><td>10</td><td>2</td><td>1</td><td>3</td><td>1</td><td>占领 1.5 倍速度，山地行军最快，修理相邻载具 +3 HP</td></tr>
@@ -96,9 +98,20 @@
       <h4>查看敌军</h4>
       <p>点击敌军单位（或已行动的我方单位）可查看其<b>移动范围（半透明蓝格）和攻击范围（橙格虚线）</b>，但不能操作。再点一次取消。</p>
       <h4>战斗规则</h4>
-      <p>命中 90%，会心一击 12%（1.5 倍伤害）；反击伤害为 70%。单位间有克制关系（重装克步兵、坦克克步兵等）。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。</p>
+      <p>命中 90%，会心一击 12%（1.5 倍伤害）；反击伤害为 70%。单位间有克制关系（重装克步兵与载具、坦克克步兵等）。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。</p>
+      <h4>经济与生产</h4>
+      <p>💵 每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金，初始资金 <b>300</b>。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。</p>
     </div>
     <p style="margin-top:16px"><button id="helpClose" class="primary">知道了</button></p>
+  </div>
+</div>
+
+<div id="prodDialog" class="overlay hidden">
+  <div class="dialog">
+    <h1 id="prodTitle">🏭 生产单位</h1>
+    <p class="sub" id="prodFunds">💰 资金：300</p>
+    <div id="prodList"></div>
+    <p style="margin-top:16px"><button id="prodClose">取消</button></p>
   </div>
 </div>
 
