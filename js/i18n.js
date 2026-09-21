@@ -27,7 +27,7 @@ const I18N={
     m8:'💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！',
     // 帮助对话框
     helpTitle:'📖 游戏说明', helpSub:'单位特性 · 颜色图例 · 地形效果',
-    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则',
+    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
     uInf:'多面手，可占领建筑，山地移动力好', uHeavy:'高攻高防的近战主力，克制载具（履带，不可入山地）', uRecon:'高速突袭，装甲薄弱（轮胎，不可入山地）',
     uArtillery:'远程轰击，移动后不能开火（履带）', uEngineer:'占领 1.5 倍速度，山地行军最快，修理相邻载具 +3 HP', uMedic:'治疗相邻步兵/工程师 +4 HP',
@@ -106,7 +106,7 @@ const I18N={
     m7:'💥 Hits and crits; ⬆️ gain XP and <b>level up</b> — enemies level up too! 🎵 Battle BGM: upbeat march for you, tense minor for the enemy.',
     m8:'💰 <b>Economy & production</b>: each owned building gives income every turn (+50 each), starting funds 300. Click <b>your empty factory</b> to open the production menu and spend funds on new units (they wait this turn). The enemy saves money and builds too — expand your economy!',
     helpTitle:'📖 How to Play', helpSub:'Unit traits · Color legend · Terrain effects',
-    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules',
+    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production',
     thUnit:'Unit', thHp:'HP', thAtk:'ATK', thDef:'DEF', thMove:'MOV', thRange:'RNG', thTrait:'Trait',
     uInf:'Versatile, can capture, good mountain mobility', uHeavy:'Strong melee main force, strong vs vehicles (treads, no mountains)', uRecon:'Fast raider, weak armor (tires, no mountains)',
     uArtillery:'Long-range fire, cannot fire after moving (treads)', uEngineer:'1.5× capture, fastest in mountains, repairs adjacent vehicles +3 HP', uMedic:'Heals adjacent infantry/engineers +4 HP',
