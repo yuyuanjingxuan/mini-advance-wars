@@ -9,8 +9,8 @@ const TERRAINS={
   hq:      {name:'总部', emoji:'🚩', cost:1, def:0.4 },
   factory: {name:'工厂', emoji:'🏭', cost:1, def:0.3 },
 };
-// 可占领的建筑（城镇/工厂/总部，共用占领进度机制）
-const CAPTURABLE=['city','factory','hq'];
+// 可占领的建筑（城镇/工厂，共用占领进度机制；总部不可占领）
+const CAPTURABLE=['city','factory'];
 // 每兵种地形移动力（参考高级战争：步兵/机甲步行、履带、轮胎）
 // 步兵：森林 1 山地 2；工程师（机甲化）：山地 1；履带（重装/坦克/火炮）：森林 2 不可入山地；
 // 轮胎（侦察车/火箭炮）：平原 2 森林 3 不可入山地；河流对所有地面单位不可通行
@@ -18,7 +18,7 @@ const MOVE_COST={
   infantry:{plain:1,forest:1,mountain:2,water:Infinity,city:1,factory:1,hq:1},
   medic:   {plain:1,forest:1,mountain:2,water:Infinity,city:1,factory:1,hq:1},
   engineer:{plain:1,forest:1,mountain:1,water:Infinity,city:1,factory:1,hq:1},
-  heavy:   {plain:1,forest:2,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
+  heavy:   {plain:1,forest:1,mountain:2,water:Infinity,city:1,factory:1,hq:1},
   tank:    {plain:1,forest:2,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
   artillery:{plain:1,forest:2,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
   recon:   {plain:2,forest:3,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
@@ -26,7 +26,7 @@ const MOVE_COST={
 };
 const UNIT_TYPES={
   infantry:{name:'步兵',  emoji:'🪖', hp:10, atk:5, def:1, move:3, minR:1, maxR:1, desc:'多面手，擅长山地作战，可占领建筑'},
-  heavy:  {name:'重装兵', emoji:'🛡️', hp:10, atk:7, def:3, move:4, minR:1, maxR:1, desc:'高攻高防主力，克制载具（履带，不可入山地）'},
+  heavy:  {name:'重装兵', emoji:'🛡️', hp:10, atk:7, def:3, move:4, minR:1, maxR:1, desc:'高攻高防主力，克制载具（步兵，可进山）'},
   recon:  {name:'侦察车', emoji:'🚙', hp:10, atk:6, def:0, move:6, minR:1, maxR:1, desc:'高速突袭，但装甲薄弱（轮胎，不可入山地）'},
   artillery:{name:'火炮', emoji:'', icon:'cannon', hp:10, atk:7, def:1, move:2, minR:2, maxR:3, desc:'远程轰击，移动后不能开火（履带）'},
   engineer:{name:'工程师', emoji:'🔧', hp:10, atk:2, def:1, move:3, minR:1, maxR:1, desc:'占领速度×1.5，山地行军最快，修理相邻载具（+3 HP）'},
