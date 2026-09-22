@@ -165,13 +165,15 @@ function setLang(l){
   const names={infantry:'nInfantry',heavy:'nHeavy',recon:'nRecon',artillery:'nArtillery',engineer:'nEngineer',medic:'nMedic',tank:'nTank',rocket:'nRocket'};
   const descs={infantry:'dInfantry',heavy:'dHeavy',recon:'dRecon',artillery:'dArtillery',engineer:'dEngineer',medic:'dMedic',tank:'dTank',rocket:'dRocket'};
   for(const k in names){UNIT_TYPES[k].name=T(names[k]);UNIT_TYPES[k].desc=T(descs[k]);}
-  TERRAINS.plain.name=T('tPlain').replace(/^🟩\s*/,'');
-  TERRAINS.forest.name=T('tForest').replace(/^🌲\s*/,'');
-  TERRAINS.mountain.name=T('tMountain').replace(/^⛰️\s*/,'');
-  TERRAINS.water.name=T('tWater').replace(/^🌊\s*/,'');
-  TERRAINS.city.name=T('tCity').replace(/^🏙️\s*/,'').split('：')[0].split(':')[0];
-  TERRAINS.hq.name=T('tHq').replace(/^🚩\s*/,'').split('：')[0].split(':')[0];
-  TERRAINS.factory.name=T('tFactory').replace(/^🏭\s*/,'').split('：')[0].split(':')[0];
+  // 先剥离 tchip HTML 前缀（v 图标同步后 t* 键以 <i class="tchip..."> 开头），再兼容旧 emoji 前缀
+  const stripChip=s=>s.replace(/^<i class="tchip t-\w+"><\/i>\s*/,'');
+  TERRAINS.plain.name=stripChip(T('tPlain')).replace(/^🟩\s*/,'');
+  TERRAINS.forest.name=stripChip(T('tForest')).replace(/^🌲\s*/,'');
+  TERRAINS.mountain.name=stripChip(T('tMountain')).replace(/^⛰️\s*/,'');
+  TERRAINS.water.name=stripChip(T('tWater')).replace(/^🌊\s*/,'');
+  TERRAINS.city.name=stripChip(T('tCity')).replace(/^🏙️\s*/,'').split('：')[0].split(':')[0];
+  TERRAINS.hq.name=stripChip(T('tHq')).replace(/^🚩\s*/,'').split('：')[0].split(':')[0];
+  TERRAINS.factory.name=stripChip(T('tFactory')).replace(/^🏭\s*/,'').split('：')[0].split(':')[0];
   applyStaticTexts();
   if(G)render();
 }
