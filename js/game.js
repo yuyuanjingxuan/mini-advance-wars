@@ -657,9 +657,10 @@ function showInfo(u){
     el.innerHTML=T('unitHint')+'<br><span style="color:var(--dim);font-size:12px">'+T('unitHint2')+'</span>';
     return;
   }
-  const b=UNIT_TYPES[u.type],t=terrAt(u.x,u.y);
+  const b=UNIT_TYPES[u.type],t=terrAt(u.x,u.y),tKey=G.map[u.y][u.x];
   const ratio=u.hp/u.maxHp,hc=ratio>0.6?'':ratio>0.3?'mid':'low';
   const uicon=b.icon?`<i class="uicon ${b.icon}"></i>`:b.emoji;
+  const tchip=`<i class="tchip t-${tKey}"></i>`;
   el.innerHTML=`
     <div class="uhead"><span class="uemoji">${uicon}</span>
       <span><span class="uname">${b.name}</span><span class="uside ${u.side==='P'?'p':'e'}">${sideName(u.side)} Lv.${u.level}</span></span>
@@ -670,7 +671,7 @@ function showInfo(u){
       <span>${T('thAtk')} <b>${u.atk}</b></span><span>${T('thDef')} <b>${u.def}</b></span>
       <span>${T('thMove')} <b>${u.move}</b></span><span>${T('thRange')} <b>${u.minR===u.maxR?u.maxR:u.minR+'-'+u.maxR}</b></span>
     </div>
-    <div style="font-size:12px;color:var(--dim);margin-top:6px">${b.desc}<br>${T('onTerrain')}：${t.emoji||'🟩'} ${t.name}（+${Math.round(t.def*100)}%）${u.acted?`<br><b style="color:var(--dim)">${u.side==='P'?T('actedP'):T('actedE')}</b>`:''}</div>`;
+    <div style="font-size:12px;color:var(--dim);margin-top:6px">${b.desc}<br>${T('onTerrain')}：${tchip} ${t.name}（+${Math.round(t.def*100)}%）${u.acted?`<br><b style="color:var(--dim)">${u.side==='P'?T('actedP'):T('actedE')}</b>`:''}</div>`;
 }
 function log(msg,cls='info'){
   const el=$('#log');

@@ -81,13 +81,13 @@
         <div class="row"><span class="chip baseP"></span>蓝底 = 我方单位　<span class="chip baseE"></span>红底 = 敌军单位</div>
         <div class="row"><span class="chip acted"></span>灰显 = 我方已行动　<span class="chip" style="background:transparent;border:2px dashed rgba(255,140,140,.85);border-radius:50%"></span>虚线框 = 敌军已行动</div>
         <div class="row"><span class="chip" style="background:rgba(120,220,160,.45);border:2px solid rgba(150,240,180,.9)"></span>绿格+箭头 = 移动路径预览（悬停显示）</div>
-        <div class="row"><span class="chip" style="background:#4da3ff;clip-path:polygon(0 0,100% 50%,0 100%)"></span>🚩旗帜 = 城镇归属（蓝=我方，红=敌军）</div>
+        <div class="row"><i class="flag" style="display:inline-block;width:12px;height:16px;position:static;vertical-align:-3px"></i>旗帜 = 城镇归属（蓝=我方，红=敌军）</div>
         <div class="row">右上角 <b>I / II / III…</b> = 单位等级（罗马数字）</div>
       </div>
       <h4>地形效果</h4>
-      <p>🌲 森林：防御 +20%，步兵消耗 1 / 履带 2 / 轮胎 3　｜　⛰️ 山地：防御 +40%，步兵消耗 2 / 工程师 1 / 载具不可入<br>
-      🌊 河流：不可通行（浅滩可过）　｜　🏙️ 城镇：防御 +30%，回合开始回复 2 HP（仅限己方占领的建筑）　｜　🟩 平原：无加成，所有兵种消耗 1（轮胎 2）<br>
-      🚩 总部：防御 +40%，占领敌方总部获胜，己方总部被占战败　｜　🏭 工厂：防御 +30%，回合开始回复 2 HP，可修理驻守载具</p>
+      <p><i class="tchip t-forest"></i> 森林：防御 +20%，步兵消耗 1 / 履带 2 / 轮胎 3　｜　<i class="tchip t-mountain"></i> 山地：防御 +40%，步兵消耗 2 / 工程师 1 / 载具不可入<br>
+      <i class="tchip t-water"></i> 河流：不可通行（浅滩可过）　｜　<i class="tchip t-city"></i> 城镇：防御 +30%，回合开始回复 2 HP（仅限己方占领的建筑）　｜　<i class="tchip t-plain"></i> 平原：无加成，所有兵种消耗 1（轮胎 2）<br>
+      <i class="tchip t-hq"></i> 总部：防御 +40%，占领敌方总部获胜，己方总部被占战败　｜　<i class="tchip t-factory"></i> 工厂：防御 +30%，回合开始回复 2 HP，可修理驻守载具</p>
       <h4>占领规则</h4>
       <p>只有<b>步兵</b>、<b>重装兵</b>和<b>工程师</b>能占领建筑（城镇/工厂/总部，工程师 1.5 倍速度）。站在建筑上待机或移动结束即积累进度（进度 = 单位当前 HP×倍率，满 20 占领）。<b>离开建筑后进度清零</b>。占领后建筑插上本方旗帜，只有己方建筑才回血。敌军同样会占领，被夺走的建筑会变红旗。<b>占领敌方总部直接获胜，己方总部被占直接战败</b>。</p>
       <h4>辅助单位</h4>
