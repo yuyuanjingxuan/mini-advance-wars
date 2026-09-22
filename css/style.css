@@ -54,7 +54,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
   repeating-linear-gradient(90deg,transparent 0 8%,#6e5c42 8% 12%) 30% 58%/62% 26% no-repeat,
   #c9bfa8}
 /* 侧栏地形小图标：与棋盘 CSS 地形同款色块（统一显示，不再用 emoji） */
-.tchip{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:2px}
+/* position:relative 使 .t-hq::before/::after 等棋盘伪元素以小图标为基准，避免相对视口定位成巨大色块 */
+.tchip{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:2px;position:relative;overflow:hidden}
 .tchip.t-plain{background:#7cbf5e}
 .tchip.t-forest{background:radial-gradient(circle at 30% 30%,#2e6238 0 30%,transparent 32%),radial-gradient(circle at 70% 65%,#356e40 0 28%,transparent 30%),#4f8f57}
 .tchip.t-mountain{background:linear-gradient(160deg,#c2a377,#a98c60);position:relative;overflow:hidden}
