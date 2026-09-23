@@ -64,7 +64,7 @@ python -m http.server 8765
 ## 📦 Tech
 
 - Pure HTML + CSS + JavaScript (**zero dependencies**, no frameworks, no build step)
-- Clean structure: `index.html` (page) + `css/style.css` (styles) + `js/config.js` (config) + `js/i18n.js` (i18n) + `js/audio.js` (SFX) + `js/game.js` (logic)
+- **Single-file architecture**: all styles and scripts (config / i18n / SFX / logic) are embedded in `index.html` — just open and play, no external files needed
 - Runs in any modern browser — double-click `index.html` works too (no ES modules / fetch, file:// friendly)
 
 ## 📄 License

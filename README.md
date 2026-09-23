@@ -64,7 +64,7 @@ python -m http.server 8765
 ## 📦 技术
 
 - 纯 HTML + CSS + JavaScript（**零依赖**，无框架、无构建）
-- 结构清晰：`index.html`（页面）+ `css/style.css`（样式）+ `js/config.js`（配置）+ `js/i18n.js`（多语言）+ `js/audio.js`（音效）+ `js/game.js`（逻辑）
+- **单文件架构**：全部样式与脚本（配置 / 多语言 / 音效 / 逻辑）均内嵌在 `index.html` 中，双击即玩，无外部依赖文件
 - 任意现代浏览器直接运行，双击 `index.html` 即可（无 ES Module / fetch，file:// 协议可用）
 
 ## 📄 许可证
