@@ -13,8 +13,6 @@
 
 [简体中文](README.md) | **English**
 
-🎮 [**Play Online**](https://yuyuanjingxuan.github.io/mini-advance-wars/)
-
 </div>
 
 ---
@@ -56,6 +54,8 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 > 💡 Forest/mountains grant defense bonuses but slow movement — each unit type has different move costs per terrain (infantry excel in mountains, treads cannot enter mountains); owned buildings heal 2 HP per turn and grant +50 income; cannon/rocket cannot fire after moving — they must wait in place to fire; heavy counters vehicles.
 
 ## 🚀 Getting Started
+
+[![Play Online](https://img.shields.io/badge/▶️_Play%20Online-Mini%20Advance%20Wars-brightgreen)](https://yuyuanjingxuan.github.io/mini-advance-wars/)
 
 **No build, no install:**
 

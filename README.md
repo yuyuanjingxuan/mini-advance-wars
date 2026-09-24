@@ -13,8 +13,6 @@
 
 **简体中文** | [English](README.en.md)
 
-🎮 [**在线试玩**](https://yuyuanjingxuan.github.io/mini-advance-wars/)
-
 </div>
 
 ---
@@ -56,6 +54,8 @@
 > 💡 森林/山地提供防御加成但移动缓慢，每个兵种在不同地形的移动力不同（步兵擅长山地，履带单位不能进山）；占领建筑每回合回复 2 HP 并提供 +50 收入；火炮/火箭炮移动后不能开火，只能原地待机开火；重装兵克制载具。
 
 ## 🚀 开始游戏
+
+[![Play Online](https://img.shields.io/badge/▶️_在线试玩-迷你高级战争-brightgreen)](https://yuyuanjingxuan.github.io/mini-advance-wars/)
 
 **无需构建、无需安装：**
 
