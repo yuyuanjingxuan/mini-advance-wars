@@ -305,6 +305,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button data-mode="infantryDuel">🪖 步兵对决<br><small>双方只能出非载具单位</small></button>
       <button data-mode="armorDuel">🛡️ 装甲对决<br><small>双方只能出侦察车/坦克</small></button>
       <button data-mode="artilleryDuel">💥 炮兵对决<br><small>双方只能出火炮/火箭炮</small></button>
+      <button data-mode="siege">🏰 坚守阵地<br><small>存活 15 回合，敌方持续刷新</small></button>
     </div>
     <p style="margin:16px 0 4px">选择地图规模（随机对称地图）：</p>
     <div class="sizes" style="flex-wrap:wrap">
@@ -399,7 +400,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
       🪖 <b>步兵对决</b>：双方只能出非载具单位（步兵/重装兵/工程师/军医）。<br>
       🛡️ <b>装甲对决</b>：双方只能出侦察车/坦克。<br>
       💥 <b>炮兵对决</b>：双方只能出火炮/火箭炮。<br>
+      🏰 <b>坚守阵地</b>：生存模式，规则与其它模式不同，见下方专门说明。<br>
       三种对决模式下运兵车均不开放（无武装，对决模式里没有战斗意义）；初始部队数目的随机池会自动按当前模式过滤。</p>
+      <h4>坚守阵地</h4>
+      <p>🏰 敌方开局<b>没有总部和工厂</b>（不参与经济系统），我方开局部队数目仍可选无/少/中/多，且我方会额外获得对应数量的城市（无=0、少=2、中=3、多=4 座，地图中立城市不足时按实际数量给）。<br>
+      敌方每 <b>3 回合</b>刷新一波部队，直接在敌方出生点附近凭空生成，不需要经济或工厂；每波预算在 <b>300~600</b> 资金之间随机，按现有造价表贪心随机选兵直到用完预算，兵种覆盖全部 9 种（含坦克/火箭炮），出生点已满时会跳过当波刷新。每方单位数量上限 12，敌方也不例外。<br>
+      <b>目标是活到第 15 回合</b>：坚持到底即获胜，己方总部被占则立刻战败。<b>此模式下歼灭全部敌军不算获胜</b>——敌方会持续刷新，没有"消灭干净"这回事。</p>
       <h4>敌方 AI 风格</h4>
       <p>开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>
       🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>
@@ -574,6 +580,7 @@ const I18N={
     modeInfantryDuel:'🪖 步兵对决', modeInfantryDuelSub:'双方只能出非载具单位',
     modeArmorDuel:'🛡️ 装甲对决', modeArmorDuelSub:'双方只能出侦察车/坦克',
     modeArtilleryDuel:'💥 炮兵对决', modeArtilleryDuelSub:'双方只能出火炮/火箭炮',
+    modeSiege:'🏰 坚守阵地', modeSiegeSub:'存活 15 回合，敌方持续刷新',
     aiStyleLabel:'选择敌方 AI 风格：',
     aiBalanced:'🛡️ 稳健', aiBalancedSub:'不打亏本仗，会避险',
     aiAggressive:'🔥 激进', aiAggressiveSub:'不计代价追求击杀',
@@ -604,7 +611,7 @@ const I18N={
     m8:'💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！',
     // 帮助对话框
     helpTitle:'📖 游戏说明', helpSub:'单位特性 · 颜色图例 · 地形效果',
-    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hGameMode:'游戏模式', hAiStyle:'敌方 AI 风格', hDifficulty:'敌方强度', hTroops:'初始部队数目',
+    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hGameMode:'游戏模式', hSiege:'坚守阵地', hAiStyle:'敌方 AI 风格', hDifficulty:'敌方强度', hTroops:'初始部队数目',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
     uInf:'多面手，可占领建筑，山地移动力好（普通枪械）', uHeavy:'高攻高防近战主力，移动迟缓，携带反装甲武器克制载具（步兵，可进山）', uRecon:'极速侦察，轻甲炮打不动坦克、装甲薄弱（森林机动尚可，不可入山地）',
     uArtillery:'高爆炮弹对各类目标均有效，移动后不能开火（履带笨重，不可入山地）', uEngineer:'占领 1.5 倍速度，修理相邻载具 +3 HP，无护甲攻击弱', uMedic:'治疗相邻步兵/重装兵/工程师 +4 HP，无护甲攻击弱',
@@ -646,16 +653,18 @@ const I18N={
     // 经济与生产
     incomeLog:(s,inc,n)=>`${sideName(s)} 💵 收入 +${inc}（${n} 座建筑 × ${INCOME_PER}）`,
     buildLog:(s,t)=>`🏭 ${sideName(s)} 生产了 ${UNIT_TYPES[t].name}！`,
+    siegeWaveLog:(n)=>`🏰 敌方新增一波部队（${n} 个单位）！`,
     prodTitle:'🏭 生产单位', prodCancel:'取消', prodHint:'点击工厂生产单位',
     prodFunds:(f)=>`💰 资金：${f}`,
     ecoRule:'💵 开局无初始资金，第 1 回合就会按开局拥有的建筑数结算一次收入；此后每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵/工程师/军医最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。',
-    gameModeRule:'开局前可在主菜单选择游戏模式，限制双方（含工厂生产）能出的兵种：<br>⚔️ <b>遭遇战</b>：标准对局，不限制兵种，即本文档其它章节描述的默认玩法。<br>🪖 <b>步兵对决</b>：双方只能出非载具单位（步兵/重装兵/工程师/军医）。<br>🛡️ <b>装甲对决</b>：双方只能出侦察车/坦克。<br>💥 <b>炮兵对决</b>：双方只能出火炮/火箭炮。<br>三种对决模式下运兵车均不开放（无武装，对决模式里没有战斗意义）；初始部队数目的随机池会自动按当前模式过滤。',
+    gameModeRule:'开局前可在主菜单选择游戏模式，限制双方（含工厂生产）能出的兵种：<br>⚔️ <b>遭遇战</b>：标准对局，不限制兵种，即本文档其它章节描述的默认玩法。<br>🪖 <b>步兵对决</b>：双方只能出非载具单位（步兵/重装兵/工程师/军医）。<br>🛡️ <b>装甲对决</b>：双方只能出侦察车/坦克。<br>💥 <b>炮兵对决</b>：双方只能出火炮/火箭炮。<br>🏰 <b>坚守阵地</b>：生存模式，规则与其它模式不同，见下方专门说明。<br>三种对决模式下运兵车均不开放（无武装，对决模式里没有战斗意义）；初始部队数目的随机池会自动按当前模式过滤。',
+    siegeRule:'🏰 敌方开局<b>没有总部和工厂</b>（不参与经济系统），我方开局部队数目仍可选无/少/中/多，且我方会额外获得对应数量的城市（无=0、少=2、中=3、多=4 座，地图中立城市不足时按实际数量给）。<br>敌方每 <b>3 回合</b>刷新一波部队，直接在敌方出生点附近凭空生成，不需要经济或工厂；每波预算在 <b>300~600</b> 资金之间随机，按现有造价表贪心随机选兵直到用完预算，兵种覆盖全部 9 种（含坦克/火箭炮），出生点已满时会跳过当波刷新。每方单位数量上限 12，敌方也不例外。<br><b>目标是活到第 15 回合</b>：坚持到底即获胜，己方总部被占则立刻战败。<b>此模式下歼灭全部敌军不算获胜</b>——敌方会持续刷新，没有"消灭干净"这回事。',
     aiStyleRule:'开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。',
     difficultyRule:'开局前可在主菜单选择敌方强度，只放大敌方单位的 HP 上限（开局单位与工厂新造单位均生效），不影响我方、不影响 AI 决策风格，可与任意 AI 风格自由组合：<br>😴 <b>白痴</b>：敌方 HP ×0.8　｜　🙂 <b>简单</b>：敌方 HP ×0.9　｜　⚖️ <b>普通</b>：敌方 HP ×1.0（默认）<br>🔥 <b>困难</b>：敌方 HP ×1.1　｜　💀 <b>地狱</b>：敌方 HP ×1.2　｜　☠️ <b>噩梦</b>：敌方 HP ×1.5',
     troopsRule:'开局前可在主菜单选择双方的初始部队规模，四档均为双方对称配置：<br>🚫 <b>无</b>：0 个单位，双方只有 HQ+工厂+城镇，完全靠收入慢慢造兵。<br>🪖 <b>少</b>：3 个单位（1 个必选步兵 + 2 个随机，随机池：步兵/重装兵/工程师/军医）。<br>⚔️ <b>中</b>：6 个单位（1 个必选步兵 + 5 个随机，随机池：步兵/重装兵/侦察车/火炮/工程师/军医/运兵车）。<br>🎖️ <b>多</b>：9 个单位（1 个必选步兵 + 8 个随机，随机池：全部 9 种兵种，坦克/火箭炮仅此档可能出现）。<br>随机池均包含步兵自身在内，可能重复抽到步兵；出生点围绕各自 HQ 就近分布。',
     // 结果
     winTitle:'🎉 胜利！', loseTitle:'💀 战败……',
-    winText:(n,how)=>how==='hq'?`历经 ${n} 回合占领了敌方总部！`:`历经 ${n} 回合消灭了全部敌军！`, loseText:(n,how)=>how==='hq'?`己方总部于第 ${n} 回合被占领，再接再厉！`:`我军全灭于第 ${n} 回合，再接再厉！`,
+    winText:(n,how)=>how==='hq'?`历经 ${n} 回合占领了敌方总部！`:how==='survive'?`坚守 ${n} 回合，成功守住阵地！`:`历经 ${n} 回合消灭了全部敌军！`, loseText:(n,how)=>how==='hq'?`己方总部于第 ${n} 回合被占领，再接再厉！`:`我军全灭于第 ${n} 回合，再接再厉！`,
     again:'再来一局', backMenu:'返回菜单', backConfirm:'返回主菜单？当前进度将丢失',
     // 单位卡
     actedP:'已行动（灰显）', actedE:'已行动（虚线框）', onTerrain:'所在地形',
@@ -692,6 +701,7 @@ const I18N={
     modeInfantryDuel:'🪖 Infantry Duel', modeInfantryDuelSub:'Both sides: foot units only',
     modeArmorDuel:'🛡️ Armor Duel', modeArmorDuelSub:'Both sides: recon/tank only',
     modeArtilleryDuel:'💥 Artillery Duel', modeArtilleryDuelSub:'Both sides: artillery/rocket only',
+    modeSiege:'🏰 Hold the Line', modeSiegeSub:'Survive 15 turns, enemy respawns endlessly',
     aiStyleLabel:'Choose enemy AI style:',
     aiBalanced:'🛡️ Balanced', aiBalancedSub:'No bad trades, plays it safe',
     aiAggressive:'🔥 Aggressive', aiAggressiveSub:'Chases kills at any cost',
@@ -760,15 +770,17 @@ const I18N={
     startLog:'⚔️ Battle start! Destroy all enemies or capture the enemy HQ to win.',
     incomeLog:(s,inc,n)=>`${sideName(s)} 💵 Income +${inc} (${n} buildings × ${INCOME_PER})`,
     buildLog:(s,t)=>`🏭 ${sideName(s)} built a ${UNIT_TYPES[t].name}!`,
+    siegeWaveLog:(n)=>`🏰 A new enemy wave arrived (${n} units)!`,
     prodTitle:'🏭 Build Unit', prodCancel:'Cancel', prodHint:'Click factory to build',
     prodFunds:(f)=>`💰 Funds: ${f}`,
     ecoRule:'💵 No starting funds — turn 1 immediately settles income based on the buildings you own at kickoff; after that, every owned building (city/factory/HQ) grants <b>+50</b> funds at the start of each turn. Click <b>your empty factory</b> to open the production menu: pick a unit and pay its cost (infantry/engineer/medic cheapest, rocket priciest); new units wait this turn and act next turn. Max 12 units per side. The enemy collects income and builds units too.',
-    gameModeRule:'Pick a game mode before starting — it restricts which units either side (including factory production) can field:<br>⚔️ <b>Skirmish</b>: standard match, no unit restrictions — the default mode described throughout the rest of this document.<br>🪖 <b>Infantry Duel</b>: both sides limited to foot units (infantry/heavy/engineer/medic).<br>🛡️ <b>Armor Duel</b>: both sides limited to recon/tank.<br>💥 <b>Artillery Duel</b>: both sides limited to artillery/rocket.<br>Transports are unavailable in all three duel modes (unarmed, no combat purpose there); the starting-troops random pool automatically filters to whatever the current mode allows.',
+    gameModeRule:'Pick a game mode before starting — it restricts which units either side (including factory production) can field:<br>⚔️ <b>Skirmish</b>: standard match, no unit restrictions — the default mode described throughout the rest of this document.<br>🪖 <b>Infantry Duel</b>: both sides limited to foot units (infantry/heavy/engineer/medic).<br>🛡️ <b>Armor Duel</b>: both sides limited to recon/tank.<br>💥 <b>Artillery Duel</b>: both sides limited to artillery/rocket.<br>🏰 <b>Hold the Line</b>: a survival mode with different rules — see the dedicated section below.<br>Transports are unavailable in all three duel modes (unarmed, no combat purpose there); the starting-troops random pool automatically filters to whatever the current mode allows.',
+    siegeRule:'🏰 The enemy starts with <b>no HQ or factory</b> (no economy at all). Your own starting troop tier (None/Few/Medium/Many) still applies, and you additionally get a matching number of extra cities (None=0, Few=2, Medium=3, Many=4 — capped by however many neutral cities the map actually has). <br>Every <b>3 turns</b>, a new enemy wave spawns near the enemy\'s original spawn tiles out of thin air — no economy or factory needed. Each wave has a random budget between <b>300 and 600</b> funds, greedily filled with random units (using the normal cost table) from all 9 unit types (including tanks/rockets) until the budget runs out; a wave is skipped if there\'s no open spawn tile left. The 12-unit-per-side cap still applies to the enemy.<br><b>Your goal is to survive to turn 15</b> — hold out and you win; losing your own HQ is still an instant defeat. <b>Destroying all enemy units does NOT win this mode</b> — the enemy keeps respawning, so there\'s no such thing as "wiping them out."',
     aiStyleRule:'Pick the enemy\'s style before starting (shown at the top during the match):<br>🛡️ <b>Balanced</b>: avoids bad trades — skips an attack if it can\'t kill and the counter-risk is too high; retreats low-HP units to safer tiles; prioritizes finishing off weakened targets.<br>🔥 <b>Aggressive</b>: barely considers its own safety, always maximizes this turn\'s damage/kills even in a losing trade.<br>🏰 <b>Defensive</b>: doesn\'t chase you down, prioritizes capturing neutral/lost buildings, holds position when there\'s nothing to fight, and grinds you down with economy and terrain.',
     difficultyRule:'Pick the enemy difficulty before starting — it only scales enemy units\' max HP (applies to both the starting roster and units built at factories during the match), doesn\'t affect your side, and doesn\'t affect AI decision-making — freely combine it with any AI style:<br>😴 <b>Trivial</b>: Enemy HP ×0.8　｜　🙂 <b>Easy</b>: Enemy HP ×0.9　｜　⚖️ <b>Normal</b>: Enemy HP ×1.0 (default)<br>🔥 <b>Hard</b>: Enemy HP ×1.1　｜　💀 <b>Hell</b>: Enemy HP ×1.2　｜　☠️ <b>Nightmare</b>: Enemy HP ×1.5',
     troopsRule:'Pick both sides\' starting troop size before the match — all four tiers are symmetric for both sides:<br>🚫 <b>None</b>: 0 units, both sides start with only HQ+factory+city and build up purely from income.<br>🪖 <b>Few</b>: 3 units (1 mandatory infantry + 2 random, pool: infantry/heavy/engineer/medic).<br>⚔️ <b>Medium</b>: 6 units (1 mandatory infantry + 5 random, pool: infantry/heavy/recon/artillery/engineer/medic/transport).<br>🎖️ <b>Many</b>: 9 units (1 mandatory infantry + 8 random, pool: all 9 unit types — tanks/rockets can only appear at this tier).<br>The random pool always includes infantry itself, so it may be picked more than once; spawn points cluster near each side\'s own HQ.',
     winTitle:'🎉 Victory!', loseTitle:'💀 Defeat…',
-    winText:(n,how)=>how==='hq'?`Captured the enemy HQ in ${n} turns!`:`Destroyed all enemies in ${n} turns!`, loseText:(n,how)=>how==='hq'?`Your HQ was captured on turn ${n}. Try again!`:`Your army fell on turn ${n}. Try again!`,
+    winText:(n,how)=>how==='hq'?`Captured the enemy HQ in ${n} turns!`:how==='survive'?`Held the line for ${n} turns!`:`Destroyed all enemies in ${n} turns!`, loseText:(n,how)=>how==='hq'?`Your HQ was captured on turn ${n}. Try again!`:`Your army fell on turn ${n}. Try again!`,
     again:'Play Again', backMenu:'Main Menu', backConfirm:'Return to main menu? Current progress will be lost',
     actedP:'acted (gray)', actedE:'acted (dashed)', onTerrain:'Terrain',
     myFlag:'🚩Owned by you', enFlag:'⚠️Enemy-owned', capturing:'Capturing', neutral:'Neutral', prog:'Progress',
@@ -845,11 +857,12 @@ function applyStaticTexts(){
   }
   set('gameModeLabel',T('gameModeLabel'));
   const modeBtns=document.querySelectorAll('#menu button[data-mode]');
-  if(modeBtns.length===4){
+  if(modeBtns.length===5){
     modeBtns[0].innerHTML=T('modeSkirmish')+'<br><small>'+T('modeSkirmishSub')+'</small>';
     modeBtns[1].innerHTML=T('modeInfantryDuel')+'<br><small>'+T('modeInfantryDuelSub')+'</small>';
     modeBtns[2].innerHTML=T('modeArmorDuel')+'<br><small>'+T('modeArmorDuelSub')+'</small>';
     modeBtns[3].innerHTML=T('modeArtilleryDuel')+'<br><small>'+T('modeArtilleryDuelSub')+'</small>';
+    modeBtns[4].innerHTML=T('modeSiege')+'<br><small>'+T('modeSiegeSub')+'</small>';
   }
   set('aiStyleLabel',T('aiStyleLabel'));
   const aiBtns=document.querySelectorAll('#menu button[data-ai]');
@@ -883,7 +896,7 @@ function applyStaticTexts(){
   const hdTitle=document.querySelector('#helpDialog .dialog h1');if(hdTitle)hdTitle.textContent=T('helpTitle');
   const hdSub=document.querySelector('#helpDialog .dialog .sub');if(hdSub)hdSub.textContent=T('helpSub');
   const hdH4=document.querySelectorAll('#helpDialog h4');
-  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hGameMode','hAiStyle','hDifficulty','hTroops'];
+  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hGameMode','hSiege','hAiStyle','hDifficulty','hTroops'];
   hdH4.forEach((h,i)=>{if(hKeys[i])h.textContent=T(hKeys[i]);});
   // 单位表
   const utable=document.querySelector('#helpDialog .utable');
@@ -932,9 +945,10 @@ function applyStaticTexts(){
     hdPs[6].innerHTML=T('combatRule');
     if(hdPs[7])hdPs[7].innerHTML=T('ecoRule');
     if(hdPs[8])hdPs[8].innerHTML=T('gameModeRule');
-    if(hdPs[9])hdPs[9].innerHTML=T('aiStyleRule');
-    if(hdPs[10])hdPs[10].innerHTML=T('difficultyRule');
-    if(hdPs[11])hdPs[11].innerHTML=T('troopsRule');
+    if(hdPs[9])hdPs[9].innerHTML=T('siegeRule');
+    if(hdPs[10])hdPs[10].innerHTML=T('aiStyleRule');
+    if(hdPs[11])hdPs[11].innerHTML=T('difficultyRule');
+    if(hdPs[12])hdPs[12].innerHTML=T('troopsRule');
   }
   set('helpClose',T('knowBtn'));
   set('prodTitle',T('prodTitle'));set('prodClose',T('prodCancel'));
@@ -1105,12 +1119,20 @@ const GAME_MODES={
   infantryDuel:  {pool:['infantry','heavy','engineer','medic']},
   armorDuel:     {pool:['recon','tank']},
   artilleryDuel: {pool:['artillery','rocket']},
+  siege:         {pool:null}, // 坚守阵地不限制玩家/初始兵种池，敌方刷新兵种池单独在 SIEGE 里定义
 };
 // 当前对局允许的兵种列表（null=不限制，返回全部 UNIT_TYPES 键）；生产菜单、初始部队随机池、AI 造兵都统一走这个函数
 function allowedUnitTypes(){
   const mode=GAME_MODES[G&&G.gameMode]||GAME_MODES.skirmish;
   return mode.pool||Object.keys(UNIT_TYPES);
 }
+// 坚守阵地参数：敌方无 HQ/工厂（不走经济系统），每 WAVE_INTERVAL 回合按预算贪心随机刷新一波，共 TOTAL_TURNS 回合，
+// 目标是活到最后；"歼灭全部敌军"在此模式下不成立（敌方会无限刷新），只能通过存活判定获胜
+const SIEGE={
+  totalTurns:15, waveInterval:3, budgetMin:300, budgetMax:600,
+  pool:['infantry','heavy','recon','artillery','engineer','medic','tank','rocket','transport'], // 复用 many 档兵种池
+  citiesByTier:{none:0,few:2,mid:3,many:4}, // 我方初始部队档位 → 额外城市数量
+};
 const $=s=>document.querySelector(s);
 const board=$('#board');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1292,6 +1314,27 @@ function aiBuild(){
     log(T('buildLog')('E',pick),'e');
   }
   updateFunds();
+}
+// 坚守阵地：敌方无 HQ/工厂，不走经济系统，每 SIEGE.waveInterval 回合按预算贪心随机在敌方出生点附近刷新一波单位
+function siegeWave(){
+  const size=G.size;
+  const spawnPool=[[1,size-3],[0,size-2],[2,size-2],[0,size-1],[1,size-1],[0,size-3],[2,size-1],[3,size-1],[3,size-3]]
+    .map(([x,y])=>[size-1-x,size-1-y]); // 镜像到敌方半场，跟正常开局出生点是同一批已清障坐标
+  const openSpots=spawnPool.filter(([x,y])=>!unitAt(x,y));
+  if(!openSpots.length)return;
+  const budget=SIEGE.budgetMin+Math.floor(Math.random()*(SIEGE.budgetMax-SIEGE.budgetMin+1));
+  let spent=0,placed=0;
+  const pool=SIEGE.pool;
+  while(spent<budget&&placed<openSpots.length&&G.units.filter(u=>u.side==='E').length<MAX_SIDE_UNITS){
+    const candidates=pool.filter(t=>UNIT_COSTS[t]<=budget-spent);
+    if(!candidates.length)break; // 剩余预算连最便宜的都买不起，结束这一波
+    const type=candidates[Math.floor(Math.random()*candidates.length)];
+    const[x,y]=openSpots[placed];
+    G.units.push(makeUnit('E',type,x,y));
+    spent+=UNIT_COSTS[type];
+    placed++;
+  }
+  if(placed>0)log(T('siegeWaveLog')(placed),'e');
 }
 // 玩家生产：点击己方空工厂打开生产菜单（新单位当回合待机，同高级战争）
 let prodFactory=null;
@@ -1545,8 +1588,10 @@ function gainXp(u,n){
 function checkEnd(){
   const p=G.units.some(u=>u.side==='P');
   const e=G.units.some(u=>u.side==='E');
-  if(!e||!p){G.over=true;showResult(!e);return;}
-  // 总部占领：占领敌方总部直接获胜，己方总部被占直接战败
+  if(!p){G.over=true;showResult(false);return;} // 我方全灭永远直接战败，坚守阵地也不例外
+  // 歼灭全部敌军获胜：坚守阵地模式下敌方会无限刷新（含开局 0 部队的初始状态），这条路径必须禁用，否则要么开局即判胜、要么永远打不完
+  if(G.gameMode!=='siege'&&!e){G.over=true;showResult(true);return;}
+  // 总部占领：占领敌方总部直接获胜，己方总部被占直接战败（坚守阵地下敌方没有 HQ，这段自然不会触发）
   for(const[k,cap]of G.caps){
     const[x,y]=k.split(',').map(Number);
     if(G.map[y][x]!=='hq'||!cap.owner)continue;
@@ -1836,7 +1881,15 @@ async function startEnemyPhase(){
     if(G.over)return;
     await sleep(220);
   }
-  aiBuild(); // 敌方回合结束：在己方空工厂造兵（下回合行动）
+  aiBuild(); // 敌方回合结束：在己方空工厂造兵（下回合行动，坚守阵地模式下敌方没有工厂，自然跳过）
+  // 坚守阵地：每 waveInterval 回合刷新一波敌方单位，达到总回合数后即存活获胜
+  if(G.gameMode==='siege'&&G.siege){
+    if(G.turn>=G.siege.nextWaveTurn){
+      siegeWave();
+      G.siege.nextWaveTurn+=SIEGE.waveInterval;
+    }
+    if(G.turn+1>SIEGE.totalTurns){G.over=true;showResult(true,'survive');return;}
+  }
   // 新回合：本方建筑回血（只有己方占领的建筑才回血）
   G.turn++;G.phase='P';G.busy=false;
   BGM.setSide('P'); // 我方回合切换回我方主题
@@ -2025,21 +2078,43 @@ function newGame(size){
     types.push(allowed.includes('infantry')?'infantry':modePool[Math.floor(Math.random()*modePool.length)]);
     for(let i=1;i<tier.count;i++)types.push(modePool[Math.floor(Math.random()*modePool.length)]);
   }
+  const isSiege=gameModeChoice==='siege';
   spawns.forEach((p,i)=>{
     G.units.push(makeUnit('P',types[i],p[0],p[1]));
-    G.units.push(makeUnit('E',types[i],size-1-p[0],size-1-p[1]));
+    if(!isSiege)G.units.push(makeUnit('E',types[i],size-1-p[0],size-1-p[1])); // 坚守阵地：敌方开局 0 部队，完全靠后续波次刷新
   });
   // 建筑归属：每方固定的 1 总部+1 工厂+1 城镇开局即归属该方（坐标须与 genMap 的 fixedBuilds 公式一致）；
   // 地图上随机分布的中立建筑、奇数尺寸的中心争夺城镇均开局中立
   const fixedCoords=[[2,size-3],[1,size-2],[3,size-2]]; // 左半场（我方）三座固定建筑
   const ownFixed=new Set(fixedCoords.map(([x,y])=>x+','+y));
   const enemyFixed=new Set(fixedCoords.map(([x,y])=>(size-1-x)+','+(size-1-y)));
+  // 坚守阵地：敌方没有 HQ/工厂（不走经济系统，"占领敌方总部获胜"和"敌方工厂造兵"因此自然失效），
+  // 敌方固定建筑格子改成中立城市；同时按我方初始部队档位在我方半场附近额外放几座固定归属玩家的城市
+  if(isSiege){
+    for(const[fx,fy]of fixedCoords){
+      const[ex,ey]=[size-1-fx,size-1-fy];
+      map[ey][ex]='city';
+    }
+    enemyFixed.clear(); // 敌方固定建筑已改成城市，不再赋予敌方归属，保持中立（敌方在此模式下不需要任何固定资产）
+    // 额外城市数量按我方初始部队档位定（少/中/多 → 2/3/4），不新建坐标，
+    // 而是从 genMap 已生成的中立城市里挑离己方 HQ([1,size-2]) 最近的几座直接改归属——
+    // 这些格子本来就避开了山地/河流/建筑冲突，比额外设计新坐标更安全，且不受初始部队数量多少的影响
+    const extraCities=SIEGE.citiesByTier[troopsChoice]||0;
+    const [hqX,hqY]=[1,size-2];
+    const neutralCities=[];
+    for(let y=0;y<size;y++)for(let x=0;x<Math.ceil(size/2);x++){
+      if(map[y][x]==='city'&&!ownFixed.has(x+','+y))neutralCities.push([x,y]);
+    }
+    neutralCities.sort((a,b)=>(Math.abs(a[0]-hqX)+Math.abs(a[1]-hqY))-(Math.abs(b[0]-hqX)+Math.abs(b[1]-hqY)));
+    for(const[cx,cy]of neutralCities.slice(0,extraCities))ownFixed.add(cx+','+cy);
+  }
   for(let y=0;y<size;y++)for(let x=0;x<size;x++){
     if(!CAPTURABLE.includes(map[y][x]))continue;
     const k=x+','+y;
     const owner=ownFixed.has(k)?'P':enemyFixed.has(k)?'E':null;
     G.caps.set(k,{owner,prog:owner?CAP_NEED:0});
   }
+  if(isSiege)G.siege={nextWaveTurn:SIEGE.waveInterval}; // 下一次刷怪发生在第几回合的敌方阶段
   board.style.setProperty('--n',size);
   fitBoard();
   $('#menu').classList.add('hidden');
