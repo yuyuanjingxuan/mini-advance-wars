@@ -1472,6 +1472,7 @@ function doUnload(u,spot){
   const rider=riderOf(u);
   if(!rider||!spot)return;
   rider.aboard=null;rider.x=spot.x;rider.y=spot.y;
+  rider.acted=false; // 上车时乘客的 acted 被置 true（视为"已用掉本回合行动去上车"），下车后应恢复可行动
   log(T('unloadLog')(rider.type),'dim');
 }
 // 原地行动按钮组：根据选中单位当前格子能做的事动态生成按钮
