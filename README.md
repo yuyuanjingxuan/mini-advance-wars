@@ -82,6 +82,10 @@ python -m http.server 8765
 - **单文件架构**：全部样式与脚本（配置 / 多语言 / 音效 / 逻辑）均内嵌在 `index.html` 中，双击即玩，无外部依赖文件
 - 任意现代浏览器直接运行，双击 `index.html` 即可（无 ES Module / fetch，file:// 协议可用）
 
+## 📋 更新日志
+
+详见 [CHANGELOG.md](CHANGELOG.md)
+
 ## 📄 许可证
 
 [AGPL-3.0](LICENSE) — 可自由使用、修改、二次分发（包括商用），但你的修改版本（含作为网络服务运行的情形）同样必须开源。

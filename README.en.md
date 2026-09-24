@@ -82,6 +82,10 @@ python -m http.server 8765
 - **Single-file architecture**: all styles and scripts (config / i18n / SFX / logic) are embedded in `index.html` — just open and play, no external files needed
 - Runs in any modern browser — double-click `index.html` works too (no ES modules / fetch, file:// friendly)
 
+## 📋 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md)
+
 ## 📄 License
 
 [AGPL-3.0](LICENSE) — free to use, modify, and redistribute (including commercially), but your modified version (including running it as a network service) must also be open-sourced under the same license.
