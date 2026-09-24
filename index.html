@@ -191,6 +191,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .sizes{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .sizes button{padding:12px 18px;font-size:15px;line-height:1.5}
 .sizes small{color:var(--dim);font-size:11px}
+/* 选中态（.primary）按钮是浅蓝底，--dim 浅灰字在上面对比度太低看不清，覆盖成深蓝字（跟主标题 #08243f 一致但透明度稍高，区分主副标题层级） */
+.sizes button.primary small{color:rgba(8,36,63,.75)}
 /* 主菜单专用更宽对话框：5 档地图尺寸 + AI 风格 + 部队数目三排按钮，560px 太挤 */
 #menu .dialog{max-width:760px}
 /* ================= 帮助面板 ================= */
