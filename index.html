@@ -300,7 +300,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
         <tr><td>🛡️ 重装兵</td><td>10</td><td>7</td><td>3</td><td>2</td><td>1</td><td>高攻高防的近战主力，移动迟缓，克制载具（步兵，可进山）</td></tr>
         <tr><td>🚙 侦察车</td><td>10</td><td>5</td><td>0</td><td>7</td><td>1</td><td>极速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）</td></tr>
         <tr><td><i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i> 火炮</td><td>10</td><td>7</td><td>1</td><td>2</td><td>2-3</td><td>远程轰击，移动后不能开火（履带）</td></tr>
-        <tr><td>🔧 工程师</td><td>10</td><td>2</td><td>1</td><td>3</td><td>1</td><td>占领 1.5 倍速度，山地行军最快，修理相邻载具 +3 HP</td></tr>
+        <tr><td>🔧 工程师</td><td>10</td><td>2</td><td>1</td><td>3</td><td>1</td><td>占领 1.5 倍速度，修理相邻载具 +3 HP</td></tr>
         <tr><td>⚕️ 军医</td><td>10</td><td>1</td><td>0</td><td>3</td><td>1</td><td>治疗相邻步兵/重装兵/工程师 +4 HP</td></tr>
         <tr><td><i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i> 坦克</td><td>12</td><td>9</td><td>3</td><td>5</td><td>1</td><td>突击主力，平原强势（履带，不可入山地）</td></tr>
         <tr><td>🚀 火箭炮</td><td>10</td><td>8</td><td>0</td><td>3</td><td>3-5</td><td>超远程轰击 3-5，移动力低，移动后不能开火（轮胎）</td></tr>
@@ -319,7 +319,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
         <div class="row">右上角 <b>I / II / III…</b> = 单位等级（罗马数字）</div>
       </div>
       <h4>地形效果</h4>
-      <p><i class="tchip t-forest"></i> 森林：防御 +20%，步兵消耗 1 / 履带 2 / 轮胎 3　｜　<i class="tchip t-mountain"></i> 山地：防御 +40%，步兵消耗 2 / 工程师 1 / 载具不可入<br>
+      <p><i class="tchip t-forest"></i> 森林：防御 +20%，步兵消耗 1 / 履带 2 / 轮胎 3　｜　<i class="tchip t-mountain"></i> 山地：防御 +40%，步兵消耗 2 / 载具不可入<br>
       <i class="tchip t-water"></i> 河流：不可通行（浅滩可过）　｜　<i class="tchip t-city"></i> 城镇：防御 +30%，回合开始回复 2 HP（仅限己方占领的建筑）　｜　<i class="tchip t-plain"></i> 平原：无加成，所有兵种消耗均为 1<br>
       <i class="tchip t-hq"></i> 总部：防御 +40%，占领敌方总部获胜，己方总部被占战败　｜　<i class="tchip t-factory"></i> 工厂：防御 +30%，回合开始回复 2 HP，可修理驻守载具</p>
       <h4>占领规则</h4>
@@ -379,12 +379,12 @@ const TERRAINS={
 // 可占领的建筑（城镇/工厂/总部，共用占领进度机制；总部开局即归属所在半场一方，任一方占领敌方总部即获胜，己方总部被占即战败）
 const CAPTURABLE=['city','factory','hq'];
 // 每兵种地形移动力（参考高级战争：步兵/机甲步行、履带、轮胎）
-// 步兵/重装/军医：森林 1 山地 2；工程师（机甲化）：山地 1；履带（坦克/火炮）：森林 2 不可入山地；
+// 步兵/重装/工程师/军医：森林 1 山地 2（移动能力完全一致）；履带（坦克/火炮）：森林 2 不可入山地；
 // 轮胎（侦察车/火箭炮）：平原 1（不额外惩罚，纯靠总移动力体现灵活）森林 3 不可入山地；河流对所有地面单位不可通行
 const MOVE_COST={
   infantry:{plain:1,forest:1,mountain:2,water:Infinity,city:1,factory:1,hq:1},
   medic:   {plain:1,forest:1,mountain:2,water:Infinity,city:1,factory:1,hq:1},
-  engineer:{plain:1,forest:1,mountain:1,water:Infinity,city:1,factory:1,hq:1},
+  engineer:{plain:1,forest:1,mountain:2,water:Infinity,city:1,factory:1,hq:1},
   heavy:   {plain:1,forest:1,mountain:2,water:Infinity,city:1,factory:1,hq:1},
   tank:    {plain:1,forest:2,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
   artillery:{plain:1,forest:2,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
@@ -397,7 +397,7 @@ const UNIT_TYPES={
   heavy:  {name:'重装兵', emoji:'🛡️', hp:10, atk:7, def:3, move:2, minR:1, maxR:1, desc:'高攻高防主力，移动迟缓，克制载具（步兵，可进山）'},
   recon:  {name:'侦察车', emoji:'🚙', hp:10, atk:5, def:0, move:7, minR:1, maxR:1, desc:'极速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）'},
   artillery:{name:'火炮', emoji:'', icon:'cannon', hp:10, atk:7, def:1, move:2, minR:2, maxR:3, desc:'远程轰击，移动后不能开火（履带）'},
-  engineer:{name:'工程师', emoji:'🔧', hp:10, atk:2, def:1, move:3, minR:1, maxR:1, desc:'占领速度×1.5，山地行军最快，修理相邻载具（+3 HP）'},
+  engineer:{name:'工程师', emoji:'🔧', hp:10, atk:2, def:1, move:3, minR:1, maxR:1, desc:'占领速度×1.5，修理相邻载具（+3 HP）'},
   medic:  {name:'军医',   emoji:'⚕️', hp:10, atk:1, def:0, move:3, minR:1, maxR:1, desc:'治疗相邻步兵/重装兵/工程师（+4 HP），自身攻击很弱'},
   tank:   {name:'坦克',   emoji:'', icon:'tank', hp:12, atk:9, def:3, move:5, minR:1, maxR:1, desc:'突击主力，平原强势（履带，不可入山地）'},
   rocket: {name:'火箭炮', emoji:'🚀', hp:10, atk:8, def:0, move:3, minR:3, maxR:5, desc:'超远程轰击 3-5，移动力低，移动后不能开火（轮胎）'},
@@ -474,14 +474,14 @@ const I18N={
     hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
     uInf:'多面手，可占领建筑，山地移动力好', uHeavy:'高攻高防的近战主力，移动迟缓，克制载具（步兵，可进山）', uRecon:'极速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）',
-    uArtillery:'远程轰击，移动后不能开火（履带）', uEngineer:'占领 1.5 倍速度，山地行军最快，修理相邻载具 +3 HP', uMedic:'治疗相邻步兵/重装兵/工程师 +4 HP',
+    uArtillery:'远程轰击，移动后不能开火（履带）', uEngineer:'占领 1.5 倍速度，修理相邻载具 +3 HP', uMedic:'治疗相邻步兵/重装兵/工程师 +4 HP',
     uTank:'突击主力，平原强势（履带，不可入山地）', uRocket:'超远程轰击 3-5，移动力低，移动后不能开火（轮胎）',
     uTransport:'无武装，搭载 1 名步兵类跨越地形限制，被击毁乘客同死（履带，不可入山地/水域）',
     lMv:'蓝格 = 可移动格子（含地形消耗）', lZone:'橙格虚线 = 攻击范围（只能打，不能停）', lAtk:'红框闪烁 = 当前可攻击的敌人',
     lSel:'金框 = 当前选中的单位', lBase:'蓝底 = 我方单位　红底 = 敌军单位',
     lActed:'灰显 = 我方已行动　虚线框 = 敌军已行动', lPath:'绿格+箭头 = 移动路径预览（悬停显示）',
     lFlag:'<i class="flag" style="display:inline-block;width:12px;height:16px;position:relative;vertical-align:-3px"></i>旗帜 = 城镇归属（蓝=我方，红=敌军，灰=占领中）', lLv:'右上角 I / II / III… = 单位等级（罗马数字）',
-    tForest:'<i class="tchip t-forest"></i> 森林：防御 +20%，步兵消耗 1 / 履带 2 / 轮胎 3', tMountain:'<i class="tchip t-mountain"></i> 山地：防御 +40%，步兵消耗 2 / 工程师 1 / 载具不可入',
+    tForest:'<i class="tchip t-forest"></i> 森林：防御 +20%，步兵消耗 1 / 履带 2 / 轮胎 3', tMountain:'<i class="tchip t-mountain"></i> 山地：防御 +40%，步兵消耗 2 / 载具不可入',
     tWater:'<i class="tchip t-water"></i> 河流：不可通行（浅滩可过）', tCity:'<i class="tchip t-city"></i> 城镇：防御 +30%，回合开始回复 2 HP（仅限己方占领的建筑）', tPlain:'<i class="tchip t-plain"></i> 平原：无加成，所有兵种消耗均为 1',
     tHq:'<i class="tchip t-hq"></i> 总部：防御 +40%，占领敌方总部获胜，己方总部被占战败', tFactory:'<i class="tchip t-factory"></i> 工厂：防御 +30%，回合开始回复 2 HP，可修理驻守载具',
     capRule:'<b>建筑归属</b>：开局时城镇/工厂均为<b>中立</b>（灰色），总部则<b>已经属于所在半场的一方</b>（我方总部在我方，敌方总部在敌方）。双方都可以占领<b>中立建筑</b>或<b>对方已占领的建筑（含总部）</b>，占领后归属会互相易手。<br>只有<b>步兵</b>、<b>重装兵</b>和<b>工程师</b>能占领建筑，工程师 1.5 倍速度。站在建筑上待机或移动结束即积累进度（进度 = 单位当前 HP×倍率，满 20 占领）。<b>离开建筑后进度清零</b>。占领后建筑插上本方旗帜，只有己方建筑才回血。敌军同样会占领，被夺走的建筑会变红旗。<b>占领敌方总部直接获胜，己方总部被占直接战败</b>。',
@@ -529,7 +529,7 @@ const I18N={
     nInfantry:'步兵', nHeavy:'重装兵', nRecon:'侦察车', nArtillery:'火炮', nEngineer:'工程师', nMedic:'军医', nTank:'坦克', nRocket:'火箭炮', nTransport:'运兵车',
     // 兵种描述
     dInfantry:'多面手，擅长山地作战，可占领建筑', dHeavy:'高攻高防的近战主力，移动迟缓，对载具 1.5 倍伤害（步兵，可进山）', dRecon:'极速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）',
-    dArtillery:'远程轰击，移动后不能开火（履带）', dEngineer:'占领速度×1.5，山地行军最快，修理相邻载具（+3 HP）', dMedic:'治疗相邻步兵/重装兵/工程师（+4 HP），自身攻击很弱',
+    dArtillery:'远程轰击，移动后不能开火（履带）', dEngineer:'占领速度×1.5，修理相邻载具（+3 HP）', dMedic:'治疗相邻步兵/重装兵/工程师（+4 HP），自身攻击很弱',
     dTank:'突击主力，平原强势（履带，不可入山地）', dRocket:'超远程轰击 3-5，移动力低，移动后不能开火（轮胎）',
     dTransport:'无武装运输车，可搭载 1 名步兵类单位提升机动性（履带，不可入山地/水域），被击毁时车内乘客一同阵亡',
     actLoad:'🚚 上车', actUnload:'⬇️ 下车', cargoLabel:'🚚 车内：',
@@ -562,14 +562,14 @@ const I18N={
     hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production',
     thUnit:'Unit', thHp:'HP', thAtk:'ATK', thDef:'DEF', thMove:'MOV', thRange:'RNG', thTrait:'Trait',
     uInf:'Versatile, can capture, good mountain mobility', uHeavy:'Strong melee main force, sluggish, strong vs vehicles (infantry, can enter mountains)', uRecon:'Blazing-fast scout, weak in combat and armor (tires, no mountains)',
-    uArtillery:'Long-range fire, cannot fire after moving (treads)', uEngineer:'1.5× capture, fastest in mountains, repairs adjacent vehicles +3 HP', uMedic:'Heals adjacent infantry/heavies/engineers +4 HP',
+    uArtillery:'Long-range fire, cannot fire after moving (treads)', uEngineer:'1.5× capture, repairs adjacent vehicles +3 HP', uMedic:'Heals adjacent infantry/heavies/engineers +4 HP',
     uTank:'Assault main force, strong on plains (treads, no mountains)', uRocket:'Ultra long-range fire 3-5, low mobility, cannot fire after moving (tires)',
     uTransport:'Unarmed, carries 1 foot unit past terrain limits; cargo dies with it (treads, no mountains/water)',
     lMv:'Blue = movable tiles (terrain cost included)', lZone:'Orange dashed = attack range (fire only, cannot stop)', lAtk:'Red pulse = attackable enemy now',
     lSel:'Gold outline = selected unit', lBase:'Blue base = your unit　Red base = enemy unit',
     lActed:'Gray = your unit acted　Dashed = enemy acted', lPath:'Green + arrows = move path preview (hover)',
     lFlag:'<i class="flag" style="display:inline-block;width:12px;height:16px;position:relative;vertical-align:-3px"></i>Flag = city owner (blue=yours, red=enemy, gray=capturing)', lLv:'Top-right I / II / III… = unit level (Roman)',
-    tForest:'<i class="tchip t-forest"></i> Forest: DEF +20%, infantry 1 / treads 2 / tires 3', tMountain:'<i class="tchip t-mountain"></i> Mountain: DEF +40%, infantry 2 / engineer 1 / vehicles blocked',
+    tForest:'<i class="tchip t-forest"></i> Forest: DEF +20%, infantry 1 / treads 2 / tires 3', tMountain:'<i class="tchip t-mountain"></i> Mountain: DEF +40%, infantry 2 / vehicles blocked',
     tWater:'<i class="tchip t-water"></i> River: impassable (fords passable)', tCity:'<i class="tchip t-city"></i> City: DEF +30%, heals 2 HP at turn start (owned buildings only)', tPlain:'<i class="tchip t-plain"></i> Plain: no bonus, cost 1 for every unit',
     tHq:'<i class="tchip t-hq"></i> HQ: DEF +40%, capturing the enemy HQ wins, losing yours means defeat', tFactory:'<i class="tchip t-factory"></i> Factory: DEF +30%, heals 2 HP at turn start, repairs garrisoned vehicles',
     capRule:'<b>Ownership</b>: cities/factories start <b>neutral</b> (gray); each HQ already belongs to the side on its half of the map (yours on your side, the enemy\'s on theirs). Either side can capture a <b>neutral building</b> or one <b>already held by the other side (including HQ)</b> — ownership flips on capture.<br>Only <b>infantry</b>, <b>heavies</b> and <b>engineers</b> capture buildings, engineer 1.5×. Standing on a building and waiting builds progress (progress = HP × multiplier, 20 to capture). <b>Progress resets to 0 when the unit leaves</b>. Captured buildings fly your flag; only owned buildings heal. Enemies capture too. <b>Capturing the enemy HQ wins instantly; losing your own HQ means defeat</b>.',
@@ -610,7 +610,7 @@ const I18N={
     defBonus:'DEF bonus', moveCost:'Move cost', impassable:'impassable',
     nInfantry:'Infantry', nHeavy:'Heavy', nRecon:'Recon', nArtillery:'Artillery', nEngineer:'Engineer', nMedic:'Medic', nTank:'Tank', nRocket:'Rocket', nTransport:'Transport',
     dInfantry:'Versatile, good in mountains, can capture', dHeavy:'High ATK/DEF melee main, sluggish, 1.5× damage vs vehicles (infantry, can enter mountains)', dRecon:'Blazing-fast scout, weak in combat and armor (tires, no mountains)',
-    dArtillery:'Long-range fire, cannot fire after moving (treads)', dEngineer:'Capture ×1.5, fastest in mountains, repairs adjacent vehicles (+3 HP)', dMedic:'Heals adjacent infantry/heavies/engineers (+4 HP), weak attack',
+    dArtillery:'Long-range fire, cannot fire after moving (treads)', dEngineer:'Capture ×1.5, repairs adjacent vehicles (+3 HP)', dMedic:'Heals adjacent infantry/heavies/engineers (+4 HP), weak attack',
     dTank:'Assault main force, strong on plains (treads, no mountains)', dRocket:'Ultra long-range fire 3-5, low mobility, cannot fire after moving (tires)',
     dTransport:'Unarmed transport, carries 1 foot unit for extra mobility (treads, no mountains/water); cargo dies if the transport is destroyed',
     actLoad:'🚚 Load', actUnload:'⬇️ Unload', cargoLabel:'🚚 Cargo: ',
