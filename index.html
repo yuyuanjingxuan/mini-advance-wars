@@ -295,13 +295,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <table class="utable">
         <tr><th>单位</th><th>HP</th><th>攻</th><th>防</th><th>移动</th><th>射程</th><th>特性</th></tr>
         <tr><td>🪖 步兵</td><td>10</td><td>5</td><td>1</td><td>3</td><td>1</td><td>多面手，可占领建筑，山地移动力好</td></tr>
-        <tr><td>🛡️ 重装兵</td><td>10</td><td>7</td><td>3</td><td>4</td><td>1</td><td>高攻高防的近战主力，克制载具（履带，不可入山地）</td></tr>
-        <tr><td>🚙 侦察车</td><td>10</td><td>6</td><td>0</td><td>6</td><td>1</td><td>高速突袭，装甲薄弱（轮胎，不可入山地）</td></tr>
+        <tr><td>🛡️ 重装兵</td><td>10</td><td>7</td><td>3</td><td>3</td><td>1</td><td>高攻高防的近战主力，移动沉重，克制载具（步兵，可进山）</td></tr>
+        <tr><td>🚙 侦察车</td><td>10</td><td>5</td><td>0</td><td>6</td><td>1</td><td>高速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）</td></tr>
         <tr><td><i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i> 火炮</td><td>10</td><td>7</td><td>1</td><td>2</td><td>2-3</td><td>远程轰击，移动后不能开火（履带）</td></tr>
         <tr><td>🔧 工程师</td><td>10</td><td>2</td><td>1</td><td>3</td><td>1</td><td>占领 1.5 倍速度，山地行军最快，修理相邻载具 +3 HP</td></tr>
         <tr><td>⚕️ 军医</td><td>10</td><td>1</td><td>0</td><td>3</td><td>1</td><td>治疗相邻步兵/工程师 +4 HP</td></tr>
         <tr><td><i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i> 坦克</td><td>12</td><td>9</td><td>3</td><td>5</td><td>1</td><td>突击主力，平原强势（履带，不可入山地）</td></tr>
-        <tr><td>🚀 火箭炮</td><td>10</td><td>8</td><td>0</td><td>6</td><td>3-5</td><td>超远程轰击 3-5，移动后不能开火（轮胎）</td></tr>
+        <tr><td>🚀 火箭炮</td><td>10</td><td>8</td><td>0</td><td>3</td><td>3-5</td><td>超远程轰击 3-5，移动力低，移动后不能开火（轮胎）</td></tr>
         <tr><td>🚚 运兵车</td><td>10</td><td>0</td><td>0</td><td>5</td><td>—</td><td>无武装，搭载 1 名步兵类跨越地形限制，被击毁乘客同死（履带，不可入山地/水域）</td></tr>
       </table>
       <h4>颜色图例</h4>
@@ -391,13 +391,13 @@ const MOVE_COST={
 };
 const UNIT_TYPES={
   infantry:{name:'步兵',  emoji:'🪖', hp:10, atk:5, def:1, move:3, minR:1, maxR:1, desc:'多面手，擅长山地作战，可占领建筑'},
-  heavy:  {name:'重装兵', emoji:'🛡️', hp:10, atk:7, def:3, move:4, minR:1, maxR:1, desc:'高攻高防主力，克制载具（步兵，可进山）'},
-  recon:  {name:'侦察车', emoji:'🚙', hp:10, atk:6, def:0, move:6, minR:1, maxR:1, desc:'高速突袭，但装甲薄弱（轮胎，不可入山地）'},
+  heavy:  {name:'重装兵', emoji:'🛡️', hp:10, atk:7, def:3, move:3, minR:1, maxR:1, desc:'高攻高防主力，移动沉重，克制载具（步兵，可进山）'},
+  recon:  {name:'侦察车', emoji:'🚙', hp:10, atk:5, def:0, move:6, minR:1, maxR:1, desc:'高速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）'},
   artillery:{name:'火炮', emoji:'', icon:'cannon', hp:10, atk:7, def:1, move:2, minR:2, maxR:3, desc:'远程轰击，移动后不能开火（履带）'},
   engineer:{name:'工程师', emoji:'🔧', hp:10, atk:2, def:1, move:3, minR:1, maxR:1, desc:'占领速度×1.5，山地行军最快，修理相邻载具（+3 HP）'},
   medic:  {name:'军医',   emoji:'⚕️', hp:10, atk:1, def:0, move:3, minR:1, maxR:1, desc:'治疗相邻步兵/工程师（+4 HP），自身攻击很弱'},
   tank:   {name:'坦克',   emoji:'', icon:'tank', hp:12, atk:9, def:3, move:5, minR:1, maxR:1, desc:'突击主力，平原强势（履带，不可入山地）'},
-  rocket: {name:'火箭炮', emoji:'🚀', hp:10, atk:8, def:0, move:6, minR:3, maxR:5, desc:'超远程轰击 3-5，移动后不能开火（轮胎）'},
+  rocket: {name:'火箭炮', emoji:'🚀', hp:10, atk:8, def:0, move:3, minR:3, maxR:5, desc:'超远程轰击 3-5，移动力低，移动后不能开火（轮胎）'},
   transport:{name:'运兵车', emoji:'🚚', hp:10, atk:0, def:0, move:5, minR:0, maxR:0, desc:'无武装运输车，可搭载 1 名步兵类单位提升机动性（履带，不可入山地/水域），被击毁时车内乘客一同阵亡'},
 };
 // 载具（可被工程师修理）
@@ -469,9 +469,9 @@ const I18N={
     helpTitle:'📖 游戏说明', helpSub:'单位特性 · 颜色图例 · 地形效果',
     hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
-    uInf:'多面手，可占领建筑，山地移动力好', uHeavy:'高攻高防的近战主力，克制载具（步兵，可进山）', uRecon:'高速突袭，装甲薄弱（轮胎，不可入山地）',
+    uInf:'多面手，可占领建筑，山地移动力好', uHeavy:'高攻高防的近战主力，移动沉重，克制载具（步兵，可进山）', uRecon:'高速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）',
     uArtillery:'远程轰击，移动后不能开火（履带）', uEngineer:'占领 1.5 倍速度，山地行军最快，修理相邻载具 +3 HP', uMedic:'治疗相邻步兵/工程师 +4 HP',
-    uTank:'突击主力，平原强势（履带，不可入山地）', uRocket:'超远程轰击 3-5，移动后不能开火（轮胎）',
+    uTank:'突击主力，平原强势（履带，不可入山地）', uRocket:'超远程轰击 3-5，移动力低，移动后不能开火（轮胎）',
     uTransport:'无武装，搭载 1 名步兵类跨越地形限制，被击毁乘客同死（履带，不可入山地/水域）',
     lMv:'蓝格 = 可移动格子（含地形消耗）', lZone:'橙格虚线 = 攻击范围（只能打，不能停）', lAtk:'红框闪烁 = 当前可攻击的敌人',
     lSel:'金框 = 当前选中的单位', lBase:'蓝底 = 我方单位　红底 = 敌军单位',
@@ -524,9 +524,9 @@ const I18N={
     // 兵种名
     nInfantry:'步兵', nHeavy:'重装兵', nRecon:'侦察车', nArtillery:'火炮', nEngineer:'工程师', nMedic:'军医', nTank:'坦克', nRocket:'火箭炮', nTransport:'运兵车',
     // 兵种描述
-    dInfantry:'多面手，擅长山地作战，可占领建筑', dHeavy:'高攻高防的近战主力，对载具 1.5 倍伤害（步兵，可进山）', dRecon:'高速突袭，但装甲薄弱（轮胎，不可入山地）',
+    dInfantry:'多面手，擅长山地作战，可占领建筑', dHeavy:'高攻高防的近战主力，移动沉重，对载具 1.5 倍伤害（步兵，可进山）', dRecon:'高速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）',
     dArtillery:'远程轰击，移动后不能开火（履带）', dEngineer:'占领速度×1.5，山地行军最快，修理相邻载具（+3 HP）', dMedic:'治疗相邻步兵/工程师（+4 HP），自身攻击很弱',
-    dTank:'突击主力，平原强势（履带，不可入山地）', dRocket:'超远程轰击 3-5，移动后不能开火（轮胎）',
+    dTank:'突击主力，平原强势（履带，不可入山地）', dRocket:'超远程轰击 3-5，移动力低，移动后不能开火（轮胎）',
     dTransport:'无武装运输车，可搭载 1 名步兵类单位提升机动性（履带，不可入山地/水域），被击毁时车内乘客一同阵亡',
     actLoad:'🚚 上车', actUnload:'⬇️ 下车', cargoLabel:'🚚 车内：',
     sideP:'我方', sideE:'敌军',
@@ -556,9 +556,9 @@ const I18N={
     helpTitle:'📖 How to Play', helpSub:'Unit traits · Color legend · Terrain effects',
     hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production',
     thUnit:'Unit', thHp:'HP', thAtk:'ATK', thDef:'DEF', thMove:'MOV', thRange:'RNG', thTrait:'Trait',
-    uInf:'Versatile, can capture, good mountain mobility', uHeavy:'Strong melee main force, strong vs vehicles (infantry, can enter mountains)', uRecon:'Fast raider, weak armor (tires, no mountains)',
+    uInf:'Versatile, can capture, good mountain mobility', uHeavy:'Strong melee main force, slow-moving, strong vs vehicles (infantry, can enter mountains)', uRecon:'Fast scout, weak in combat and armor (tires, no mountains)',
     uArtillery:'Long-range fire, cannot fire after moving (treads)', uEngineer:'1.5× capture, fastest in mountains, repairs adjacent vehicles +3 HP', uMedic:'Heals adjacent infantry/engineers +4 HP',
-    uTank:'Assault main force, strong on plains (treads, no mountains)', uRocket:'Ultra long-range fire 3-5, cannot fire after moving (tires)',
+    uTank:'Assault main force, strong on plains (treads, no mountains)', uRocket:'Ultra long-range fire 3-5, low mobility, cannot fire after moving (tires)',
     uTransport:'Unarmed, carries 1 foot unit past terrain limits; cargo dies with it (treads, no mountains/water)',
     lMv:'Blue = movable tiles (terrain cost included)', lZone:'Orange dashed = attack range (fire only, cannot stop)', lAtk:'Red pulse = attackable enemy now',
     lSel:'Gold outline = selected unit', lBase:'Blue base = your unit　Red base = enemy unit',
@@ -604,9 +604,9 @@ const I18N={
     myFlag:'🚩Owned by you', enFlag:'⚠️Enemy-owned', capturing:'Capturing', neutral:'Neutral', prog:'Progress',
     defBonus:'DEF bonus', moveCost:'Move cost', impassable:'impassable',
     nInfantry:'Infantry', nHeavy:'Heavy', nRecon:'Recon', nArtillery:'Artillery', nEngineer:'Engineer', nMedic:'Medic', nTank:'Tank', nRocket:'Rocket', nTransport:'Transport',
-    dInfantry:'Versatile, good in mountains, can capture', dHeavy:'High ATK/DEF melee main, 1.5× damage vs vehicles (infantry, can enter mountains)', dRecon:'Fast raider, weak armor (tires, no mountains)',
+    dInfantry:'Versatile, good in mountains, can capture', dHeavy:'High ATK/DEF melee main, slow-moving, 1.5× damage vs vehicles (infantry, can enter mountains)', dRecon:'Fast scout, weak in combat and armor (tires, no mountains)',
     dArtillery:'Long-range fire, cannot fire after moving (treads)', dEngineer:'Capture ×1.5, fastest in mountains, repairs adjacent vehicles (+3 HP)', dMedic:'Heals adjacent infantry/engineers (+4 HP), weak attack',
-    dTank:'Assault main force, strong on plains (treads, no mountains)', dRocket:'Ultra long-range fire 3-5, cannot fire after moving (tires)',
+    dTank:'Assault main force, strong on plains (treads, no mountains)', dRocket:'Ultra long-range fire 3-5, low mobility, cannot fire after moving (tires)',
     dTransport:'Unarmed transport, carries 1 foot unit for extra mobility (treads, no mountains/water); cargo dies if the transport is destroyed',
     actLoad:'🚚 Load', actUnload:'⬇️ Unload', cargoLabel:'🚚 Cargo: ',
     sideP:'Player', sideE:'Enemy',
@@ -887,8 +887,8 @@ function tryCapture(u){
   const cap=G.caps.get(k);
   if(cap&&cap.owner===u.side)return; // 已是本方城镇
   const gain=Math.round(u.hp*(CAP_MULT[u.type]||1)); // 占领速度倍率（工程师 1.5）
-  // 仅在建筑当前属于敌方时清零重占；中立或己方在占的进度需要跨回合累计
-  const prog=(cap&&cap.owner&&cap.owner!==u.side?0:cap?cap.prog:0)+gain;
+  // progSide 记录当前这份未完成进度是哪一方在累积；换人（被敌方开始占）才清零重算，同一方跨回合累计
+  const prog=(cap&&cap.progSide===u.side?cap.prog:0)+gain;
   if(prog>=CAP_NEED){
     G.caps.set(k,{owner:u.side,prog:CAP_NEED});
     floatText(u.x,u.y,u.side==='P'?T('capFloatP'):T('capFloatE'),'capture');
@@ -896,7 +896,8 @@ function tryCapture(u){
     log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${u.side==='P'?T('capVerb'):T('takeVerb')} (${u.x},${u.y})！`,'level');
     gainXp(u,8); // 占领成功 +8 经验（辅助单位的升级途径）
   }else{
-    G.caps.set(k,{owner:u.side,prog,by:u.id});
+    // 未完成占领：owner 保持不变（中立仍是 undefined，已属他方仍是原 owner），只记录进行中的 progSide/prog
+    G.caps.set(k,{owner:cap?cap.owner:undefined,prog,progSide:u.side,by:u.id});
     floatText(u.x,u.y,`${T('prog')} ${prog}/${CAP_NEED}`,'capprog');
     log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${T('prog')} ${prog}/${CAP_NEED}`,'dim');
   }
@@ -1458,8 +1459,8 @@ async function aiAct(u){
       resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
     }
     const t=plan.target;
-    // 间接打击单位（火炮/火箭炮）移动后不能开火，只能原地开火
-    const canFire=!(NO_MOVE_FIRE.includes(u.type)&&!ARTILLERY_MOVE_FIRE&&(plan.x!==u.x||plan.y!==u.y));
+    // 间接打击单位（火炮/火箭炮）移动后不能开火，只能原地开火；注意 u.x/u.y 此时已是移动后坐标，须与出发格 fx/fy 比较
+    const canFire=!(NO_MOVE_FIRE.includes(u.type)&&!ARTILLERY_MOVE_FIRE&&(fx!==u.x||fy!==u.y));
     if(t&&t.hp>0&&G.units.includes(t)&&inRange(u,u.x,u.y,t.x,t.y)&&canFire){
       await doAttack(u,t);
     }
