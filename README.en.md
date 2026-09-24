@@ -4,12 +4,16 @@
 
 **Zero-dependency turn-based strategy game · Inspired by GBA's Advance Wars**
 
+[![CI](https://github.com/yuyuanjingxuan/mini-advance-wars/actions/workflows/ci.yml/badge.svg)](https://github.com/yuyuanjingxuan/mini-advance-wars/actions/workflows/ci.yml)
+[![Deploy to GitHub Pages](https://github.com/yuyuanjingxuan/mini-advance-wars/actions/workflows/deploy.yml/badge.svg)](https://github.com/yuyuanjingxuan/mini-advance-wars/actions/workflows/deploy.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)](#-tech)
 [![Vanilla JS](https://img.shields.io/badge/code-vanilla%20JS-blue)](index.html)
 [![Platform](https://img.shields.io/badge/platform-web%20%7C%20any%20browser-lightgrey)](#-getting-started)
 
 [简体中文](README.md) | **English**
+
+🎮 [**Play Online**](https://yuyuanjingxuan.github.io/mini-advance-wars/)
 
 </div>
 

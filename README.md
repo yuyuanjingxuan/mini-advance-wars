@@ -4,12 +4,16 @@
 
 **零依赖回合制战棋游戏 · 致敬 GBA《高级战争》**
 
+[![CI](https://github.com/yuyuanjingxuan/mini-advance-wars/actions/workflows/ci.yml/badge.svg)](https://github.com/yuyuanjingxuan/mini-advance-wars/actions/workflows/ci.yml)
+[![Deploy to GitHub Pages](https://github.com/yuyuanjingxuan/mini-advance-wars/actions/workflows/deploy.yml/badge.svg)](https://github.com/yuyuanjingxuan/mini-advance-wars/actions/workflows/deploy.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)](#-技术)
 [![Vanilla JS](https://img.shields.io/badge/code-vanilla%20JS-blue)](index.html)
 [![Platform](https://img.shields.io/badge/platform-web%20%7C%20any%20browser-lightgrey)](#-开始游戏)
 
 **简体中文** | [English](README.en.md)
+
+🎮 [**在线试玩**](https://yuyuanjingxuan.github.io/mini-advance-wars/)
 
 </div>
 
