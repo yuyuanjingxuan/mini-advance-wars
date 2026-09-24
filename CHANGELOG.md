@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.1] - 2026-09-25
+
+### Added
+
+- **Selectable enemy difficulty**: six tiers — 😴 Trivial (×0.8), 🙂 Easy (×0.9), ⚖️ Normal (×1.0, default), 🔥 Hard (×1.1), 💀 Hell (×1.2), ☠️ Nightmare (×1.5) — scaling only enemy unit max HP (applies to both the starting roster and units built at enemy factories during the match). Fully independent of the AI style setting — difficulty scales numbers, AI style controls behavior, and either can be freely combined with the other
+
+### Fixed
+
+- Subtitle text on selected (highlighted) main-menu buttons was nearly unreadable — light gray text on a light blue selected background had almost no contrast. Subtitles on selected buttons now use a dark blue that's actually legible
+
 ## [1.0.0] - 2026-09-24
 
 First stable release. Zero-dependency, single-file, turn-based strategy game inspired by GBA's *Advance Wars*.
@@ -35,4 +45,5 @@ First stable release. Zero-dependency, single-file, turn-based strategy game ins
 - Income log lines are now color-coded by side, matching every other combat log line
 - Riders disembarking from a transport are no longer stuck permanently "acted" and unable to move afterward
 
+[1.0.1]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.0.1
 [1.0.0]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.0.0
