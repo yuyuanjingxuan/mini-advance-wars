@@ -124,6 +124,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .hpbar b.mid{background:#ffd257}
 .hpbar b.low{background:#ff5d5d}
 .lv{position:absolute;top:-8px;right:-8px;font-size:10px;font-style:normal;background:var(--gold);color:#5a3c00;border-radius:8px;padding:0 4px;font-weight:700;border:1px solid #b8860b;z-index:3;letter-spacing:.5px}
+/* 运兵车载人标记：右上角小圆点 */
+.cargo{position:absolute;top:-6px;left:-6px;width:10px;height:10px;border-radius:50%;background:var(--gold);border:1px solid #8a6d1f;z-index:3}
 .cell.mv::after{content:'';position:absolute;inset:0;background:rgba(90,170,255,.38);border:2px solid rgba(140,200,255,.75);border-radius:5px;pointer-events:none;z-index:4}
 /* 查看模式（敌军/已行动单位）：蓝格半透明，与可操作蓝格区分 */
 .cell.mv.view::after{background:rgba(90,170,255,.16);border-color:rgba(140,200,255,.35)}
@@ -300,6 +302,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
         <tr><td>⚕️ 军医</td><td>10</td><td>1</td><td>0</td><td>3</td><td>1</td><td>治疗相邻步兵/工程师 +4 HP</td></tr>
         <tr><td><i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i> 坦克</td><td>12</td><td>9</td><td>3</td><td>5</td><td>1</td><td>突击主力，平原强势（履带，不可入山地）</td></tr>
         <tr><td>🚀 火箭炮</td><td>10</td><td>8</td><td>0</td><td>6</td><td>3-5</td><td>超远程轰击 3-5，移动后不能开火（轮胎）</td></tr>
+        <tr><td>🚚 运兵车</td><td>10</td><td>0</td><td>0</td><td>5</td><td>—</td><td>无武装，搭载 1 名步兵类跨越地形限制，被击毁乘客同死（履带，不可入山地/水域）</td></tr>
       </table>
       <h4>颜色图例</h4>
       <div class="legend">
@@ -320,8 +323,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <h4>占领规则</h4>
       <p>只有<b>步兵</b>、<b>重装兵</b>和<b>工程师</b>能占领建筑（城镇/工厂/总部，工程师 1.5 倍速度）。站在建筑上待机或移动结束即积累进度（进度 = 单位当前 HP×倍率，满 20 占领）。<b>离开建筑后进度清零</b>。占领后建筑插上本方旗帜，只有己方建筑才回血。敌军同样会占领，被夺走的建筑会变红旗。<b>占领敌方总部直接获胜，己方总部被占直接战败</b>。</p>
       <h4>辅助单位</h4>
-      <p>🔧 <b>工程师</b>：占领 1.5 倍速度，回合行动后自动修理<b>相邻</b>载具（侦察车/火炮/坦克/火箭炮）+3 HP（原地待机也可修理）。<br>
-      ⚕️ <b>军医</b>：回合行动后自动治疗<b>相邻</b>步兵/工程师 +4 HP（原地待机也可治疗）。两者攻击都很弱，注意保护。</p>
+      <p>🔧 <b>工程师</b>：占领 1.5 倍速度，选中后若相邻有受损载具（侦察车/火炮/坦克/火箭炮/运兵车），可点击"修理"按钮 +3 HP。<br>
+      ⚕️ <b>军医</b>：选中后若相邻有受损步兵/工程师，可点击"治疗"按钮 +4 HP。两者攻击都很弱，注意保护。移动或原地不动都可以发起修理/治疗，不强制先移动。</p>
+      <h4>运输规则</h4>
+      <p>🚚 <b>运兵车</b>：无武装载具，移动力 5，不可进山地/水域。移动到己方空运兵车所在格即可<b>上车</b>（步兵/重装兵/工程师/军医均可搭乘，限 1 人），上车后乘客不再单独占格、不能行动，直到下车。<br>
+      选中运兵车后若相邻有空位，可点击"下车"按钮，乘客落到相邻空格且<b>当回合仍可行动</b>；运兵车本身行动结束。<b>运兵车被击毁时，车内乘客一同阵亡</b>，注意保护。</p>
       <h4>升级规则</h4>
       <p>命中 +8、击毁 +25 经验。<b>辅助单位也有升级途径</b>：占领成功 +8、修理/治疗 +6 经验。升级（上限 <b>Lv.V</b>）攻 +1 防 +1 HP 上限 +2，并恢复 3 HP；升级所需经验递增（30/40/50/60），成长曲线平滑；满级后再获得经验转为恢复 3 HP。敌军同样会升级。</p>
       <h4>查看敌军</h4>
@@ -381,6 +387,7 @@ const MOVE_COST={
   artillery:{plain:1,forest:2,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
   recon:   {plain:2,forest:3,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
   rocket:  {plain:2,forest:3,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
+  transport:{plain:1,forest:2,mountain:Infinity,water:Infinity,city:1,factory:1,hq:1},
 };
 const UNIT_TYPES={
   infantry:{name:'步兵',  emoji:'🪖', hp:10, atk:5, def:1, move:3, minR:1, maxR:1, desc:'多面手，擅长山地作战，可占领建筑'},
@@ -391,23 +398,27 @@ const UNIT_TYPES={
   medic:  {name:'军医',   emoji:'⚕️', hp:10, atk:1, def:0, move:3, minR:1, maxR:1, desc:'治疗相邻步兵/工程师（+4 HP），自身攻击很弱'},
   tank:   {name:'坦克',   emoji:'', icon:'tank', hp:12, atk:9, def:3, move:5, minR:1, maxR:1, desc:'突击主力，平原强势（履带，不可入山地）'},
   rocket: {name:'火箭炮', emoji:'🚀', hp:10, atk:8, def:0, move:6, minR:3, maxR:5, desc:'超远程轰击 3-5，移动后不能开火（轮胎）'},
+  transport:{name:'运兵车', emoji:'🚚', hp:10, atk:0, def:0, move:5, minR:0, maxR:0, desc:'无武装运输车，可搭载 1 名步兵类单位提升机动性（履带，不可入山地/水域），被击毁时车内乘客一同阵亡'},
 };
 // 载具（可被工程师修理）
-const VEHICLES=['recon','artillery','tank','rocket'];
+const VEHICLES=['recon','artillery','tank','rocket','transport'];
 // 间接打击单位：移动后不能开火、不反击
 const NO_MOVE_FIRE=['artillery','rocket'];
 // 可占领建筑的单位（步兵/重装/工程师）
 const CAPTURERS=['infantry','heavy','engineer'];
-// 克制倍率：DMG_MULT[攻击方][防守方]
+// 可被运兵车搭载的单位（步兵类）
+const RIDERS=['infantry','heavy','engineer','medic'];
+// 克制倍率：DMG_MULT[攻击方][防守方]（transport 无武装不会作为攻击方出现，但需要作为防守方的列）
 const DMG_MULT={
-  infantry:{infantry:1.0, heavy:0.55, recon:0.9,  artillery:1.0, engineer:0.9, medic:1.0, tank:0.35, rocket:0.9},
-  heavy:   {infantry:1.3, heavy:1.0,  recon:1.5,  artillery:1.5, engineer:1.2, medic:1.3, tank:0.9,  rocket:1.5},
-  recon:   {infantry:1.2, heavy:0.5,  recon:1.0,  artillery:1.2, engineer:1.1, medic:1.2, tank:0.4,  rocket:1.2},
-  artillery:{infantry:1.2,heavy:1.3,  recon:1.2,  artillery:1.0, engineer:1.1, medic:1.2, tank:1.2,  rocket:1.3},
-  engineer:{infantry:0.5, heavy:0.3,  recon:0.4,  artillery:0.5, engineer:1.0, medic:0.8, tank:0.2,  rocket:0.5},
-  medic:   {infantry:0.35,heavy:0.2,  recon:0.35, artillery:0.35,engineer:0.8, medic:1.0, tank:0.15, rocket:0.35},
-  tank:    {infantry:1.4, heavy:1.1,  recon:1.3,  artillery:1.4, engineer:1.3, medic:1.4, tank:1.0,  rocket:1.4},
-  rocket:  {infantry:1.3, heavy:1.2,  recon:1.3,  artillery:1.3, engineer:1.2, medic:1.3, tank:1.1,  rocket:1.0},
+  infantry:{infantry:1.0, heavy:0.55, recon:0.9,  artillery:1.0, engineer:0.9, medic:1.0, tank:0.35, rocket:0.9, transport:1.0},
+  heavy:   {infantry:1.3, heavy:1.0,  recon:1.5,  artillery:1.5, engineer:1.2, medic:1.3, tank:0.9,  rocket:1.5, transport:1.5},
+  recon:   {infantry:1.2, heavy:0.5,  recon:1.0,  artillery:1.2, engineer:1.1, medic:1.2, tank:0.4,  rocket:1.2, transport:1.2},
+  artillery:{infantry:1.2,heavy:1.3,  recon:1.2,  artillery:1.0, engineer:1.1, medic:1.2, tank:1.2,  rocket:1.3, transport:1.3},
+  engineer:{infantry:0.5, heavy:0.3,  recon:0.4,  artillery:0.5, engineer:1.0, medic:0.8, tank:0.2,  rocket:0.5, transport:0.5},
+  medic:   {infantry:0.35,heavy:0.2,  recon:0.35, artillery:0.35,engineer:0.8, medic:1.0, tank:0.15, rocket:0.35,transport:0.35},
+  tank:    {infantry:1.4, heavy:1.1,  recon:1.3,  artillery:1.4, engineer:1.3, medic:1.4, tank:1.0,  rocket:1.4, transport:1.4},
+  rocket:  {infantry:1.3, heavy:1.2,  recon:1.3,  artillery:1.3, engineer:1.2, medic:1.3, tank:1.1,  rocket:1.0, transport:1.3},
+  transport:{infantry:0,  heavy:0,    recon:0,    artillery:0,   engineer:0,   medic:0,   tank:0,    rocket:0,   transport:0},
 };
 const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
 const HIT_CHANCE=0.9, CRIT_CHANCE=0.12, CRIT_MULT=1.5, COUNTER_MULT=0.7;
@@ -421,7 +432,7 @@ const INCOME_PER=50;     // 每座己方建筑每回合收入
 const MAX_SIDE_UNITS=12; // 每方单位上限（防止无限爆兵）
 const UNIT_COSTS={ // 单位造价（参考高级战争比例缩放）
   infantry:100, engineer:120, medic:120, recon:180,
-  heavy:220, artillery:280, tank:320, rocket:400,
+  heavy:220, artillery:280, tank:320, rocket:400, transport:150,
 };
 
 </script>
@@ -456,11 +467,12 @@ const I18N={
     m8:'💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！',
     // 帮助对话框
     helpTitle:'📖 游戏说明', helpSub:'单位特性 · 颜色图例 · 地形效果',
-    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产',
+    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
     uInf:'多面手，可占领建筑，山地移动力好', uHeavy:'高攻高防的近战主力，克制载具（步兵，可进山）', uRecon:'高速突袭，装甲薄弱（轮胎，不可入山地）',
     uArtillery:'远程轰击，移动后不能开火（履带）', uEngineer:'占领 1.5 倍速度，山地行军最快，修理相邻载具 +3 HP', uMedic:'治疗相邻步兵/工程师 +4 HP',
     uTank:'突击主力，平原强势（履带，不可入山地）', uRocket:'超远程轰击 3-5，移动后不能开火（轮胎）',
+    uTransport:'无武装，搭载 1 名步兵类跨越地形限制，被击毁乘客同死（履带，不可入山地/水域）',
     lMv:'蓝格 = 可移动格子（含地形消耗）', lZone:'橙格虚线 = 攻击范围（只能打，不能停）', lAtk:'红框闪烁 = 当前可攻击的敌人',
     lSel:'金框 = 当前选中的单位', lBase:'蓝底 = 我方单位　红底 = 敌军单位',
     lActed:'灰显 = 我方已行动　虚线框 = 敌军已行动', lPath:'绿格+箭头 = 移动路径预览（悬停显示）',
@@ -469,7 +481,8 @@ const I18N={
     tWater:'<i class="tchip t-water"></i> 河流：不可通行（浅滩可过）', tCity:'<i class="tchip t-city"></i> 城镇：防御 +30%，回合开始回复 2 HP（仅限己方占领的建筑）', tPlain:'<i class="tchip t-plain"></i> 平原：无加成，所有兵种消耗 1（轮胎 2）',
     tHq:'<i class="tchip t-hq"></i> 总部：防御 +40%，占领敌方总部获胜，己方总部被占战败', tFactory:'<i class="tchip t-factory"></i> 工厂：防御 +30%，回合开始回复 2 HP，可修理驻守载具',
     capRule:'只有<b>步兵</b>、<b>重装兵</b>和<b>工程师</b>能占领建筑（城镇/工厂/总部，工程师 1.5 倍速度）。站在建筑上待机或移动结束即积累进度（进度 = 单位当前 HP×倍率，满 20 占领）。<b>离开建筑后进度清零</b>。占领后建筑插上本方旗帜，只有己方建筑才回血。敌军同样会占领，被夺走的建筑会变红旗。<b>占领敌方总部直接获胜，己方总部被占直接战败</b>。',
-    supRule:'🔧 <b>工程师</b>：占领 1.5 倍速度，回合行动后自动修理<b>相邻</b>载具（侦察车/火炮/坦克/火箭炮）+3 HP（原地待机也可修理）。<br>⚕️ <b>军医</b>：回合行动后自动治疗<b>相邻</b>步兵/工程师 +4 HP（原地待机也可治疗）。两者攻击都很弱，注意保护。',
+    supRule:'🔧 <b>工程师</b>：占领 1.5 倍速度，选中后若相邻有受损载具（侦察车/火炮/坦克/火箭炮/运兵车），可点击"修理"按钮 +3 HP。<br>⚕️ <b>军医</b>：选中后若相邻有受损步兵/工程师，可点击"治疗"按钮 +4 HP。两者攻击都很弱，注意保护。移动或原地不动都可以发起修理/治疗，不强制先移动。',
+    transRule:'🚚 <b>运兵车</b>：无武装载具，移动力 5，不可进山地/水域。移动到己方空运兵车所在格即可<b>上车</b>（步兵/重装兵/工程师/军医均可搭乘，限 1 人），上车后乘客不再单独占格、不能行动，直到下车。<br>选中运兵车后若相邻有空位，可点击"下车"按钮，乘客落到相邻空格且<b>当回合仍可行动</b>；运兵车本身行动结束。<b>运兵车被击毁时，车内乘客一同阵亡</b>，注意保护。',
     lvlRule:'命中 +8、击毁 +25 经验。<b>辅助单位也有升级途径</b>：占领成功 +8、修理/治疗 +6 经验。升级（上限 <b>Lv.V</b>）攻 +1 防 +1 HP 上限 +2，并恢复 3 HP；升级所需经验递增（30/40/50/60），成长曲线平滑；满级后再获得经验转为恢复 3 HP。敌军同样会升级。',
     viewRule:'点击敌军单位（或已行动的我方单位）可查看其<b>移动范围（半透明蓝格）和攻击范围（橙格虚线）</b>，但不能操作。再点一次取消。',
     combatRule:'命中 90%，会心一击 12%（1.5 倍伤害）；反击伤害为 70%。单位间有克制关系（重装克步兵与载具、坦克克步兵等）。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。',
@@ -478,6 +491,9 @@ const I18N={
     atkLog:(a,d)=>`${sideName(a.side)} ${UNIT_TYPES[a.type].name} 攻击 ${sideName(d.side)} ${UNIT_TYPES[d.type].name}！`,
     counter:'反击！', dodged:'……被闪避了！', remain:(n,m)=>`${UNIT_TYPES?UNIT_TYPES[n].name:n} 剩余 ${m} HP`,
     killLog:(a,d)=>`💥 ${sideName(a.side)} ${UNIT_TYPES[a.type].name} 击毁了 ${sideName(d.side)} ${UNIT_TYPES[d.type].name}！`,
+    cargoLostLog:(t)=>`💀 运兵车被击毁，车内的 ${UNIT_TYPES[t].name} 一同阵亡！`,
+    loadLog:(t)=>`🚚 ${UNIT_TYPES[t].name} 登上了运兵车`,
+    unloadLog:(t)=>`⬇️ ${UNIT_TYPES[t].name} 下车了`,
     lvlUp:(s,t,l)=>`⬆️ ${sideName(s)} ${UNIT_TYPES[t].name} 升到 Lv.${l}！（攻+1 防+1 HP+2）`,
     maxLvl:(s,t)=>`✚ ${sideName(s)} ${UNIT_TYPES[t].name} 已满级，经验转为恢复 3 HP`,
     capOk:(s)=>`${sideName(s)} ${''}占领了城镇！`,
@@ -506,11 +522,13 @@ const I18N={
     myFlag:'🚩我方占领', enFlag:'⚠️敌军占领', capturing:'占领中', neutral:'中立', prog:'进度',
     defBonus:'防御加成', moveCost:'移动消耗', impassable:'不可通行',
     // 兵种名
-    nInfantry:'步兵', nHeavy:'重装兵', nRecon:'侦察车', nArtillery:'火炮', nEngineer:'工程师', nMedic:'军医', nTank:'坦克', nRocket:'火箭炮',
+    nInfantry:'步兵', nHeavy:'重装兵', nRecon:'侦察车', nArtillery:'火炮', nEngineer:'工程师', nMedic:'军医', nTank:'坦克', nRocket:'火箭炮', nTransport:'运兵车',
     // 兵种描述
     dInfantry:'多面手，擅长山地作战，可占领建筑', dHeavy:'高攻高防的近战主力，对载具 1.5 倍伤害（步兵，可进山）', dRecon:'高速突袭，但装甲薄弱（轮胎，不可入山地）',
     dArtillery:'远程轰击，移动后不能开火（履带）', dEngineer:'占领速度×1.5，山地行军最快，修理相邻载具（+3 HP）', dMedic:'治疗相邻步兵/工程师（+4 HP），自身攻击很弱',
     dTank:'突击主力，平原强势（履带，不可入山地）', dRocket:'超远程轰击 3-5，移动后不能开火（轮胎）',
+    dTransport:'无武装运输车，可搭载 1 名步兵类单位提升机动性（履带，不可入山地/水域），被击毁时车内乘客一同阵亡',
+    actLoad:'🚚 上车', actUnload:'⬇️ 下车', cargoLabel:'🚚 车内：',
     sideP:'我方', sideE:'敌军',
   },
   en:{
@@ -536,11 +554,12 @@ const I18N={
     m7:'💥 Hits and crits; ⬆️ gain XP and <b>level up</b> — enemies level up too! 🎵 Battle BGM: upbeat march for you, tense minor for the enemy.',
     m8:'💰 <b>Economy & production</b>: each owned building gives income every turn (+50 each), starting funds 300. Click <b>your empty factory</b> to open the production menu and spend funds on new units (they wait this turn). The enemy saves money and builds too — expand your economy!',
     helpTitle:'📖 How to Play', helpSub:'Unit traits · Color legend · Terrain effects',
-    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production',
+    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production',
     thUnit:'Unit', thHp:'HP', thAtk:'ATK', thDef:'DEF', thMove:'MOV', thRange:'RNG', thTrait:'Trait',
     uInf:'Versatile, can capture, good mountain mobility', uHeavy:'Strong melee main force, strong vs vehicles (infantry, can enter mountains)', uRecon:'Fast raider, weak armor (tires, no mountains)',
     uArtillery:'Long-range fire, cannot fire after moving (treads)', uEngineer:'1.5× capture, fastest in mountains, repairs adjacent vehicles +3 HP', uMedic:'Heals adjacent infantry/engineers +4 HP',
     uTank:'Assault main force, strong on plains (treads, no mountains)', uRocket:'Ultra long-range fire 3-5, cannot fire after moving (tires)',
+    uTransport:'Unarmed, carries 1 foot unit past terrain limits; cargo dies with it (treads, no mountains/water)',
     lMv:'Blue = movable tiles (terrain cost included)', lZone:'Orange dashed = attack range (fire only, cannot stop)', lAtk:'Red pulse = attackable enemy now',
     lSel:'Gold outline = selected unit', lBase:'Blue base = your unit　Red base = enemy unit',
     lActed:'Gray = your unit acted　Dashed = enemy acted', lPath:'Green + arrows = move path preview (hover)',
@@ -549,7 +568,8 @@ const I18N={
     tWater:'<i class="tchip t-water"></i> River: impassable (fords passable)', tCity:'<i class="tchip t-city"></i> City: DEF +30%, heals 2 HP at turn start (owned buildings only)', tPlain:'<i class="tchip t-plain"></i> Plain: no bonus, cost 1 for all (tires 2)',
     tHq:'<i class="tchip t-hq"></i> HQ: DEF +40%, capturing the enemy HQ wins, losing yours means defeat', tFactory:'<i class="tchip t-factory"></i> Factory: DEF +30%, heals 2 HP at turn start, repairs garrisoned vehicles',
     capRule:'Only <b>infantry</b>, <b>heavies</b> and <b>engineers</b> capture buildings (cities/factories/HQ, engineer 1.5×). Standing on a building and waiting builds progress (progress = HP × multiplier, 20 to capture). <b>Progress resets to 0 when the unit leaves</b>. Captured buildings fly your flag; only owned buildings heal. Enemies capture too. <b>Capturing the enemy HQ wins instantly; losing your own HQ means defeat</b>.',
-    supRule:'🔧 <b>Engineer</b>: 1.5× capture; after acting, auto-repairs <b>adjacent</b> vehicles (recon/artillery/tank/rocket) +3 HP (waiting in place works too).<br>⚕️ <b>Medic</b>: after acting, auto-heals <b>adjacent</b> infantry/engineers +4 HP (waiting in place works too). Both are weak in combat — protect them.',
+    supRule:'🔧 <b>Engineer</b>: 1.5× capture speed; when selected, if a damaged vehicle (recon/artillery/tank/rocket/transport) is adjacent, click "Repair" for +3 HP.<br>⚕️ <b>Medic</b>: when selected, if a damaged infantry/engineer is adjacent, click "Heal" for +4 HP. Both are weak in combat — protect them. Either can act from a move or in place, moving first is not required.',
+    transRule:'🚚 <b>Transport</b>: unarmed vehicle, move 5, cannot enter mountains/water. Move onto a friendly empty transport\'s tile to <b>board</b> it (infantry/heavy/engineer/medic can ride, 1 at a time); the rider then no longer occupies its own tile or acts, until it disembarks.<br>Select the transport and click "Unload" if an adjacent tile is free — the rider lands there and <b>can still act this turn</b>; the transport\'s own action ends. <b>If the transport is destroyed, its cargo is destroyed too</b> — keep it protected.',
     lvlRule:'Hit +8, destroy +25 XP. <b>Support units level too</b>: capture +8, repair/heal +6 XP. Level up (cap <b>Lv.V</b>) grants +1 ATK +1 DEF +2 HP and heals 3 HP; XP needed rises each level (30/40/50/60) for a smooth curve; at max level excess XP heals 3 HP. Enemies level up too.',
     viewRule:'Click an enemy (or an acted unit of yours) to inspect its <b>move range (translucent blue) and attack range (dashed orange)</b> — view only. Click again to cancel.',
     combatRule:'90% hit, 12% crit (1.5×); counterattack deals 70%. Units have type matchups (heavy beats infantry and vehicles, tank beats infantry, etc.). <b>Artillery/rocket cannot fire after moving — they must wait in place to fire</b>; other units may move then attack. Each unit type has its own attack/move sound. Player log is blue, enemy log is red.',
@@ -557,6 +577,9 @@ const I18N={
     atkLog:(a,d)=>`${sideName(a.side)} ${UNIT_TYPES[a.type].name} attacks ${sideName(d.side)} ${UNIT_TYPES[d.type].name}!`,
     counter:'Counterattack!', dodged:'…dodged!', remain:(n,m)=>`${UNIT_TYPES[n].name} has ${m} HP left`,
     killLog:(a,d)=>`💥 ${sideName(a.side)} ${UNIT_TYPES[a.type].name} destroyed ${sideName(d.side)} ${UNIT_TYPES[d.type].name}!`,
+    cargoLostLog:(t)=>`💀 The transport was destroyed — the ${UNIT_TYPES[t].name} aboard was lost too!`,
+    loadLog:(t)=>`🚚 The ${UNIT_TYPES[t].name} boarded the transport`,
+    unloadLog:(t)=>`⬇️ The ${UNIT_TYPES[t].name} disembarked`,
     lvlUp:(s,t,l)=>`⬆️ ${sideName(s)} ${UNIT_TYPES[t].name} reached Lv.${l}! (ATK+1 DEF+1 HP+2)`,
     maxLvl:(s,t)=>`✚ ${sideName(s)} ${UNIT_TYPES[t].name} is max level, XP converted to 3 HP heal`,
     capOk:(s)=>`${sideName(s)} captured the city!`,
@@ -580,10 +603,12 @@ const I18N={
     actedP:'acted (gray)', actedE:'acted (dashed)', onTerrain:'Terrain',
     myFlag:'🚩Owned by you', enFlag:'⚠️Enemy-owned', capturing:'Capturing', neutral:'Neutral', prog:'Progress',
     defBonus:'DEF bonus', moveCost:'Move cost', impassable:'impassable',
-    nInfantry:'Infantry', nHeavy:'Heavy', nRecon:'Recon', nArtillery:'Artillery', nEngineer:'Engineer', nMedic:'Medic', nTank:'Tank', nRocket:'Rocket',
+    nInfantry:'Infantry', nHeavy:'Heavy', nRecon:'Recon', nArtillery:'Artillery', nEngineer:'Engineer', nMedic:'Medic', nTank:'Tank', nRocket:'Rocket', nTransport:'Transport',
     dInfantry:'Versatile, good in mountains, can capture', dHeavy:'High ATK/DEF melee main, 1.5× damage vs vehicles (infantry, can enter mountains)', dRecon:'Fast raider, weak armor (tires, no mountains)',
     dArtillery:'Long-range fire, cannot fire after moving (treads)', dEngineer:'Capture ×1.5, fastest in mountains, repairs adjacent vehicles (+3 HP)', dMedic:'Heals adjacent infantry/engineers (+4 HP), weak attack',
     dTank:'Assault main force, strong on plains (treads, no mountains)', dRocket:'Ultra long-range fire 3-5, cannot fire after moving (tires)',
+    dTransport:'Unarmed transport, carries 1 foot unit for extra mobility (treads, no mountains/water); cargo dies if the transport is destroyed',
+    actLoad:'🚚 Load', actUnload:'⬇️ Unload', cargoLabel:'🚚 Cargo: ',
     sideP:'Player', sideE:'Enemy',
   }
 };
@@ -592,8 +617,8 @@ const T=k=>I18N[LANG][k]!==undefined?I18N[LANG][k]:I18N.zh[k];
 function setLang(l){
   LANG=I18N[l]?l:'zh';
   // 同步 UNIT_TYPES 名称/描述与 TERRAINS 名称（供战斗文案使用）
-  const names={infantry:'nInfantry',heavy:'nHeavy',recon:'nRecon',artillery:'nArtillery',engineer:'nEngineer',medic:'nMedic',tank:'nTank',rocket:'nRocket'};
-  const descs={infantry:'dInfantry',heavy:'dHeavy',recon:'dRecon',artillery:'dArtillery',engineer:'dEngineer',medic:'dMedic',tank:'dTank',rocket:'dRocket'};
+  const names={infantry:'nInfantry',heavy:'nHeavy',recon:'nRecon',artillery:'nArtillery',engineer:'nEngineer',medic:'nMedic',tank:'nTank',rocket:'nRocket',transport:'nTransport'};
+  const descs={infantry:'dInfantry',heavy:'dHeavy',recon:'dRecon',artillery:'dArtillery',engineer:'dEngineer',medic:'dMedic',tank:'dTank',rocket:'dRocket',transport:'dTransport'};
   for(const k in names){UNIT_TYPES[k].name=T(names[k]);UNIT_TYPES[k].desc=T(descs[k]);}
   // 先剥离 tchip HTML 前缀（v 图标同步后 t* 键以 <i class="tchip..."> 开头），再兼容旧 emoji 前缀
   const stripChip=s=>s.replace(/^<i class="tchip t-\w+"><\/i>\s*/,'');
@@ -639,19 +664,19 @@ function applyStaticTexts(){
   const hdTitle=document.querySelector('#helpDialog .dialog h1');if(hdTitle)hdTitle.textContent=T('helpTitle');
   const hdSub=document.querySelector('#helpDialog .dialog .sub');if(hdSub)hdSub.textContent=T('helpSub');
   const hdH4=document.querySelectorAll('#helpDialog h4');
-  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hLevel','hView','hCombat','hEconomy'];
+  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy'];
   hdH4.forEach((h,i)=>{if(hKeys[i])h.textContent=T(hKeys[i]);});
   // 单位表
   const utable=document.querySelector('#helpDialog .utable');
   if(utable){
     const rows=utable.querySelectorAll('tr');
-    if(rows.length>=9){
+    if(rows.length>=10){
       const th=rows[0].querySelectorAll('th');
       if(th.length>=7){th[0].textContent=T('thUnit');th[1].textContent=T('thHp');th[2].textContent=T('thAtk');th[3].textContent=T('thDef');th[4].textContent=T('thMove');th[5].textContent=T('thRange');th[6].textContent=T('thTrait');}
-      const traits=['uInf','uHeavy','uRecon','uArtillery','uEngineer','uMedic','uTank','uRocket'];
-      const unames=['nInfantry','nHeavy','nRecon','nArtillery','nEngineer','nMedic','nTank','nRocket'];
-      const ukeys=['infantry','heavy','recon','artillery','engineer','medic','tank','rocket'];
-      for(let i=1;i<=8;i++){
+      const traits=['uInf','uHeavy','uRecon','uArtillery','uEngineer','uMedic','uTank','uRocket','uTransport'];
+      const unames=['nInfantry','nHeavy','nRecon','nArtillery','nEngineer','nMedic','nTank','nRocket','nTransport'];
+      const ukeys=['infantry','heavy','recon','artillery','engineer','medic','tank','rocket','transport'];
+      for(let i=1;i<=9;i++){
         const tds=rows[i].querySelectorAll('td');
         if(tds.length>=7){
           const b=UNIT_TYPES[ukeys[i-1]];
@@ -678,14 +703,15 @@ function applyStaticTexts(){
   hdPs.forEach(p=>{
     // 跳过第一个（地形行内 br 分隔的）
   });
-  if(hdPs.length>=6){
+  if(hdPs.length>=7){
     hdPs[0].innerHTML=T('tForest')+'　｜　'+T('tMountain')+'<br>'+T('tWater')+'　｜　'+T('tCity')+'　｜　'+T('tPlain')+'<br>'+T('tHq')+'　｜　'+T('tFactory');
     hdPs[1].innerHTML=T('capRule');
     hdPs[2].innerHTML=T('supRule');
-    hdPs[3].innerHTML=T('lvlRule');
-    hdPs[4].innerHTML=T('viewRule');
-    hdPs[5].innerHTML=T('combatRule');
-    if(hdPs[6])hdPs[6].innerHTML=T('ecoRule');
+    hdPs[3].innerHTML=T('transRule');
+    hdPs[4].innerHTML=T('lvlRule');
+    hdPs[5].innerHTML=T('viewRule');
+    hdPs[6].innerHTML=T('combatRule');
+    if(hdPs[7])hdPs[7].innerHTML=T('ecoRule');
   }
   set('helpClose',T('knowBtn'));
   set('prodTitle',T('prodTitle'));set('prodClose',T('prodCancel'));
@@ -835,12 +861,14 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // ================= 工具 =================
 const ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
 function roman(n){return ROMAN[n]||String(n);}
-function unitAt(x,y){return G.units.find(u=>u.x===x&&u.y===y)||null;}
+// 车内乘客（u.aboard=运兵车id）不占格、不可见于棋盘查询
+function unitAt(x,y){return G.units.find(u=>!u.aboard&&u.x===x&&u.y===y)||null;}
+function riderOf(transport){return G.units.find(u=>u.aboard===transport.id)||null;}
 function terrAt(x,y){return TERRAINS[G.map[y][x]];}
 function manhattan(x1,y1,x2,y2){return Math.abs(x1-x2)+Math.abs(y1-y2);}
 function sideName(s){return s==='P'?T('sideP'):T('sideE');}
 function inRange(u,x,y,tx,ty){const d=manhattan(x,y,tx,ty);return d>=u.minR&&d<=u.maxR;}
-function targetsFrom(u,x,y){return G.units.filter(t=>t.side!==u.side&&inRange(u,x,y,t.x,t.y));}
+function targetsFrom(u,x,y){return G.units.filter(t=>!t.aboard&&t.side!==u.side&&inRange(u,x,y,t.x,t.y));}
 function calcDamage(att,dfd,fromX,fromY,luck=1){
   const dterr=TERRAINS[G.map[dfd.y][dfd.x]];
   const mult=DMG_MULT[att.type][dfd.type];
@@ -923,6 +951,24 @@ function canRepair(u){
 function canHeal(u){
   if(u.type!=='medic')return false;
   return G.units.some(v=>v.side===u.side&&['infantry','engineer'].includes(v.type)&&v.hp<v.maxHp&&manhattan(u.x,u.y,v.x,v.y)===1);
+}
+// 运兵车下车：找一个相邻、乘客能通行且空闲的格子（不含被占用格）
+function unloadSpot(transport,rider){
+  const costs=MOVE_COST[rider.type]||{};
+  for(const[dx,dy]of DIRS){
+    const nx=transport.x+dx,ny=transport.y+dy;
+    if(nx<0||ny<0||nx>=G.size||ny>=G.size)continue;
+    const cost=costs[G.map[ny][nx]];
+    if(cost===undefined||cost===Infinity)continue;
+    if(unitAt(nx,ny))continue;
+    return{x:nx,y:ny};
+  }
+  return null;
+}
+function canUnload(u){
+  if(u.type!=='transport')return false;
+  const rider=riderOf(u);
+  return !!(rider&&unloadSpot(u,rider));
 }
 
 // ================= 经济与生产（参考高级战争：占城→收入→工厂造兵） =================
@@ -1127,6 +1173,8 @@ function bfsReach(u){
     const[x,y]=k.split(',').map(Number);
     const occ=unitAt(x,y);
     if(!occ||occ.id===u.id)stoppable.add(k);
+    // 步兵类可停在己方空运兵车格（上车）
+    else if(occ.side===u.side&&occ.type==='transport'&&RIDERS.includes(u.type)&&!riderOf(occ))stoppable.add(k);
   }
   return{dist,parent,stoppable};
 }
@@ -1175,7 +1223,9 @@ async function resolveHit(a,d,counterMult){
     log(T('killLog')(a,d),'kill');
     SFX.destroy();
     gainXp(a,25);
-    G.units=G.units.filter(u=>u.id!==d.id);
+    const rider=riderOf(d); // 运兵车被击毁：车内乘客一同阵亡
+    G.units=G.units.filter(u=>u.id!==d.id&&(!rider||u.id!==rider.id));
+    if(rider)log(T('cargoLostLog')(rider.type),'kill');
     render();
   }else{
     log(T('remain')(d.type,d.hp),'dim');
@@ -1249,6 +1299,14 @@ function waitUnit(){ if(G.sel)finishUnitAction(G.sel); }
 function captureAction(){ if(G.sel)finishUnitAction(G.sel,tryCapture); }
 function repairAction(){ if(G.sel)finishUnitAction(G.sel,tryRepair); }
 function healAction(){ if(G.sel)finishUnitAction(G.sel,tryHeal); }
+// 运兵车下车：乘客落到相邻空格，本回合仍可行动；运兵车结束本次行动
+function unloadAction(u){
+  const rider=riderOf(u);
+  const spot=rider&&unloadSpot(u,rider);
+  if(!rider||!spot)return;
+  rider.aboard=null;rider.x=spot.x;rider.y=spot.y;
+  log(T('unloadLog')(rider.type),'dim');
+}
 // 原地行动按钮组：根据选中单位当前格子能做的事动态生成按钮
 function updateActionBtns(){
   const box=$('#actionBtns'),waitBtn=$('#waitBtn');
@@ -1262,6 +1320,7 @@ function updateActionBtns(){
   if(canCapture(u))html+=`<button data-act="capture">${T('actCapture')}</button>`;
   if(canRepair(u))html+=`<button data-act="repair">${T('actRepair')}</button>`;
   if(canHeal(u))html+=`<button data-act="heal">${T('actHeal')}</button>`;
+  if(canUnload(u))html+=`<button data-act="unload">${T('actUnload')}</button>`;
   box.innerHTML=html;
   box.style.display=html?'flex':'none';
   waitBtn.style.display='block';
@@ -1274,6 +1333,7 @@ $('#actionBtns').addEventListener('click',e=>{
   else if(act==='capture')captureAction();
   else if(act==='repair')repairAction();
   else if(act==='heal')healAction();
+  else if(act==='unload')finishUnitAction(G.sel,unloadAction);
 });
 async function playerMove(u,x,y){
   G.busy=true;
@@ -1284,10 +1344,16 @@ async function playerMove(u,x,y){
   await animateMove(u,path);
   G.busy=false;
   resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
+  // 落点是己方空运兵车：直接上车，乘客不再单独占格、不能再行动
+  const carrier=G.units.find(v=>v.id!==u.id&&v.type==='transport'&&v.side===u.side&&v.x===u.x&&v.y===u.y);
+  if(carrier&&RIDERS.includes(u.type)){
+    finishUnitAction(u,v=>{v.aboard=carrier.id;log(T('loadLog')(v.type),'dim');});
+    return;
+  }
   // 移动后不自动执行占领/修理/治疗/攻击，交由动作按钮组给玩家选择；若无可选动作则直接待机结束
   G.mode='acting';G.sel=u;G.reach=null;render();showInfo(u);
   const hasAction=targetsFrom(u,u.x,u.y).length&&(!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE)
-    ||canCapture(u)||canRepair(u)||canHeal(u);
+    ||canCapture(u)||canRepair(u)||canHeal(u)||canUnload(u);
   if(!hasAction)finishUnitAction(u);
 }
 async function playerAttack(a,d){
@@ -1306,7 +1372,7 @@ board.addEventListener('click',async e=>{
     const sel=G.sel;
     if(u&&u.id===sel.id){deselect();showInfo(u);return;} // 再点一次=取消选择（可继续查看）
     if((G.mode==='selected'||G.mode==='attack'||G.mode==='acting')&&u&&u.side==='E'&&targetsFrom(sel,sel.x,sel.y).includes(u)){await playerAttack(sel,u);return;}
-    if(G.mode==='selected'&&G.reach.stoppable.has(x+','+y)&&(!u||u.id===sel.id)){await playerMove(sel,x,y);return;}
+    if(G.mode==='selected'&&G.reach.stoppable.has(x+','+y)&&(!u||u.id===sel.id||(u.type==='transport'&&u.side===sel.side))){await playerMove(sel,x,y);return;}
     if(u&&u.side==='P'&&!u.acted){select(u);return;}
     if(u&&u.side==='E'){viewUnit(u);return;} // 点敌军=查看其范围
     deselect();return;
@@ -1410,7 +1476,7 @@ async function startEnemyPhase(){
   SFX.turn();
   collectIncome('E');updateFunds(); // 敌方建筑收入
   await sleep(450);
-  for(const u of G.units.filter(v=>v.side==='E')){
+  for(const u of G.units.filter(v=>v.side==='E'&&!v.aboard)){
     if(u.hp<=0||G.over)continue;
     u.acted=false;
     await aiAct(u);
@@ -1517,7 +1583,8 @@ function render(){
       const hc=ratio>0.6?'':ratio>0.3?' mid':' low';
       const b=UNIT_TYPES[u.type];
       const icon=b.icon?`<i class="uicon ${b.icon}"></i>`:b.emoji;
-      html+=`<span class="unit ${u.side==='P'?'p':'e'}${u.acted?' acted':''}">${icon}`
+      const cargo=u.type==='transport'&&riderOf(u)?'<i class="cargo"></i>':'';
+      html+=`<span class="unit ${u.side==='P'?'p':'e'}${u.acted?' acted':''}">${icon}${cargo}`
           +`<i class="hpbar"><b class="${hc.trim()}" style="width:${Math.round(ratio*100)}%"></b></i>`
           +(u.level>1?`<em class="lv">${roman(u.level)}</em>`:'')
           +`</span>`;
@@ -1547,7 +1614,7 @@ function showInfo(u){
       <span>${T('thAtk')} <b>${u.atk}</b></span><span>${T('thDef')} <b>${u.def}</b></span>
       <span>${T('thMove')} <b>${u.move}</b></span><span>${T('thRange')} <b>${u.minR===u.maxR?u.maxR:u.minR+'-'+u.maxR}</b></span>
     </div>
-    <div style="font-size:12px;color:var(--dim);margin-top:6px">${b.desc}<br>${T('onTerrain')}：${tchip} ${t.name}（+${Math.round(t.def*100)}%）${u.acted?`<br><b style="color:var(--dim)">${u.side==='P'?T('actedP'):T('actedE')}</b>`:''}</div>`;
+    <div style="font-size:12px;color:var(--dim);margin-top:6px">${b.desc}<br>${T('onTerrain')}：${tchip} ${t.name}（+${Math.round(t.def*100)}%）${riderOf(u)?`<br>${T('cargoLabel')}${UNIT_TYPES[riderOf(u).type].name}`:''}${u.acted?`<br><b style="color:var(--dim)">${u.side==='P'?T('actedP'):T('actedE')}</b>`:''}</div>`;
 }
 function log(msg,cls='info'){
   const el=$('#log');
