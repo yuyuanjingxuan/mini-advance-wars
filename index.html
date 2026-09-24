@@ -244,6 +244,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <span id="phaseLabel" class="phase p">我方行动</span>
   <span>第 <b id="turnNum">1</b> 回合</span>
   <span class="funds">💰 <b id="fundsNum">300</b></span>
+  <span id="aiStyleTag" style="font-size:12px;color:var(--dim)" title="敌方 AI 风格"></span>
   <span class="spacer"></span>
   <button id="sndBtn" title="音效开关">🔊</button>
   <button id="helpBtn" title="单位与规则说明">❓ 帮助</button>
@@ -283,6 +284,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button data-size="8">小 8×8<br><small>快节奏</small></button>
       <button data-size="10" class="primary">中 10×10<br><small>标准</small></button>
       <button data-size="12">大 12×12<br><small>大地图</small></button>
+    </div>
+    <p style="margin:16px 0 4px" id="aiStyleLabel">选择敌方 AI 风格：</p>
+    <div class="sizes">
+      <button data-ai="balanced" class="primary">🛡️ 稳健<br><small>不打亏本仗，会避险</small></button>
+      <button data-ai="aggressive">🔥 激进<br><small>不计代价追求击杀</small></button>
+      <button data-ai="defensive">🏰 防守<br><small>占城据守，拖你犯错</small></button>
     </div>
     <p style="margin-top:14px"><button id="menuHelpBtn">📖 详细说明（单位 / 颜色图例）</button></p>
   </div>
@@ -339,6 +346,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <p>命中 90%，会心一击 12%（1.5 倍伤害）；反击伤害为 70%。单位间有克制关系（重装克步兵与载具、坦克克步兵等）。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。</p>
       <h4>经济与生产</h4>
       <p>💵 每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金，初始资金 <b>300</b>。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。</p>
+      <h4>敌方 AI 风格</h4>
+      <p>开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>
+      🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>
+      🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>
+      🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。</p>
     </div>
     <p style="margin-top:16px"><button id="helpClose" class="primary">知道了</button></p>
   </div>
@@ -437,6 +449,16 @@ const UNIT_COSTS={ // 单位造价（参考高级战争比例缩放）
   infantry:100, engineer:120, medic:120, recon:180,
   heavy:220, artillery:280, tank:320, rocket:400, transport:150,
 };
+// ================= 敌方 AI 风格（主菜单可选，决定 aiPlan 的评分权重） =================
+// dangerW：危险度（玩家单位对该格造成的预期总伤害）扣分权重，越高越怕死，0.35 约等于旧版固定权重
+// killBonus：能击杀目标的额外加分；badTradeAvoid：是否拒绝"净亏损"的进攻（伤害不够击杀且危险度超过造成伤害的倍数阈值时放弃进攻，转为待机/撤退）
+// retreatHpRatio：残血低于此比例、且当前格危险度不为 0 时尝试撤退到危险度更低的格子；capturePriority：占领动作的评分加成（用于防守型优先占城）
+// idleAdvance：无攻击机会时是否主动靠近玩家（防守型为 false，原地防守/占城）
+const AI_STYLES={
+  balanced:{name:'稳健',dangerW:0.35,killBonus:60,badTradeAvoid:true,badTradeMult:1.3,retreatHpRatio:0.4,capturePriority:10,idleAdvance:true},
+  aggressive:{name:'激进',dangerW:0.05,killBonus:90,badTradeAvoid:false,badTradeMult:0,retreatHpRatio:0,capturePriority:0,idleAdvance:true},
+  defensive:{name:'防守',dangerW:0.6,killBonus:50,badTradeAvoid:true,badTradeMult:1.0,retreatHpRatio:0.5,capturePriority:40,idleAdvance:false},
+};
 
 </script>
 <script>
@@ -458,6 +480,10 @@ const I18N={
     // 菜单
     mapSize:'选择地图规模（随机对称地图）：',
     sizeS:'小 8×8', sizeSsub:'快节奏', sizeM:'中 10×10', sizeMsub:'标准', sizeL:'大 12×12', sizeLsub:'大地图',
+    aiStyleLabel:'选择敌方 AI 风格：',
+    aiBalanced:'🛡️ 稳健', aiBalancedSub:'不打亏本仗，会避险',
+    aiAggressive:'🔥 激进', aiAggressiveSub:'不计代价追求击杀',
+    aiDefensive:'🏰 防守', aiDefensiveSub:'占城据守，拖你犯错',
     detailHelp:'📖 详细说明（单位 / 颜色图例）',
     langLabel:'🌐 Language:',
     // 菜单帮助段落
@@ -471,7 +497,7 @@ const I18N={
     m8:'💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！',
     // 帮助对话框
     helpTitle:'📖 游戏说明', helpSub:'单位特性 · 颜色图例 · 地形效果',
-    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产',
+    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hAiStyle:'敌方 AI 风格',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
     uInf:'多面手，可占领建筑，山地移动力好', uHeavy:'高攻高防的近战主力，移动迟缓，克制载具（步兵，可进山）', uRecon:'极速侦察，战斗力较弱、装甲薄弱（轮胎，不可入山地）',
     uArtillery:'远程轰击，移动后不能开火（履带）', uEngineer:'占领 1.5 倍速度，修理相邻载具 +3 HP', uMedic:'治疗相邻步兵/重装兵/工程师 +4 HP',
@@ -516,6 +542,7 @@ const I18N={
     prodTitle:'🏭 生产单位', prodCancel:'取消', prodHint:'点击工厂生产单位',
     prodFunds:(f)=>`💰 资金：${f}`,
     ecoRule:'💵 每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金，初始资金 <b>300</b>。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。',
+    aiStyleRule:'开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。',
     // 结果
     winTitle:'🎉 胜利！', loseTitle:'💀 战败……',
     winText:(n,how)=>how==='hq'?`历经 ${n} 回合占领了敌方总部！`:`历经 ${n} 回合消灭了全部敌军！`, loseText:(n,how)=>how==='hq'?`己方总部于第 ${n} 回合被占领，再接再厉！`:`我军全灭于第 ${n} 回合，再接再厉！`,
@@ -548,6 +575,10 @@ const I18N={
     pickRepair:'Click a highlighted vehicle to repair it', pickHeal:'Click a highlighted unit to heal it',
     mapSize:'Choose map size (random symmetric map):',
     sizeS:'Small 8×8', sizeSsub:'Quick', sizeM:'Medium 10×10', sizeMsub:'Standard', sizeL:'Large 12×12', sizeLsub:'Big map',
+    aiStyleLabel:'Choose enemy AI style:',
+    aiBalanced:'🛡️ Balanced', aiBalancedSub:'No bad trades, plays it safe',
+    aiAggressive:'🔥 Aggressive', aiAggressiveSub:'Chases kills at any cost',
+    aiDefensive:'🏰 Defensive', aiDefensiveSub:'Turtles and captures, waits you out',
     detailHelp:'📖 Details (units / color legend)',
     langLabel:'🌐 Language:',
     m1:'🪖 <b>8 unit types</b>: 🪖Infantry (versatile, can capture) · 🛡️Heavy (high ATK/DEF, anti-vehicle) · 🚙Recon (fast raider) · <i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>Cannon (range 2-3) · 🔧Engineer (1.5× capture + repair) · ⚕️Medic (heals) · <i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>Tank (assault main force) · 🚀Rocket (range 3-5)',
@@ -559,7 +590,7 @@ const I18N={
     m7:'💥 Hits and crits; ⬆️ gain XP and <b>level up</b> — enemies level up too! 🎵 Battle BGM: upbeat march for you, tense minor for the enemy.',
     m8:'💰 <b>Economy & production</b>: each owned building gives income every turn (+50 each), starting funds 300. Click <b>your empty factory</b> to open the production menu and spend funds on new units (they wait this turn). The enemy saves money and builds too — expand your economy!',
     helpTitle:'📖 How to Play', helpSub:'Unit traits · Color legend · Terrain effects',
-    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production',
+    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production', hAiStyle:'Enemy AI Style',
     thUnit:'Unit', thHp:'HP', thAtk:'ATK', thDef:'DEF', thMove:'MOV', thRange:'RNG', thTrait:'Trait',
     uInf:'Versatile, can capture, good mountain mobility', uHeavy:'Strong melee main force, sluggish, strong vs vehicles (infantry, can enter mountains)', uRecon:'Blazing-fast scout, weak in combat and armor (tires, no mountains)',
     uArtillery:'Long-range fire, cannot fire after moving (treads)', uEngineer:'1.5× capture, repairs adjacent vehicles +3 HP', uMedic:'Heals adjacent infantry/heavies/engineers +4 HP',
@@ -602,6 +633,7 @@ const I18N={
     prodTitle:'🏭 Build Unit', prodCancel:'Cancel', prodHint:'Click factory to build',
     prodFunds:(f)=>`💰 Funds: ${f}`,
     ecoRule:'💵 At the start of each turn, every owned building (city/factory/HQ) grants <b>+50</b> funds; you start with <b>300</b>. Click <b>your empty factory</b> to open the production menu: pick a unit and pay its cost (infantry cheapest, rocket priciest); new units wait this turn and act next turn. Max 12 units per side. The enemy collects income and builds units too.',
+    aiStyleRule:'Pick the enemy\'s style before starting (shown at the top during the match):<br>🛡️ <b>Balanced</b>: avoids bad trades — skips an attack if it can\'t kill and the counter-risk is too high; retreats low-HP units to safer tiles; prioritizes finishing off weakened targets.<br>🔥 <b>Aggressive</b>: barely considers its own safety, always maximizes this turn\'s damage/kills even in a losing trade.<br>🏰 <b>Defensive</b>: doesn\'t chase you down, prioritizes capturing neutral/lost buildings, holds position when there\'s nothing to fight, and grinds you down with economy and terrain.',
     winTitle:'🎉 Victory!', loseTitle:'💀 Defeat…',
     winText:(n,how)=>how==='hq'?`Captured the enemy HQ in ${n} turns!`:`Destroyed all enemies in ${n} turns!`, loseText:(n,how)=>how==='hq'?`Your HQ was captured on turn ${n}. Try again!`:`Your army fell on turn ${n}. Try again!`,
     again:'Play Again', backMenu:'Main Menu', backConfirm:'Return to main menu? Current progress will be lost',
@@ -664,12 +696,20 @@ function applyStaticTexts(){
     sizeBtns[1].innerHTML=T('sizeM')+'<br><small>'+T('sizeMsub')+'</small>';
     sizeBtns[2].innerHTML=T('sizeL')+'<br><small>'+T('sizeLsub')+'</small>';
   }
+  set('aiStyleLabel',T('aiStyleLabel'));
+  const aiBtns=document.querySelectorAll('#menu button[data-ai]');
+  if(aiBtns.length===3){
+    aiBtns[0].innerHTML=T('aiBalanced')+'<br><small>'+T('aiBalancedSub')+'</small>';
+    aiBtns[1].innerHTML=T('aiAggressive')+'<br><small>'+T('aiAggressiveSub')+'</small>';
+    aiBtns[2].innerHTML=T('aiDefensive')+'<br><small>'+T('aiDefensiveSub')+'</small>';
+  }
+  updateAiStyleTag();
   set('menuHelpBtn',T('detailHelp'));
   // 帮助对话框
   const hdTitle=document.querySelector('#helpDialog .dialog h1');if(hdTitle)hdTitle.textContent=T('helpTitle');
   const hdSub=document.querySelector('#helpDialog .dialog .sub');if(hdSub)hdSub.textContent=T('helpSub');
   const hdH4=document.querySelectorAll('#helpDialog h4');
-  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy'];
+  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hAiStyle'];
   hdH4.forEach((h,i)=>{if(hKeys[i])h.textContent=T(hKeys[i]);});
   // 单位表
   const utable=document.querySelector('#helpDialog .utable');
@@ -717,6 +757,7 @@ function applyStaticTexts(){
     hdPs[5].innerHTML=T('viewRule');
     hdPs[6].innerHTML=T('combatRule');
     if(hdPs[7])hdPs[7].innerHTML=T('ecoRule');
+    if(hdPs[8])hdPs[8].innerHTML=T('aiStyleRule');
   }
   set('helpClose',T('knowBtn'));
   set('prodTitle',T('prodTitle'));set('prodClose',T('prodCancel'));
@@ -858,7 +899,7 @@ const BGM=(function(){
 <script>
 'use strict';
 // ================= 状态 =================
-let G=null, uid=0;
+let G=null, uid=0, aiStyleChoice='balanced'; // 主菜单选中的 AI 风格，newGame 时写入 G.aiStyle
 const $=s=>document.querySelector(s);
 const board=$('#board');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1424,7 +1465,18 @@ board.addEventListener('mousemove',e=>{
 });
 
 // ================= 敌方 AI =================
+// 某格子对单位 u 的危险度：玩家单位中能打到该格的，预期伤害直接累加（未加权，调用方各自按 dangerW 折算，撤退/占领逻辑则直接用原始值比较）
+function dangerAt(x,y,u,players){
+  let danger=0;
+  for(const p of players){
+    const pd=manhattan(x,y,p.x,p.y);
+    const canReach=NO_MOVE_FIRE.includes(p.type)?(pd>=p.minR&&pd<=p.maxR):(pd<=p.move+p.maxR);
+    if(canReach)danger+=calcDamage(p,u,p.x,p.y,1);
+  }
+  return danger;
+}
 function aiPlan(u){
+  const style=AI_STYLES[G.aiStyle]||AI_STYLES.balanced;
   const reach=bfsReach(u);
   const players=G.units.filter(v=>v.side==='P');
   if(!players.length)return null;
@@ -1435,26 +1487,55 @@ function aiPlan(u){
       const d=manhattan(x,y,t.x,t.y);
       if(d<u.minR||d>u.maxR)continue;
       const dmg=calcDamage(u,t,x,y,1);
-      let score=dmg+(dmg>=t.hp?60:0)+terrAt(x,y).def*15;
-      let danger=0;
-      for(const p of players){
-        const pd=manhattan(x,y,p.x,p.y);
-        const canReach=p.type==='artillery'?(pd>=p.minR&&pd<=p.move+p.maxR):(pd<=p.move+p.maxR);
-        if(canReach)danger+=calcDamage(p,u,p.x,p.y,1)*0.35;
-      }
-      score-=danger;
+      const willKill=dmg>=t.hp;
+      const danger=dangerAt(x,y,u,players); // 该落点会被玩家造成的预期总伤害（未加权，各调用方按自己的权重折算）
+      // 亏本交易回避：打不死对方、且受到的预期伤害明显超过造成的伤害时，这个方案直接不考虑（稳健/防守风格）
+      if(style.badTradeAvoid&&!willKill&&danger>dmg*style.badTradeMult)continue;
+      let score=dmg+(willKill?style.killBonus:0)+terrAt(x,y).def*15;
+      score-=danger*style.dangerW;
       if(!best||score>best.score)best={x,y,target:t,score,reach};
     }
   }
   if(best)return best;
-  // 无攻击机会：向最近玩家推进（火炮保持距离 ~3，火箭炮保持距离 ~4）
+  // 无攻击机会：残血且原地危险度高时优先撤退到危险度更低的格子（原地不算撤退，必须真的挪窝）
+  const curDanger=dangerAt(u.x,u.y,u,players);
+  if(style.retreatHpRatio>0&&u.hp/u.maxHp<=style.retreatHpRatio&&curDanger>0){
+    let safe=null;
+    for(const k of reach.stoppable){
+      const[x,y]=k.split(',').map(Number);
+      if(x===u.x&&y===u.y)continue; // 排除原地
+      const dg=dangerAt(x,y,u,players);
+      const sc=-dg+terrAt(x,y).def*8;
+      if(!safe||sc>safe.sc)safe={x,y,sc,reach};
+    }
+    if(safe&&-safe.sc<curDanger)return{x:safe.x,y:safe.y,target:null,reach:safe.reach,score:0};
+  }
+  // 防守风格：不主动靠近玩家，能占领的兵种优先靠向可占领的中立/敌占建筑；否则原地待机防守
+  if(!style.idleAdvance){
+    let cap=null;
+    if(CAPTURERS.includes(u.type)){
+      for(const k of reach.stoppable){
+        const[x,y]=k.split(',').map(Number);
+        if(!CAPTURABLE.includes(G.map[y][x]))continue;
+        const c=capAt(x,y);
+        if(c&&c.owner==='E')continue;
+        const dg=dangerAt(x,y,u,players);
+        const sc=style.capturePriority-dg+terrAt(x,y).def*8;
+        if(!cap||sc>cap.sc)cap={x,y,sc,reach};
+      }
+    }
+    if(cap)return{x:cap.x,y:cap.y,target:null,reach:cap.reach,score:0};
+    return{x:u.x,y:u.y,target:null,reach,score:0};
+  }
+  // 向最近玩家推进（火炮保持距离 ~3，火箭炮保持距离 ~4）
   const ideal=u.type==='rocket'?4:u.type==='artillery'?3:0;
   let mv=null;
   for(const k of reach.stoppable){
     const[x,y]=k.split(',').map(Number);
     let nd=Infinity;
     for(const p of players)nd=Math.min(nd,manhattan(x,y,p.x,p.y));
-    const sc=-Math.abs(nd-ideal)*10+terrAt(x,y).def*5;
+    const dg=dangerAt(x,y,u,players);
+    const sc=-Math.abs(nd-ideal)*10+terrAt(x,y).def*5-dg*style.dangerW;
     if(!mv||sc>mv.sc)mv={x,y,sc,reach};
   }
   return{x:mv.x,y:mv.y,target:null,reach:mv.reach,score:0};
@@ -1661,7 +1742,7 @@ function makeUnit(side,type,x,y){
 }
 function newGame(size){
   const map=genMap(size);
-  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS}};
+  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS},aiStyle:aiStyleChoice};
   uid=0;
   const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[2,size-1],[3,size-1]];
   const types=['infantry','heavy','recon','infantry','artillery','engineer','tank','rocket'];
@@ -1684,9 +1765,17 @@ function newGame(size){
   $('#overlay').classList.add('hidden');
   $('#log').innerHTML='';
   log(T('startLog'),'phase');
+  updateAiStyleTag();
   SFX.start();
   BGM.start('P'); // 开局播放我方主题 BGM
   render();showInfo(null);
+}
+// header 显示当前对局的敌方 AI 风格（切换语言时也要刷新，故独立成函数供 applyStaticTexts 调用）
+function updateAiStyleTag(){
+  const el=$('#aiStyleTag');
+  if(!el||!G)return;
+  const nameKey={balanced:'aiBalanced',aggressive:'aiAggressive',defensive:'aiDefensive'}[G.aiStyle]||'aiBalanced';
+  el.textContent=`🤖 ${T(nameKey)}`;
 }
 function showResult(win,how){
   G.busy=true;G.resultWin=win;
@@ -1719,6 +1808,13 @@ $('#menuBtn').addEventListener('click',()=>{
 // 语言切换按钮（主菜单）
 document.querySelectorAll('.langBtn').forEach(b=>{
   b.addEventListener('click',()=>setLang(b.dataset.lang));
+});
+// AI 风格选择按钮（主菜单）
+document.querySelectorAll('#menu button[data-ai]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    aiStyleChoice=b.dataset.ai;
+    document.querySelectorAll('#menu button[data-ai]').forEach(x=>x.classList.toggle('primary',x===b));
+  });
 });
 $('#againBtn').addEventListener('click',()=>newGame(G.size));
 $('#toMenuBtn').addEventListener('click',toMenu);

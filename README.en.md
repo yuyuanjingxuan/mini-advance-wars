@@ -34,7 +34,7 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 | 💥 **Combat system** | 90% hit chance, 12% crit (×1.5), 0.7× counterattack, damage scales with remaining HP; cannon/rocket cannot fire after moving and never counterattack |
 | ⬆️ **Leveling** | Gain XP from combat (support units: capture +8, repair/heal +6); XP needed rises each level (30/40/50/60) for a smooth curve; level up grants +1 ATK, +1 DEF, +2 HP and heals 3 HP (cap Lv.V, excess XP converts to healing) — enemies level up too! |
 | 🔍 **Inspect enemies** | Click an enemy unit to see its move range (translucent blue) and attack range (dashed orange) — know your enemy |
-| 🤖 **Enemy AI** | Heuristic AI evaluating damage, kills, terrain and danger; cannon keeps distance 3, rocket keeps distance 4 |
+| 🤖 **Enemy AI style** | Pick one of three styles before starting: 🛡️ Balanced (avoids bad trades, retreats low-HP units, prioritizes finishing off weakened targets) · 🔥 Aggressive (maximizes damage/kills regardless of losses) · 🏰 Defensive (prioritizes capturing buildings, doesn't chase you down, turtles instead); all built on the same heuristic scoring damage/kills/terrain/danger, weighted per style |
 | �️ **Move path preview** | Hover to see the move path with direction arrows after selecting a unit |
 | 🔊 **Sound & BGM** | WebAudio chiptune SFX (per-unit attack/move sounds, crit, destroy, level-up, capture, etc.) + dual-theme BGM: upbeat march for the player, tense minor for the enemy, auto-switching with turn phases (mutable) |
 | 📜 **Battle log & unit cards** | Real-time combat log (player blue / enemy red) and detailed unit info panel |
@@ -43,9 +43,10 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 
 ## 🎮 How to Play
 
-1. **Goal**: Destroy all enemy units, or capture the enemy HQ (complete the capture while standing on the enemy HQ tile)
-2. Click your unit → click a **blue tile** to move → click a **red tile** to attack; click your empty factory to **build new units**
-3. Click **End Turn** when done; the enemy AI then acts
+1. Pick a map size and an **enemy AI style** (Balanced/Aggressive/Defensive) in the main menu
+2. **Goal**: Destroy all enemy units, or capture the enemy HQ (complete the capture while standing on the enemy HQ tile)
+3. Click your unit → click a **blue tile** to move → click a **red tile** to attack; click your empty factory to **build new units**
+4. Click **End Turn** when done; the enemy AI then acts
 
 > 💡 Forest/mountains grant defense bonuses but slow movement — each unit type has different move costs per terrain (infantry excel in mountains, treads cannot enter mountains); owned buildings heal 2 HP per turn and grant +50 income; cannon/rocket cannot fire after moving — they must wait in place to fire; heavy counters vehicles.
 
