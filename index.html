@@ -299,6 +299,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <p>💥 有命中与会心一击；⬆️ 战斗获得经验并<b>升级</b>——敌军同样会升级，速战速决！🎵 对战有 BGM：我方明快进行曲，敌方紧张小调。</p>
       <p>💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！</p>
     </div>
+    <p style="margin:16px 0 4px" id="gameModeLabel">选择游戏模式：</p>
+    <div class="sizes" style="flex-wrap:wrap">
+      <button data-mode="skirmish" class="primary">⚔️ 遭遇战<br><small>标准对局，兵种不限</small></button>
+      <button data-mode="infantryDuel">🪖 步兵对决<br><small>双方只能出非载具单位</small></button>
+      <button data-mode="armorDuel">🛡️ 装甲对决<br><small>双方只能出侦察车/坦克</small></button>
+      <button data-mode="artilleryDuel">💥 炮兵对决<br><small>双方只能出火炮/火箭炮</small></button>
+    </div>
     <p style="margin:16px 0 4px">选择地图规模（随机对称地图）：</p>
     <div class="sizes" style="flex-wrap:wrap">
       <button data-size="8">小 8×8<br><small>快节奏</small></button>
@@ -386,6 +393,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <p>命中 90%，会心一击 9%（1.5 倍伤害）；反击伤害为 70%。<b>伤害浮动</b>：每次攻击的基础伤害会在 ±15% 范围内随机浮动（不含会心与反击系数），同样的兵种/血量/地形对拼，实际伤害每次会有小幅差异，这是有意为之的设计，避免数值过于死板可预测。<b>武器与护甲系统</b>：步兵/工程师/军医用普通枪械，对轻甲载具（侦察车/运兵车）伤害打六折、对重甲（坦克）只有三折；侦察车用轻甲炮，能欺负步兵和轻载具，但打不动坦克；重装兵携带反装甲武器，打载具时切换使用（对轻甲 1.5 倍、对重甲仍有 0.7 倍），打步兵类则用普通枪械；坦克配备双武器，打载具用坦克炮、打步兵类用机枪；火炮/火箭炮为高爆炮弹，对人类目标和载具都有一定杀伤但不会秒杀。军医/工程师是非战斗单位，无护甲、攻击力很弱。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。</p>
       <h4>经济与生产</h4>
       <p>💵 每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金，开局无初始资金（首回合立即结算一次已拥有建筑的收入）。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。</p>
+      <h4>游戏模式</h4>
+      <p>开局前可在主菜单选择游戏模式，限制双方（含工厂生产）能出的兵种：<br>
+      ⚔️ <b>遭遇战</b>：标准对局，不限制兵种，即本文档其它章节描述的默认玩法。<br>
+      🪖 <b>步兵对决</b>：双方只能出非载具单位（步兵/重装兵/工程师/军医）。<br>
+      🛡️ <b>装甲对决</b>：双方只能出侦察车/坦克。<br>
+      💥 <b>炮兵对决</b>：双方只能出火炮/火箭炮。<br>
+      三种对决模式下运兵车均不开放（无武装，对决模式里没有战斗意义）；初始部队数目的随机池会自动按当前模式过滤。</p>
       <h4>敌方 AI 风格</h4>
       <p>开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>
       🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>
@@ -555,6 +569,11 @@ const I18N={
     mapSize:'选择地图规模（随机对称地图）：',
     sizeS:'小 8×8', sizeSsub:'快节奏', sizeM:'中 10×10', sizeMsub:'标准', sizeL:'大 12×12', sizeLsub:'大地图',
     sizeXL:'特大 14×14', sizeXLsub:'超大地图', sizeXXL:'巨型 16×16', sizeXXLsub:'史诗规模',
+    gameModeLabel:'选择游戏模式：',
+    modeSkirmish:'⚔️ 遭遇战', modeSkirmishSub:'标准对局，兵种不限',
+    modeInfantryDuel:'🪖 步兵对决', modeInfantryDuelSub:'双方只能出非载具单位',
+    modeArmorDuel:'🛡️ 装甲对决', modeArmorDuelSub:'双方只能出侦察车/坦克',
+    modeArtilleryDuel:'💥 炮兵对决', modeArtilleryDuelSub:'双方只能出火炮/火箭炮',
     aiStyleLabel:'选择敌方 AI 风格：',
     aiBalanced:'🛡️ 稳健', aiBalancedSub:'不打亏本仗，会避险',
     aiAggressive:'🔥 激进', aiAggressiveSub:'不计代价追求击杀',
@@ -585,7 +604,7 @@ const I18N={
     m8:'💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！',
     // 帮助对话框
     helpTitle:'📖 游戏说明', helpSub:'单位特性 · 颜色图例 · 地形效果',
-    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hAiStyle:'敌方 AI 风格', hDifficulty:'敌方强度', hTroops:'初始部队数目',
+    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hGameMode:'游戏模式', hAiStyle:'敌方 AI 风格', hDifficulty:'敌方强度', hTroops:'初始部队数目',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
     uInf:'多面手，可占领建筑，山地移动力好（普通枪械）', uHeavy:'高攻高防近战主力，移动迟缓，携带反装甲武器克制载具（步兵，可进山）', uRecon:'极速侦察，轻甲炮打不动坦克、装甲薄弱（森林机动尚可，不可入山地）',
     uArtillery:'高爆炮弹对各类目标均有效，移动后不能开火（履带笨重，不可入山地）', uEngineer:'占领 1.5 倍速度，修理相邻载具 +3 HP，无护甲攻击弱', uMedic:'治疗相邻步兵/重装兵/工程师 +4 HP，无护甲攻击弱',
@@ -630,6 +649,7 @@ const I18N={
     prodTitle:'🏭 生产单位', prodCancel:'取消', prodHint:'点击工厂生产单位',
     prodFunds:(f)=>`💰 资金：${f}`,
     ecoRule:'💵 开局无初始资金，第 1 回合就会按开局拥有的建筑数结算一次收入；此后每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵/工程师/军医最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。',
+    gameModeRule:'开局前可在主菜单选择游戏模式，限制双方（含工厂生产）能出的兵种：<br>⚔️ <b>遭遇战</b>：标准对局，不限制兵种，即本文档其它章节描述的默认玩法。<br>🪖 <b>步兵对决</b>：双方只能出非载具单位（步兵/重装兵/工程师/军医）。<br>🛡️ <b>装甲对决</b>：双方只能出侦察车/坦克。<br>💥 <b>炮兵对决</b>：双方只能出火炮/火箭炮。<br>三种对决模式下运兵车均不开放（无武装，对决模式里没有战斗意义）；初始部队数目的随机池会自动按当前模式过滤。',
     aiStyleRule:'开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。',
     difficultyRule:'开局前可在主菜单选择敌方强度，只放大敌方单位的 HP 上限（开局单位与工厂新造单位均生效），不影响我方、不影响 AI 决策风格，可与任意 AI 风格自由组合：<br>😴 <b>白痴</b>：敌方 HP ×0.8　｜　🙂 <b>简单</b>：敌方 HP ×0.9　｜　⚖️ <b>普通</b>：敌方 HP ×1.0（默认）<br>🔥 <b>困难</b>：敌方 HP ×1.1　｜　💀 <b>地狱</b>：敌方 HP ×1.2　｜　☠️ <b>噩梦</b>：敌方 HP ×1.5',
     troopsRule:'开局前可在主菜单选择双方的初始部队规模，四档均为双方对称配置：<br>🚫 <b>无</b>：0 个单位，双方只有 HQ+工厂+城镇，完全靠收入慢慢造兵。<br>🪖 <b>少</b>：3 个单位（1 个必选步兵 + 2 个随机，随机池：步兵/重装兵/工程师/军医）。<br>⚔️ <b>中</b>：6 个单位（1 个必选步兵 + 5 个随机，随机池：步兵/重装兵/侦察车/火炮/工程师/军医/运兵车）。<br>🎖️ <b>多</b>：9 个单位（1 个必选步兵 + 8 个随机，随机池：全部 9 种兵种，坦克/火箭炮仅此档可能出现）。<br>随机池均包含步兵自身在内，可能重复抽到步兵；出生点围绕各自 HQ 就近分布。',
@@ -667,6 +687,11 @@ const I18N={
     mapSize:'Choose map size (random symmetric map):',
     sizeS:'Small 8×8', sizeSsub:'Quick', sizeM:'Medium 10×10', sizeMsub:'Standard', sizeL:'Large 12×12', sizeLsub:'Big map',
     sizeXL:'X-Large 14×14', sizeXLsub:'Huge map', sizeXXL:'Giant 16×16', sizeXXLsub:'Epic scale',
+    gameModeLabel:'Choose game mode:',
+    modeSkirmish:'⚔️ Skirmish', modeSkirmishSub:'Standard match, all units allowed',
+    modeInfantryDuel:'🪖 Infantry Duel', modeInfantryDuelSub:'Both sides: foot units only',
+    modeArmorDuel:'🛡️ Armor Duel', modeArmorDuelSub:'Both sides: recon/tank only',
+    modeArtilleryDuel:'💥 Artillery Duel', modeArtilleryDuelSub:'Both sides: artillery/rocket only',
     aiStyleLabel:'Choose enemy AI style:',
     aiBalanced:'🛡️ Balanced', aiBalancedSub:'No bad trades, plays it safe',
     aiAggressive:'🔥 Aggressive', aiAggressiveSub:'Chases kills at any cost',
@@ -695,7 +720,7 @@ const I18N={
     m7:'💥 Hits and crits; ⬆️ gain XP and <b>level up</b> — enemies level up too! 🎵 Battle BGM: upbeat march for you, tense minor for the enemy.',
     m8:'💰 <b>Economy & production</b>: each owned building gives income every turn (+50 each), starting funds 300. Click <b>your empty factory</b> to open the production menu and spend funds on new units (they wait this turn). The enemy saves money and builds too — expand your economy!',
     helpTitle:'📖 How to Play', helpSub:'Unit traits · Color legend · Terrain effects',
-    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production', hAiStyle:'Enemy AI Style', hDifficulty:'Enemy Difficulty', hTroops:'Starting Troops',
+    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production', hGameMode:'Game Modes', hAiStyle:'Enemy AI Style', hDifficulty:'Enemy Difficulty', hTroops:'Starting Troops',
     thUnit:'Unit', thHp:'HP', thAtk:'ATK', thDef:'DEF', thMove:'MOV', thRange:'RNG', thTrait:'Trait',
     uInf:'Versatile, can capture, good mountain mobility (small arms)', uHeavy:'Strong melee main force, sluggish, carries an anti-armor weapon vs vehicles (infantry, can enter mountains)', uRecon:'Blazing-fast scout, light-armor gun can\'t dent tanks, weak armor (decent in forest, no mountains)',
     uArtillery:'High-explosive shells hurt any target, cannot fire after moving (heavy treads, no mountains)', uEngineer:'1.5× capture, repairs adjacent vehicles +3 HP, unarmored and weak in combat', uMedic:'Heals adjacent infantry/heavies/engineers +4 HP, unarmored and weak in combat',
@@ -738,6 +763,7 @@ const I18N={
     prodTitle:'🏭 Build Unit', prodCancel:'Cancel', prodHint:'Click factory to build',
     prodFunds:(f)=>`💰 Funds: ${f}`,
     ecoRule:'💵 No starting funds — turn 1 immediately settles income based on the buildings you own at kickoff; after that, every owned building (city/factory/HQ) grants <b>+50</b> funds at the start of each turn. Click <b>your empty factory</b> to open the production menu: pick a unit and pay its cost (infantry/engineer/medic cheapest, rocket priciest); new units wait this turn and act next turn. Max 12 units per side. The enemy collects income and builds units too.',
+    gameModeRule:'Pick a game mode before starting — it restricts which units either side (including factory production) can field:<br>⚔️ <b>Skirmish</b>: standard match, no unit restrictions — the default mode described throughout the rest of this document.<br>🪖 <b>Infantry Duel</b>: both sides limited to foot units (infantry/heavy/engineer/medic).<br>🛡️ <b>Armor Duel</b>: both sides limited to recon/tank.<br>💥 <b>Artillery Duel</b>: both sides limited to artillery/rocket.<br>Transports are unavailable in all three duel modes (unarmed, no combat purpose there); the starting-troops random pool automatically filters to whatever the current mode allows.',
     aiStyleRule:'Pick the enemy\'s style before starting (shown at the top during the match):<br>🛡️ <b>Balanced</b>: avoids bad trades — skips an attack if it can\'t kill and the counter-risk is too high; retreats low-HP units to safer tiles; prioritizes finishing off weakened targets.<br>🔥 <b>Aggressive</b>: barely considers its own safety, always maximizes this turn\'s damage/kills even in a losing trade.<br>🏰 <b>Defensive</b>: doesn\'t chase you down, prioritizes capturing neutral/lost buildings, holds position when there\'s nothing to fight, and grinds you down with economy and terrain.',
     difficultyRule:'Pick the enemy difficulty before starting — it only scales enemy units\' max HP (applies to both the starting roster and units built at factories during the match), doesn\'t affect your side, and doesn\'t affect AI decision-making — freely combine it with any AI style:<br>😴 <b>Trivial</b>: Enemy HP ×0.8　｜　🙂 <b>Easy</b>: Enemy HP ×0.9　｜　⚖️ <b>Normal</b>: Enemy HP ×1.0 (default)<br>🔥 <b>Hard</b>: Enemy HP ×1.1　｜　💀 <b>Hell</b>: Enemy HP ×1.2　｜　☠️ <b>Nightmare</b>: Enemy HP ×1.5',
     troopsRule:'Pick both sides\' starting troop size before the match — all four tiers are symmetric for both sides:<br>🚫 <b>None</b>: 0 units, both sides start with only HQ+factory+city and build up purely from income.<br>🪖 <b>Few</b>: 3 units (1 mandatory infantry + 2 random, pool: infantry/heavy/engineer/medic).<br>⚔️ <b>Medium</b>: 6 units (1 mandatory infantry + 5 random, pool: infantry/heavy/recon/artillery/engineer/medic/transport).<br>🎖️ <b>Many</b>: 9 units (1 mandatory infantry + 8 random, pool: all 9 unit types — tanks/rockets can only appear at this tier).<br>The random pool always includes infantry itself, so it may be picked more than once; spawn points cluster near each side\'s own HQ.',
@@ -817,6 +843,14 @@ function applyStaticTexts(){
     sizeBtns[3].innerHTML=T('sizeXL')+'<br><small>'+T('sizeXLsub')+'</small>';
     sizeBtns[4].innerHTML=T('sizeXXL')+'<br><small>'+T('sizeXXLsub')+'</small>';
   }
+  set('gameModeLabel',T('gameModeLabel'));
+  const modeBtns=document.querySelectorAll('#menu button[data-mode]');
+  if(modeBtns.length===4){
+    modeBtns[0].innerHTML=T('modeSkirmish')+'<br><small>'+T('modeSkirmishSub')+'</small>';
+    modeBtns[1].innerHTML=T('modeInfantryDuel')+'<br><small>'+T('modeInfantryDuelSub')+'</small>';
+    modeBtns[2].innerHTML=T('modeArmorDuel')+'<br><small>'+T('modeArmorDuelSub')+'</small>';
+    modeBtns[3].innerHTML=T('modeArtilleryDuel')+'<br><small>'+T('modeArtilleryDuelSub')+'</small>';
+  }
   set('aiStyleLabel',T('aiStyleLabel'));
   const aiBtns=document.querySelectorAll('#menu button[data-ai]');
   if(aiBtns.length===3){
@@ -849,7 +883,7 @@ function applyStaticTexts(){
   const hdTitle=document.querySelector('#helpDialog .dialog h1');if(hdTitle)hdTitle.textContent=T('helpTitle');
   const hdSub=document.querySelector('#helpDialog .dialog .sub');if(hdSub)hdSub.textContent=T('helpSub');
   const hdH4=document.querySelectorAll('#helpDialog h4');
-  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hAiStyle','hDifficulty','hTroops'];
+  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hGameMode','hAiStyle','hDifficulty','hTroops'];
   hdH4.forEach((h,i)=>{if(hKeys[i])h.textContent=T(hKeys[i]);});
   // 单位表
   const utable=document.querySelector('#helpDialog .utable');
@@ -897,9 +931,10 @@ function applyStaticTexts(){
     hdPs[5].innerHTML=T('viewRule');
     hdPs[6].innerHTML=T('combatRule');
     if(hdPs[7])hdPs[7].innerHTML=T('ecoRule');
-    if(hdPs[8])hdPs[8].innerHTML=T('aiStyleRule');
-    if(hdPs[9])hdPs[9].innerHTML=T('difficultyRule');
-    if(hdPs[10])hdPs[10].innerHTML=T('troopsRule');
+    if(hdPs[8])hdPs[8].innerHTML=T('gameModeRule');
+    if(hdPs[9])hdPs[9].innerHTML=T('aiStyleRule');
+    if(hdPs[10])hdPs[10].innerHTML=T('difficultyRule');
+    if(hdPs[11])hdPs[11].innerHTML=T('troopsRule');
   }
   set('helpClose',T('knowBtn'));
   set('prodTitle',T('prodTitle'));set('prodClose',T('prodCancel'));
@@ -1062,6 +1097,20 @@ const DIFFICULTY_TIERS={
   hell:     {hpMult:1.2},
   nightmare:{hpMult:1.5},
 };
+let gameModeChoice='skirmish'; // 主菜单选中的游戏模式，newGame 时写入 G.gameMode
+// 游戏模式：pool=null 表示遭遇战不限制兵种（沿用 TROOPS_TIERS 各档原有池子）；
+// 三种对决模式限制双方（含工厂生产）只能用列出的兵种，运兵车三种对决都不开放（无战斗力，对决模式里没有意义）
+const GAME_MODES={
+  skirmish:      {pool:null},
+  infantryDuel:  {pool:['infantry','heavy','engineer','medic']},
+  armorDuel:     {pool:['recon','tank']},
+  artilleryDuel: {pool:['artillery','rocket']},
+};
+// 当前对局允许的兵种列表（null=不限制，返回全部 UNIT_TYPES 键）；生产菜单、初始部队随机池、AI 造兵都统一走这个函数
+function allowedUnitTypes(){
+  const mode=GAME_MODES[G&&G.gameMode]||GAME_MODES.skirmish;
+  return mode.pool||Object.keys(UNIT_TYPES);
+}
 const $=s=>document.querySelector(s);
 const board=$('#board');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1224,13 +1273,14 @@ function aiBuild(){
     const cap=capAt(x,y);
     if(cap&&cap.owner==='E'&&!unitAt(x,y))factories.push({x,y});
   }
+  const allowed=allowedUnitTypes();
   for(const f of factories){
     const mine=G.units.filter(u=>u.side==='E');
     const cnt=t=>mine.filter(u=>u.type===t).length;
     let pick=null;
-    if(cnt('infantry')<2&&G.funds.E>=UNIT_COSTS.infantry)pick='infantry';
+    if(allowed.includes('infantry')&&cnt('infantry')<2&&G.funds.E>=UNIT_COSTS.infantry)pick='infantry';
     else{
-      const prefs=['tank','artillery','heavy','recon','rocket','infantry','engineer','medic'];
+      const prefs=['tank','artillery','heavy','recon','rocket','infantry','engineer','medic'].filter(t=>allowed.includes(t));
       const afford=prefs.filter(t=>UNIT_COSTS[t]<=G.funds.E);
       if(afford.length)pick=afford[Math.floor(Math.random()*Math.min(3,afford.length))];
     }
@@ -1250,7 +1300,7 @@ function openProdMenu(x,y){
   $('#prodFunds').textContent=T('prodFunds')(G.funds.P);
   const list=$('#prodList');
   list.innerHTML='';
-  for(const k of Object.keys(UNIT_TYPES)){
+  for(const k of allowedUnitTypes()){
     const b=UNIT_TYPES[k],cost=UNIT_COSTS[k];
     const btn=document.createElement('button');
     btn.className='prodbtn';
@@ -1959,15 +2009,22 @@ function makeUnit(side,type,x,y){
 }
 function newGame(size){
   const map=genMap(size);
-  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS},aiStyle:aiStyleChoice,difficulty:difficultyChoice};
+  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS},aiStyle:aiStyleChoice,difficulty:difficultyChoice,gameMode:gameModeChoice};
   uid=0;
   // 出生点按与己方 HQ([1,size-2]) 的距离升序排列，数量少的档位优先使用离 HQ 最近的点，
   // 保证"少/中"档的部队围绕 HQ 分布而不是散落到边缘（原 8 个固定坐标点 + 1 个军医点，合并后统一排序）
   const spawnPool=[[1,size-3],[0,size-2],[2,size-2],[0,size-1],[1,size-1],[0,size-3],[2,size-1],[3,size-1],[3,size-3]];
   const tier=TROOPS_TIERS[troopsChoice]||TROOPS_TIERS.none;
   const spawns=spawnPool.slice(0,tier.count);
-  const types=['infantry']; // 必选步兵放在离 HQ 最近的出生点
-  for(let i=1;i<tier.count;i++)types.push(tier.pool[Math.floor(Math.random()*tier.pool.length)]);
+  // 兵种池按当前游戏模式过滤：对决模式下原有档位兵种池可能跟模式允许兵种交集为空（例如装甲对决 vs 少档），
+  // 这种情况直接退回模式允许的全部兵种，不跟原档位池子取交集；遭遇战（无模式限制）沿用原档位池子
+  const allowed=allowedUnitTypes();
+  const modePool=GAME_MODES[gameModeChoice]&&GAME_MODES[gameModeChoice].pool?allowed:tier.pool;
+  const types=[];
+  if(tier.count>0){
+    types.push(allowed.includes('infantry')?'infantry':modePool[Math.floor(Math.random()*modePool.length)]);
+    for(let i=1;i<tier.count;i++)types.push(modePool[Math.floor(Math.random()*modePool.length)]);
+  }
   spawns.forEach((p,i)=>{
     G.units.push(makeUnit('P',types[i],p[0],p[1]));
     G.units.push(makeUnit('E',types[i],size-1-p[0],size-1-p[1]));
@@ -2058,6 +2115,13 @@ document.querySelectorAll('#menu button[data-diff]').forEach(b=>{
   b.addEventListener('click',()=>{
     difficultyChoice=b.dataset.diff;
     document.querySelectorAll('#menu button[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));
+  });
+});
+// 游戏模式选择按钮（主菜单，默认"遭遇战"）
+document.querySelectorAll('#menu button[data-mode]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    gameModeChoice=b.dataset.mode;
+    document.querySelectorAll('#menu button[data-mode]').forEach(x=>x.classList.toggle('primary',x===b));
   });
 });
 $('#againBtn').addEventListener('click',()=>newGame(G.size));
