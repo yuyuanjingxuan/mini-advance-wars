@@ -55,13 +55,21 @@
 
 ## 🚀 开始游戏
 
+### 直接玩（推荐，无需下载）
+
 [![Play Online](https://img.shields.io/badge/▶️_在线试玩-迷你高级战争-brightgreen)](https://yuyuanjingxuan.github.io/mini-advance-wars/)
 
-**无需构建、无需安装：**
+点击上方徽章，浏览器直接打开即玩，不需要下载或安装任何东西。
+
+### 本地运行（想看源码或离线游玩）
+
+零依赖、无需构建，克隆仓库后即可直接打开：
 
 ```bash
-# 方式一：直接双击打开
-index.html
+git clone https://github.com/yuyuanjingxuan/mini-advance-wars.git
+cd mini-advance-wars
+
+# 方式一：直接双击打开 index.html
 
 # 方式二：本地服务器
 python -m http.server 8765

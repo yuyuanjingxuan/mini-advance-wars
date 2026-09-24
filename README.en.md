@@ -55,13 +55,21 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 
 ## 🚀 Getting Started
 
+### Play now (no download needed)
+
 [![Play Online](https://img.shields.io/badge/▶️_Play%20Online-Mini%20Advance%20Wars-brightgreen)](https://yuyuanjingxuan.github.io/mini-advance-wars/)
 
-**No build, no install:**
+Click the badge above — it opens straight in your browser, nothing to download or install.
+
+### Run locally (to read the source or play offline)
+
+Zero dependencies, no build step — clone the repo and open it directly:
 
 ```bash
-# Option 1: just open the file
-index.html
+git clone https://github.com/yuyuanjingxuan/mini-advance-wars.git
+cd mini-advance-wars
+
+# Option 1: just double-click index.html
 
 # Option 2: serve locally
 python -m http.server 8765
