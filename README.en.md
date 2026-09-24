@@ -4,7 +4,7 @@
 
 **Zero-dependency turn-based strategy game · Inspired by GBA's Advance Wars**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![Zero Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)](#-tech)
 [![Vanilla JS](https://img.shields.io/badge/code-vanilla%20JS-blue)](index.html)
 [![Platform](https://img.shields.io/badge/platform-web%20%7C%20any%20browser-lightgrey)](#-getting-started)
@@ -72,4 +72,8 @@ python -m http.server 8765
 
 ## 📄 License
 
-[MIT](LICENSE)
+[AGPL-3.0](LICENSE) — free to use, modify, and redistribute (including commercially), but your modified version (including running it as a network service) must also be open-sourced under the same license.
+
+If AGPL-3.0's copyleft terms don't fit your use case (e.g. embedding this in a closed-source product, or operating a modified version as a service without releasing your source), a **commercial license** is available — contact the author, see [COMMERCIAL.md](COMMERCIAL.md).
+
+Copyright © 2026 [yuyuanjingxuan](https://github.com/yuyuanjingxuan)
