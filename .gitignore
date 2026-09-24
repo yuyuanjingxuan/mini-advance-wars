@@ -5,3 +5,7 @@ decisions.md
 
 # 临时文件
 .tmp_*
+
+# IDE specific files
+.idea/
+.vscode/

@@ -229,6 +229,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .prodbtn .pname{flex:1;font-weight:600}
 .prodbtn .pcost{color:var(--gold);font-weight:700}
 .prodbtn:disabled{opacity:.4}
+#actionBtns{display:flex;flex-direction:column;gap:6px}
+#actionBtns button{width:100%}
 
 </style>
 </head>
@@ -249,6 +251,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <div id="boardWrap"><div id="board"></div></div>
   <div id="side">
     <div id="unitCard" class="card"><h3>单位</h3><div id="unitInfo">点击己方单位开始行动<br><span style="color:var(--dim);font-size:12px">点击任意单位可查看详情</span></div>
+      <div id="actionBtns" style="display:none;margin-top:8px"></div>
       <button id="waitBtn" style="width:100%;margin-top:8px;display:none">⏳ 待机（原地结束行动）</button>
     </div>
     <div class="card"><h3>地形</h3><div id="tileInfo">鼠标悬停查看地形</div></div>
@@ -436,6 +439,7 @@ const I18N={
     unitHint:'点击己方单位开始行动', unitHint2:'点击任意单位可查看详情',
     terrainHint:'鼠标悬停查看地形',
     wait:'⏳ 待机（原地结束行动）',
+    actAttack:'⚔️ 攻击', actCapture:'🚩 占领', actRepair:'🔧 修理', actHeal:'⚕️ 治疗',
     // 菜单
     mapSize:'选择地图规模（随机对称地图）：',
     sizeS:'小 8×8', sizeSsub:'快节奏', sizeM:'中 10×10', sizeMsub:'标准', sizeL:'大 12×12', sizeLsub:'大地图',
@@ -518,6 +522,7 @@ const I18N={
     unitHint:'Click your unit to act', unitHint2:'Click any unit for details',
     terrainHint:'Hover a tile for info',
     wait:'⏳ Wait (end action in place)',
+    actAttack:'⚔️ Attack', actCapture:'🚩 Capture', actRepair:'🔧 Repair', actHeal:'⚕️ Heal',
     mapSize:'Choose map size (random symmetric map):',
     sizeS:'Small 8×8', sizeSsub:'Quick', sizeM:'Medium 10×10', sizeMsub:'Standard', sizeL:'Large 12×12', sizeLsub:'Big map',
     detailHelp:'📖 Details (units / color legend)',
@@ -854,7 +859,8 @@ function tryCapture(u){
   const cap=G.caps.get(k);
   if(cap&&cap.owner===u.side)return; // 已是本方城镇
   const gain=Math.round(u.hp*(CAP_MULT[u.type]||1)); // 占领速度倍率（工程师 1.5）
-  const prog=(cap&&cap.owner!==u.side?0:cap?cap.prog:0)+gain;
+  // 仅在建筑当前属于敌方时清零重占；中立或己方在占的进度需要跨回合累计
+  const prog=(cap&&cap.owner&&cap.owner!==u.side?0:cap?cap.prog:0)+gain;
   if(prog>=CAP_NEED){
     G.caps.set(k,{owner:u.side,prog:CAP_NEED});
     floatText(u.x,u.y,u.side==='P'?T('capFloatP'):T('capFloatE'),'capture');
@@ -902,6 +908,21 @@ function tryHeal(u){
     gainXp(u,6); // 治疗 +6 经验
     return; // 每回合只治一个
   }
+}
+// 以下 can* 系列为无副作用判定，仅用于原地行动按钮组的可见性检查（不修改状态）
+function canCapture(u){
+  if(!CAPTURABLE.includes(G.map[u.y][u.x]))return false;
+  if(!CAPTURERS.includes(u.type))return false;
+  const cap=capAt(u.x,u.y);
+  return !(cap&&cap.owner===u.side);
+}
+function canRepair(u){
+  if(u.type!=='engineer')return false;
+  return G.units.some(v=>v.side===u.side&&VEHICLES.includes(v.type)&&v.hp<v.maxHp&&manhattan(u.x,u.y,v.x,v.y)===1);
+}
+function canHeal(u){
+  if(u.type!=='medic')return false;
+  return G.units.some(v=>v.side===u.side&&['infantry','engineer'].includes(v.type)&&v.hp<v.maxHp&&manhattan(u.x,u.y,v.x,v.y)===1);
 }
 
 // ================= 经济与生产（参考高级战争：占城→收入→工厂造兵） =================
@@ -1215,10 +1236,45 @@ function select(u){G.sel=u;G.mode='selected';G.reach=bfsReach(u);SFX.select();re
 function deselect(){G.sel=null;G.reach=null;G.mode='idle';render();}
 // 查看模式：点击敌军（或已行动单位）查看其移动/攻击范围，不能操作
 function viewUnit(u){G.sel=u;G.mode='view';G.reach=bfsReach(u);SFX.select();render();showInfo(u);}
-function waitUnit(){
-  if(G.sel){G.sel.acted=true;log(T('waitLog')(G.sel.type),'dim');tryCapture(G.sel);tryRepair(G.sel);tryHeal(G.sel);}
-  G.sel=null;G.reach=null;G.mode='idle';render();showInfo(null);
+// 结束当前单位行动并收尾（可选执行一个原地动作：占领/修理/治疗）
+function finishUnitAction(u,action){
+  u.acted=true;
+  if(action)action(u);
+  else log(T('waitLog')(u.type),'dim');
+  G.sel=null;G.reach=null;G.mode='idle';
+  checkEnd();
+  if(!G.over){render();showInfo(null);}
 }
+function waitUnit(){ if(G.sel)finishUnitAction(G.sel); }
+function captureAction(){ if(G.sel)finishUnitAction(G.sel,tryCapture); }
+function repairAction(){ if(G.sel)finishUnitAction(G.sel,tryRepair); }
+function healAction(){ if(G.sel)finishUnitAction(G.sel,tryHeal); }
+// 原地行动按钮组：根据选中单位当前格子能做的事动态生成按钮
+function updateActionBtns(){
+  const box=$('#actionBtns'),waitBtn=$('#waitBtn');
+  const active=G.sel&&(G.mode==='selected'||G.mode==='acting')&&G.phase==='P'&&!G.busy&&!G.over;
+  if(!box||!waitBtn)return;
+  if(!active){box.style.display='none';box.innerHTML='';waitBtn.style.display='none';return;}
+  const u=G.sel;
+  let html='';
+  if(targetsFrom(u,u.x,u.y).length&&(!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE))
+    html+=`<button data-act="attack">${T('actAttack')}</button>`;
+  if(canCapture(u))html+=`<button data-act="capture">${T('actCapture')}</button>`;
+  if(canRepair(u))html+=`<button data-act="repair">${T('actRepair')}</button>`;
+  if(canHeal(u))html+=`<button data-act="heal">${T('actHeal')}</button>`;
+  box.innerHTML=html;
+  box.style.display=html?'flex':'none';
+  waitBtn.style.display='block';
+}
+$('#actionBtns').addEventListener('click',e=>{
+  const btn=e.target.closest('button[data-act]');
+  if(!btn||!G||!G.sel||G.busy||G.over||G.phase!=='P')return;
+  const act=btn.dataset.act;
+  if(act==='attack'){G.mode='attack';render();showInfo(G.sel);}
+  else if(act==='capture')captureAction();
+  else if(act==='repair')repairAction();
+  else if(act==='heal')healAction();
+});
 async function playerMove(u,x,y){
   G.busy=true;
   const fx=u.x,fy=u.y; // 记录出发格（用于离开城镇时清零占领进度）
@@ -1228,12 +1284,11 @@ async function playerMove(u,x,y){
   await animateMove(u,path);
   G.busy=false;
   resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
-  tryCapture(u);tryRepair(u);tryHeal(u);
-  const ts=targetsFrom(u,u.x,u.y);
-  // 间接打击单位（火炮/火箭炮）移动后不能开火，只能原地待机开火
-  const canFire=!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE;
-  if(ts.length&&canFire){G.mode='attack';G.sel=u;render();showInfo(u);}
-  else{u.acted=true;G.sel=null;render();showInfo(u);}
+  // 移动后不自动执行占领/修理/治疗/攻击，交由动作按钮组给玩家选择；若无可选动作则直接待机结束
+  G.mode='acting';G.sel=u;G.reach=null;render();showInfo(u);
+  const hasAction=targetsFrom(u,u.x,u.y).length&&(!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE)
+    ||canCapture(u)||canRepair(u)||canHeal(u);
+  if(!hasAction)finishUnitAction(u);
 }
 async function playerAttack(a,d){
   G.busy=true;G.reach=null;G.mode='idle';render();
@@ -1247,10 +1302,10 @@ board.addEventListener('click',async e=>{
   const cellEl=e.target.closest('.cell');if(!cellEl)return;
   const x=+cellEl.dataset.x,y=+cellEl.dataset.y;
   const u=unitAt(x,y);
-  if(G.mode==='selected'||G.mode==='attack'||G.mode==='view'){
+  if(G.mode==='selected'||G.mode==='attack'||G.mode==='acting'||G.mode==='view'){
     const sel=G.sel;
     if(u&&u.id===sel.id){deselect();showInfo(u);return;} // 再点一次=取消选择（可继续查看）
-    if(G.mode==='selected'&&u&&u.side==='E'&&targetsFrom(sel,sel.x,sel.y).includes(u)){await playerAttack(sel,u);return;}
+    if((G.mode==='selected'||G.mode==='attack'||G.mode==='acting')&&u&&u.side==='E'&&targetsFrom(sel,sel.x,sel.y).includes(u)){await playerAttack(sel,u);return;}
     if(G.mode==='selected'&&G.reach.stoppable.has(x+','+y)&&(!u||u.id===sel.id)){await playerMove(sel,x,y);return;}
     if(u&&u.side==='P'&&!u.acted){select(u);return;}
     if(u&&u.side==='E'){viewUnit(u);return;} // 点敌军=查看其范围
@@ -1396,9 +1451,9 @@ function render(){
   const moveSet=G.reach?G.reach.stoppable:null;
   // 选中时：攻击范围（从移动范围内任意落点可达的攻击格）；view 模式同样显示
   let zoneSet=null,atkSet=null;
-  if(G.sel&&(G.mode==='selected'||G.mode==='attack'||G.mode==='view')){
+  if(G.sel&&(G.mode==='selected'||G.mode==='attack'||G.mode==='acting'||G.mode==='view')){
     atkSet=new Set(targetsFrom(G.sel,G.sel.x,G.sel.y).map(t=>t.id));
-    if(G.mode!=='attack'){
+    if(G.mode!=='attack'&&G.mode!=='acting'){
       zoneSet=new Set();
       const u=G.sel;
       const spots=G.mode==='selected'?[...G.reach.stoppable].map(k=>k.split(',').map(Number)):[[u.x,u.y]];
@@ -1417,8 +1472,7 @@ function render(){
       for(const k of[...zoneSet])if(moveSet&&moveSet.has(k))zoneSet.delete(k);
     }
   }
-  const waitBtn=$('#waitBtn');
-  if(waitBtn)waitBtn.style.display=(G.sel&&G.mode==='selected'&&G.phase==='P'&&!G.busy&&!G.over)?'block':'none';
+  updateActionBtns();
   // 移动路径预览：鼠标悬停在可停留格上时，显示从选中单位到该格的路径箭头
   let pathSet=null,pathDirs=null;
   if(G.sel&&G.mode==='selected'&&G.hover&&G.reach.stoppable.has(G.hover.x+','+G.hover.y)){
