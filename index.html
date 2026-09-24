@@ -412,9 +412,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
       🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>
       🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。</p>
       <h4>敌方强度</h4>
-      <p>开局前可在主菜单选择敌方强度，只放大敌方单位的 HP 上限（开局单位与工厂新造单位均生效），不影响我方、不影响 AI 决策风格，可与任意 AI 风格自由组合：<br>
-      😴 <b>白痴</b>：敌方 HP ×0.8　｜　🙂 <b>简单</b>：敌方 HP ×0.9　｜　⚖️ <b>普通</b>：敌方 HP ×1.0（默认）<br>
-      🔥 <b>困难</b>：敌方 HP ×1.1　｜　💀 <b>地狱</b>：敌方 HP ×1.2　｜　☠️ <b>噩梦</b>：敌方 HP ×1.5</p>
+      <p>开局前可在主菜单选择敌方强度，同时放大敌方单位的 <b>HP 上限</b>和<b>每回合收入</b>（开局单位、工厂新造单位、每回合结算均生效），不影响我方、不影响 AI 决策风格，可与任意 AI 风格自由组合：<br>
+      😴 <b>白痴</b>：敌方 HP/收入 ×0.8　｜　🙂 <b>简单</b>：敌方 HP/收入 ×0.9　｜　⚖️ <b>普通</b>：敌方 HP/收入 ×1.0（默认）<br>
+      🔥 <b>困难</b>：敌方 HP/收入 ×1.1　｜　💀 <b>地狱</b>：敌方 HP/收入 ×1.2　｜　☠️ <b>噩梦</b>：敌方 HP/收入 ×1.5</p>
       <h4>初始部队数目</h4>
       <p>开局前可在主菜单选择双方的初始部队规模，四档均为双方对称配置：<br>
       🚫 <b>无</b>：0 个单位，双方只有 HQ+工厂+城镇，完全靠收入慢慢造兵。<br>
@@ -651,7 +651,7 @@ const I18N={
     phaseLog:(n,who)=>`—— 第 ${n} 回合：${who} ——`,
     startLog:'⚔️ 战斗开始！消灭所有敌军或占领敌方总部即可获胜。',
     // 经济与生产
-    incomeLog:(s,inc,n)=>`${sideName(s)} 💵 收入 +${inc}（${n} 座建筑 × ${INCOME_PER}）`,
+    incomeLog:(s,inc,n,mult)=>`${sideName(s)} 💵 收入 +${inc}（${n} 座建筑 × ${INCOME_PER}${mult&&mult!==1?` × ${mult}`:''}）`,
     buildLog:(s,t)=>`🏭 ${sideName(s)} 生产了 ${UNIT_TYPES[t].name}！`,
     siegeWaveLog:(n)=>`🏰 敌方新增一波部队（${n} 个单位）！`,
     prodTitle:'🏭 生产单位', prodCancel:'取消', prodHint:'点击工厂生产单位',
@@ -660,7 +660,7 @@ const I18N={
     gameModeRule:'开局前可在主菜单选择游戏模式，限制双方（含工厂生产）能出的兵种：<br>⚔️ <b>遭遇战</b>：标准对局，不限制兵种，即本文档其它章节描述的默认玩法。<br>🪖 <b>步兵对决</b>：双方只能出非载具单位（步兵/重装兵/工程师/军医）。<br>🛡️ <b>装甲对决</b>：双方只能出侦察车/坦克。<br>💥 <b>炮兵对决</b>：双方只能出火炮/火箭炮。<br>🏰 <b>坚守阵地</b>：生存模式，规则与其它模式不同，见下方专门说明。<br>三种对决模式下运兵车均不开放（无武装，对决模式里没有战斗意义）；初始部队数目的随机池会自动按当前模式过滤。',
     siegeRule:'🏰 敌方开局<b>没有总部和工厂</b>（不参与经济系统），我方开局部队数目仍可选无/少/中/多，且我方会额外获得对应数量的城市（无=0、少=2、中=3、多=4 座，地图中立城市不足时按实际数量给）。<br>敌方每 <b>3 回合</b>刷新一波部队，直接在敌方出生点附近凭空生成，不需要经济或工厂；每波预算在 <b>300~600</b> 资金之间随机，按现有造价表贪心随机选兵直到用完预算，兵种覆盖全部 9 种（含坦克/火箭炮），出生点已满时会跳过当波刷新。每方单位数量上限 12，敌方也不例外。<br><b>目标是活到第 15 回合</b>：坚持到底即获胜，己方总部被占则立刻战败。<b>此模式下歼灭全部敌军不算获胜</b>——敌方会持续刷新，没有"消灭干净"这回事。',
     aiStyleRule:'开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。',
-    difficultyRule:'开局前可在主菜单选择敌方强度，只放大敌方单位的 HP 上限（开局单位与工厂新造单位均生效），不影响我方、不影响 AI 决策风格，可与任意 AI 风格自由组合：<br>😴 <b>白痴</b>：敌方 HP ×0.8　｜　🙂 <b>简单</b>：敌方 HP ×0.9　｜　⚖️ <b>普通</b>：敌方 HP ×1.0（默认）<br>🔥 <b>困难</b>：敌方 HP ×1.1　｜　💀 <b>地狱</b>：敌方 HP ×1.2　｜　☠️ <b>噩梦</b>：敌方 HP ×1.5',
+    difficultyRule:'开局前可在主菜单选择敌方强度，同时放大敌方单位的 <b>HP 上限</b>和<b>每回合收入</b>（开局单位、工厂新造单位、每回合结算均生效），不影响我方、不影响 AI 决策风格，可与任意 AI 风格自由组合：<br>😴 <b>白痴</b>：敌方 HP/收入 ×0.8　｜　🙂 <b>简单</b>：敌方 HP/收入 ×0.9　｜　⚖️ <b>普通</b>：敌方 HP/收入 ×1.0（默认）<br>🔥 <b>困难</b>：敌方 HP/收入 ×1.1　｜　💀 <b>地狱</b>：敌方 HP/收入 ×1.2　｜　☠️ <b>噩梦</b>：敌方 HP/收入 ×1.5',
     troopsRule:'开局前可在主菜单选择双方的初始部队规模，四档均为双方对称配置：<br>🚫 <b>无</b>：0 个单位，双方只有 HQ+工厂+城镇，完全靠收入慢慢造兵。<br>🪖 <b>少</b>：3 个单位（1 个必选步兵 + 2 个随机，随机池：步兵/重装兵/工程师/军医）。<br>⚔️ <b>中</b>：6 个单位（1 个必选步兵 + 5 个随机，随机池：步兵/重装兵/侦察车/火炮/工程师/军医/运兵车）。<br>🎖️ <b>多</b>：9 个单位（1 个必选步兵 + 8 个随机，随机池：全部 9 种兵种，坦克/火箭炮仅此档可能出现）。<br>随机池均包含步兵自身在内，可能重复抽到步兵；出生点围绕各自 HQ 就近分布。',
     // 结果
     winTitle:'🎉 胜利！', loseTitle:'💀 战败……',
@@ -768,7 +768,7 @@ const I18N={
     waitLog:(t)=>`${UNIT_TYPES[t].name} waits.`,
     phaseLog:(n,who)=>`—— Turn ${n}: ${who} ——`,
     startLog:'⚔️ Battle start! Destroy all enemies or capture the enemy HQ to win.',
-    incomeLog:(s,inc,n)=>`${sideName(s)} 💵 Income +${inc} (${n} buildings × ${INCOME_PER})`,
+    incomeLog:(s,inc,n,mult)=>`${sideName(s)} 💵 Income +${inc} (${n} buildings × ${INCOME_PER}${mult&&mult!==1?` × ${mult}`:''})`,
     buildLog:(s,t)=>`🏭 ${sideName(s)} built a ${UNIT_TYPES[t].name}!`,
     siegeWaveLog:(n)=>`🏰 A new enemy wave arrived (${n} units)!`,
     prodTitle:'🏭 Build Unit', prodCancel:'Cancel', prodHint:'Click factory to build',
@@ -777,7 +777,7 @@ const I18N={
     gameModeRule:'Pick a game mode before starting — it restricts which units either side (including factory production) can field:<br>⚔️ <b>Skirmish</b>: standard match, no unit restrictions — the default mode described throughout the rest of this document.<br>🪖 <b>Infantry Duel</b>: both sides limited to foot units (infantry/heavy/engineer/medic).<br>🛡️ <b>Armor Duel</b>: both sides limited to recon/tank.<br>💥 <b>Artillery Duel</b>: both sides limited to artillery/rocket.<br>🏰 <b>Hold the Line</b>: a survival mode with different rules — see the dedicated section below.<br>Transports are unavailable in all three duel modes (unarmed, no combat purpose there); the starting-troops random pool automatically filters to whatever the current mode allows.',
     siegeRule:'🏰 The enemy starts with <b>no HQ or factory</b> (no economy at all). Your own starting troop tier (None/Few/Medium/Many) still applies, and you additionally get a matching number of extra cities (None=0, Few=2, Medium=3, Many=4 — capped by however many neutral cities the map actually has). <br>Every <b>3 turns</b>, a new enemy wave spawns near the enemy\'s original spawn tiles out of thin air — no economy or factory needed. Each wave has a random budget between <b>300 and 600</b> funds, greedily filled with random units (using the normal cost table) from all 9 unit types (including tanks/rockets) until the budget runs out; a wave is skipped if there\'s no open spawn tile left. The 12-unit-per-side cap still applies to the enemy.<br><b>Your goal is to survive to turn 15</b> — hold out and you win; losing your own HQ is still an instant defeat. <b>Destroying all enemy units does NOT win this mode</b> — the enemy keeps respawning, so there\'s no such thing as "wiping them out."',
     aiStyleRule:'Pick the enemy\'s style before starting (shown at the top during the match):<br>🛡️ <b>Balanced</b>: avoids bad trades — skips an attack if it can\'t kill and the counter-risk is too high; retreats low-HP units to safer tiles; prioritizes finishing off weakened targets.<br>🔥 <b>Aggressive</b>: barely considers its own safety, always maximizes this turn\'s damage/kills even in a losing trade.<br>🏰 <b>Defensive</b>: doesn\'t chase you down, prioritizes capturing neutral/lost buildings, holds position when there\'s nothing to fight, and grinds you down with economy and terrain.',
-    difficultyRule:'Pick the enemy difficulty before starting — it only scales enemy units\' max HP (applies to both the starting roster and units built at factories during the match), doesn\'t affect your side, and doesn\'t affect AI decision-making — freely combine it with any AI style:<br>😴 <b>Trivial</b>: Enemy HP ×0.8　｜　🙂 <b>Easy</b>: Enemy HP ×0.9　｜　⚖️ <b>Normal</b>: Enemy HP ×1.0 (default)<br>🔥 <b>Hard</b>: Enemy HP ×1.1　｜　💀 <b>Hell</b>: Enemy HP ×1.2　｜　☠️ <b>Nightmare</b>: Enemy HP ×1.5',
+    difficultyRule:'Pick the enemy difficulty before starting — it scales both enemy units\' <b>max HP</b> and the enemy\'s <b>per-turn income</b> (applies to the starting roster, factory-built units, and every turn\'s income settlement), doesn\'t affect your side, and doesn\'t affect AI decision-making — freely combine it with any AI style:<br>😴 <b>Trivial</b>: Enemy HP/income ×0.8　｜　🙂 <b>Easy</b>: Enemy HP/income ×0.9　｜　⚖️ <b>Normal</b>: Enemy HP/income ×1.0 (default)<br>🔥 <b>Hard</b>: Enemy HP/income ×1.1　｜　💀 <b>Hell</b>: Enemy HP/income ×1.2　｜　☠️ <b>Nightmare</b>: Enemy HP/income ×1.5',
     troopsRule:'Pick both sides\' starting troop size before the match — all four tiers are symmetric for both sides:<br>🚫 <b>None</b>: 0 units, both sides start with only HQ+factory+city and build up purely from income.<br>🪖 <b>Few</b>: 3 units (1 mandatory infantry + 2 random, pool: infantry/heavy/engineer/medic).<br>⚔️ <b>Medium</b>: 6 units (1 mandatory infantry + 5 random, pool: infantry/heavy/recon/artillery/engineer/medic/transport).<br>🎖️ <b>Many</b>: 9 units (1 mandatory infantry + 8 random, pool: all 9 unit types — tanks/rockets can only appear at this tier).<br>The random pool always includes infantry itself, so it may be picked more than once; spawn points cluster near each side\'s own HQ.',
     winTitle:'🎉 Victory!', loseTitle:'💀 Defeat…',
     winText:(n,how)=>how==='hq'?`Captured the enemy HQ in ${n} turns!`:how==='survive'?`Held the line for ${n} turns!`:`Destroyed all enemies in ${n} turns!`, loseText:(n,how)=>how==='hq'?`Your HQ was captured on turn ${n}. Try again!`:`Your army fell on turn ${n}. Try again!`,
@@ -1104,12 +1104,12 @@ const TROOPS_TIERS={
 };
 // 敌方强度档位：只调敌方单位 HP 倍率，不影响我方、不影响 AI 决策风格（两者完全独立，可任意组合）
 const DIFFICULTY_TIERS={
-  trivial:  {hpMult:0.8},
-  easy:     {hpMult:0.9},
-  normal:   {hpMult:1.0},
-  hard:     {hpMult:1.1},
-  hell:     {hpMult:1.2},
-  nightmare:{hpMult:1.5},
+  trivial:  {hpMult:0.8, incomeMult:0.8},
+  easy:     {hpMult:0.9, incomeMult:0.9},
+  normal:   {hpMult:1.0, incomeMult:1.0},
+  hard:     {hpMult:1.1, incomeMult:1.1},
+  hell:     {hpMult:1.2, incomeMult:1.2},
+  nightmare:{hpMult:1.5, incomeMult:1.5},
 };
 let gameModeChoice='skirmish'; // 主菜单选中的游戏模式，newGame 时写入 G.gameMode
 // 游戏模式：pool=null 表示遭遇战不限制兵种（沿用 TROOPS_TIERS 各档原有池子）；
@@ -1282,9 +1282,11 @@ window.addEventListener('resize',()=>{
 function collectIncome(side){
   const n=countOwned(side);
   if(!n)return;
-  const inc=n*INCOME_PER;
+  // 敌方强度：难度档位同时放大敌方收入（跟 HP 倍率同一档位、同一数值），我方恒定 ×1.0
+  const mult=side==='E'?(DIFFICULTY_TIERS[G&&G.difficulty]||DIFFICULTY_TIERS.normal).incomeMult:1;
+  const inc=Math.round(n*INCOME_PER*mult);
   G.funds[side]+=inc;
-  log(T('incomeLog')(side,inc,n),'dim');
+  log(T('incomeLog')(side,inc,n,mult),'dim');
 }
 // AI 建造：敌方回合结束时在己方空工厂造兵（新单位下回合行动）
 function aiBuild(){
