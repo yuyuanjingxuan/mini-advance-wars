@@ -38,6 +38,7 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 | ⬆️ **Leveling** | Gain XP from combat (support units: capture +8, repair/heal +6); XP needed rises each level (30/40/50/60) for a smooth curve; level up grants +1 ATK, +1 DEF, +2 HP and heals 3 HP (cap Lv.V, excess XP converts to healing) — enemies level up too! |
 | 🔍 **Inspect enemies** | Click an enemy unit to see its move range (translucent blue) and attack range (dashed orange) — know your enemy |
 | 🤖 **Enemy AI style** | Pick one of three styles before starting: 🛡️ Balanced (avoids bad trades, retreats low-HP units, prioritizes finishing off weakened targets) · 🔥 Aggressive (maximizes damage/kills regardless of losses) · 🏰 Defensive (prioritizes capturing buildings, doesn't chase you down, turtles instead); all built on the same heuristic scoring damage/kills/terrain/danger, weighted per style |
+| ☠️ **Enemy difficulty** | Pick one of six tiers before starting: 😴 Trivial (×0.8) · 🙂 Easy (×0.9) · ⚖️ Normal (×1.0, default) · 🔥 Hard (×1.1) · 💀 Hell (×1.2) · ☠️ Nightmare (×1.5), scaling only enemy unit max HP — fully independent of AI style and freely combinable |
 | �️ **Move path preview** | Hover to see the move path with direction arrows after selecting a unit |
 | 🔊 **Sound & BGM** | WebAudio chiptune SFX (per-unit attack/move sounds, crit, destroy, level-up, capture, etc.) + dual-theme BGM: upbeat march for the player, tense minor for the enemy, auto-switching with turn phases (mutable) |
 | 📜 **Battle log & unit cards** | Real-time combat log (player blue / enemy red) and detailed unit info panel |
@@ -46,7 +47,7 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 
 ## 🎮 How to Play
 
-1. Pick a map size, an **enemy AI style** (Balanced/Aggressive/Defensive), and a **starting troop size** (None/Few/Medium/Many) in the main menu
+1. Pick a map size, an **enemy AI style** (Balanced/Aggressive/Defensive), an **enemy difficulty** (Trivial–Nightmare), and a **starting troop size** (None/Few/Medium/Many) in the main menu
 2. **Goal**: Destroy all enemy units, or capture the enemy HQ (complete the capture while standing on the enemy HQ tile)
 3. Click your unit → click a **blue tile** to move → click a **red tile** to attack; click your empty factory to **build new units**
 4. Click **End Turn** when done; the enemy AI then acts

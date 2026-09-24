@@ -311,6 +311,15 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button data-ai="aggressive">🔥 激进<br><small>不计代价追求击杀</small></button>
       <button data-ai="defensive">🏰 防守<br><small>占城据守，拖你犯错</small></button>
     </div>
+    <p style="margin:16px 0 4px" id="difficultyLabel">选择敌方强度：</p>
+    <div class="sizes" style="flex-wrap:wrap">
+      <button data-diff="trivial">😴 白痴<br><small>敌方 HP ×0.8</small></button>
+      <button data-diff="easy">🙂 简单<br><small>敌方 HP ×0.9</small></button>
+      <button data-diff="normal" class="primary">⚖️ 普通<br><small>敌方 HP ×1.0</small></button>
+      <button data-diff="hard">🔥 困难<br><small>敌方 HP ×1.1</small></button>
+      <button data-diff="hell">💀 地狱<br><small>敌方 HP ×1.2</small></button>
+      <button data-diff="nightmare">☠️ 噩梦<br><small>敌方 HP ×1.5</small></button>
+    </div>
     <p style="margin:16px 0 4px" id="troopsLabel">选择初始部队数目：</p>
     <div class="sizes">
       <button data-troops="none" class="primary">🚫 无<br><small>0 个单位，纯经济开局</small></button>
@@ -380,6 +389,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
       🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>
       🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>
       🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。</p>
+      <h4>敌方强度</h4>
+      <p>开局前可在主菜单选择敌方强度，只放大敌方单位的 HP 上限（开局单位与工厂新造单位均生效），不影响我方、不影响 AI 决策风格，可与任意 AI 风格自由组合：<br>
+      😴 <b>白痴</b>：敌方 HP ×0.8　｜　🙂 <b>简单</b>：敌方 HP ×0.9　｜　⚖️ <b>普通</b>：敌方 HP ×1.0（默认）<br>
+      🔥 <b>困难</b>：敌方 HP ×1.1　｜　💀 <b>地狱</b>：敌方 HP ×1.2　｜　☠️ <b>噩梦</b>：敌方 HP ×1.5</p>
       <h4>初始部队数目</h4>
       <p>开局前可在主菜单选择双方的初始部队规模，四档均为双方对称配置：<br>
       🚫 <b>无</b>：0 个单位，双方只有 HQ+工厂+城镇，完全靠收入慢慢造兵。<br>
@@ -544,6 +557,13 @@ const I18N={
     aiBalanced:'🛡️ 稳健', aiBalancedSub:'不打亏本仗，会避险',
     aiAggressive:'🔥 激进', aiAggressiveSub:'不计代价追求击杀',
     aiDefensive:'🏰 防守', aiDefensiveSub:'占城据守，拖你犯错',
+    difficultyLabel:'选择敌方强度：',
+    diffTrivial:'😴 白痴', diffTrivialSub:'敌方 HP ×0.8',
+    diffEasy:'🙂 简单', diffEasySub:'敌方 HP ×0.9',
+    diffNormal:'⚖️ 普通', diffNormalSub:'敌方 HP ×1.0',
+    diffHard:'🔥 困难', diffHardSub:'敌方 HP ×1.1',
+    diffHell:'💀 地狱', diffHellSub:'敌方 HP ×1.2',
+    diffNightmare:'☠️ 噩梦', diffNightmareSub:'敌方 HP ×1.5',
     troopsLabel:'选择初始部队数目：',
     troopsNone:'🚫 无', troopsNoneSub:'0 个单位，纯经济开局',
     troopsFew:'🪖 少', troopsFewSub:'3 个单位',
@@ -563,7 +583,7 @@ const I18N={
     m8:'💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！',
     // 帮助对话框
     helpTitle:'📖 游戏说明', helpSub:'单位特性 · 颜色图例 · 地形效果',
-    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hAiStyle:'敌方 AI 风格', hTroops:'初始部队数目',
+    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hAiStyle:'敌方 AI 风格', hDifficulty:'敌方强度', hTroops:'初始部队数目',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
     uInf:'多面手，可占领建筑，山地移动力好（普通枪械）', uHeavy:'高攻高防近战主力，移动迟缓，携带反装甲武器克制载具（步兵，可进山）', uRecon:'极速侦察，轻甲炮打不动坦克、装甲薄弱（森林机动尚可，不可入山地）',
     uArtillery:'高爆炮弹对各类目标均有效，移动后不能开火（履带笨重，不可入山地）', uEngineer:'占领 1.5 倍速度，修理相邻载具 +3 HP，无护甲攻击弱', uMedic:'治疗相邻步兵/重装兵/工程师 +4 HP，无护甲攻击弱',
@@ -609,6 +629,7 @@ const I18N={
     prodFunds:(f)=>`💰 资金：${f}`,
     ecoRule:'💵 开局无初始资金，第 1 回合就会按开局拥有的建筑数结算一次收入；此后每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵/工程师/军医最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。',
     aiStyleRule:'开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。',
+    difficultyRule:'开局前可在主菜单选择敌方强度，只放大敌方单位的 HP 上限（开局单位与工厂新造单位均生效），不影响我方、不影响 AI 决策风格，可与任意 AI 风格自由组合：<br>😴 <b>白痴</b>：敌方 HP ×0.8　｜　🙂 <b>简单</b>：敌方 HP ×0.9　｜　⚖️ <b>普通</b>：敌方 HP ×1.0（默认）<br>🔥 <b>困难</b>：敌方 HP ×1.1　｜　💀 <b>地狱</b>：敌方 HP ×1.2　｜　☠️ <b>噩梦</b>：敌方 HP ×1.5',
     troopsRule:'开局前可在主菜单选择双方的初始部队规模，四档均为双方对称配置：<br>🚫 <b>无</b>：0 个单位，双方只有 HQ+工厂+城镇，完全靠收入慢慢造兵。<br>🪖 <b>少</b>：3 个单位（1 个必选步兵 + 2 个随机，随机池：步兵/重装兵/工程师/军医）。<br>⚔️ <b>中</b>：6 个单位（1 个必选步兵 + 5 个随机，随机池：步兵/重装兵/侦察车/火炮/工程师/军医/运兵车）。<br>🎖️ <b>多</b>：9 个单位（1 个必选步兵 + 8 个随机，随机池：全部 9 种兵种，坦克/火箭炮仅此档可能出现）。<br>随机池均包含步兵自身在内，可能重复抽到步兵；出生点围绕各自 HQ 就近分布。',
     // 结果
     winTitle:'🎉 胜利！', loseTitle:'💀 战败……',
@@ -648,6 +669,13 @@ const I18N={
     aiBalanced:'🛡️ Balanced', aiBalancedSub:'No bad trades, plays it safe',
     aiAggressive:'🔥 Aggressive', aiAggressiveSub:'Chases kills at any cost',
     aiDefensive:'🏰 Defensive', aiDefensiveSub:'Turtles and captures, waits you out',
+    difficultyLabel:'Choose enemy difficulty:',
+    diffTrivial:'😴 Trivial', diffTrivialSub:'Enemy HP ×0.8',
+    diffEasy:'🙂 Easy', diffEasySub:'Enemy HP ×0.9',
+    diffNormal:'⚖️ Normal', diffNormalSub:'Enemy HP ×1.0',
+    diffHard:'🔥 Hard', diffHardSub:'Enemy HP ×1.1',
+    diffHell:'💀 Hell', diffHellSub:'Enemy HP ×1.2',
+    diffNightmare:'☠️ Nightmare', diffNightmareSub:'Enemy HP ×1.5',
     troopsLabel:'Choose starting troop size:',
     troopsNone:'🚫 None', troopsNoneSub:'0 units, pure economy start',
     troopsFew:'🪖 Few', troopsFewSub:'3 units',
@@ -665,7 +693,7 @@ const I18N={
     m7:'💥 Hits and crits; ⬆️ gain XP and <b>level up</b> — enemies level up too! 🎵 Battle BGM: upbeat march for you, tense minor for the enemy.',
     m8:'💰 <b>Economy & production</b>: each owned building gives income every turn (+50 each), starting funds 300. Click <b>your empty factory</b> to open the production menu and spend funds on new units (they wait this turn). The enemy saves money and builds too — expand your economy!',
     helpTitle:'📖 How to Play', helpSub:'Unit traits · Color legend · Terrain effects',
-    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production', hAiStyle:'Enemy AI Style', hTroops:'Starting Troops',
+    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production', hAiStyle:'Enemy AI Style', hDifficulty:'Enemy Difficulty', hTroops:'Starting Troops',
     thUnit:'Unit', thHp:'HP', thAtk:'ATK', thDef:'DEF', thMove:'MOV', thRange:'RNG', thTrait:'Trait',
     uInf:'Versatile, can capture, good mountain mobility (small arms)', uHeavy:'Strong melee main force, sluggish, carries an anti-armor weapon vs vehicles (infantry, can enter mountains)', uRecon:'Blazing-fast scout, light-armor gun can\'t dent tanks, weak armor (decent in forest, no mountains)',
     uArtillery:'High-explosive shells hurt any target, cannot fire after moving (heavy treads, no mountains)', uEngineer:'1.5× capture, repairs adjacent vehicles +3 HP, unarmored and weak in combat', uMedic:'Heals adjacent infantry/heavies/engineers +4 HP, unarmored and weak in combat',
@@ -709,6 +737,7 @@ const I18N={
     prodFunds:(f)=>`💰 Funds: ${f}`,
     ecoRule:'💵 No starting funds — turn 1 immediately settles income based on the buildings you own at kickoff; after that, every owned building (city/factory/HQ) grants <b>+50</b> funds at the start of each turn. Click <b>your empty factory</b> to open the production menu: pick a unit and pay its cost (infantry/engineer/medic cheapest, rocket priciest); new units wait this turn and act next turn. Max 12 units per side. The enemy collects income and builds units too.',
     aiStyleRule:'Pick the enemy\'s style before starting (shown at the top during the match):<br>🛡️ <b>Balanced</b>: avoids bad trades — skips an attack if it can\'t kill and the counter-risk is too high; retreats low-HP units to safer tiles; prioritizes finishing off weakened targets.<br>🔥 <b>Aggressive</b>: barely considers its own safety, always maximizes this turn\'s damage/kills even in a losing trade.<br>🏰 <b>Defensive</b>: doesn\'t chase you down, prioritizes capturing neutral/lost buildings, holds position when there\'s nothing to fight, and grinds you down with economy and terrain.',
+    difficultyRule:'Pick the enemy difficulty before starting — it only scales enemy units\' max HP (applies to both the starting roster and units built at factories during the match), doesn\'t affect your side, and doesn\'t affect AI decision-making — freely combine it with any AI style:<br>😴 <b>Trivial</b>: Enemy HP ×0.8　｜　🙂 <b>Easy</b>: Enemy HP ×0.9　｜　⚖️ <b>Normal</b>: Enemy HP ×1.0 (default)<br>🔥 <b>Hard</b>: Enemy HP ×1.1　｜　💀 <b>Hell</b>: Enemy HP ×1.2　｜　☠️ <b>Nightmare</b>: Enemy HP ×1.5',
     troopsRule:'Pick both sides\' starting troop size before the match — all four tiers are symmetric for both sides:<br>🚫 <b>None</b>: 0 units, both sides start with only HQ+factory+city and build up purely from income.<br>🪖 <b>Few</b>: 3 units (1 mandatory infantry + 2 random, pool: infantry/heavy/engineer/medic).<br>⚔️ <b>Medium</b>: 6 units (1 mandatory infantry + 5 random, pool: infantry/heavy/recon/artillery/engineer/medic/transport).<br>🎖️ <b>Many</b>: 9 units (1 mandatory infantry + 8 random, pool: all 9 unit types — tanks/rockets can only appear at this tier).<br>The random pool always includes infantry itself, so it may be picked more than once; spawn points cluster near each side\'s own HQ.',
     winTitle:'🎉 Victory!', loseTitle:'💀 Defeat…',
     winText:(n,how)=>how==='hq'?`Captured the enemy HQ in ${n} turns!`:`Destroyed all enemies in ${n} turns!`, loseText:(n,how)=>how==='hq'?`Your HQ was captured on turn ${n}. Try again!`:`Your army fell on turn ${n}. Try again!`,
@@ -794,6 +823,16 @@ function applyStaticTexts(){
     aiBtns[2].innerHTML=T('aiDefensive')+'<br><small>'+T('aiDefensiveSub')+'</small>';
   }
   updateAiStyleTag();
+  set('difficultyLabel',T('difficultyLabel'));
+  const diffBtns=document.querySelectorAll('#menu button[data-diff]');
+  if(diffBtns.length===6){
+    diffBtns[0].innerHTML=T('diffTrivial')+'<br><small>'+T('diffTrivialSub')+'</small>';
+    diffBtns[1].innerHTML=T('diffEasy')+'<br><small>'+T('diffEasySub')+'</small>';
+    diffBtns[2].innerHTML=T('diffNormal')+'<br><small>'+T('diffNormalSub')+'</small>';
+    diffBtns[3].innerHTML=T('diffHard')+'<br><small>'+T('diffHardSub')+'</small>';
+    diffBtns[4].innerHTML=T('diffHell')+'<br><small>'+T('diffHellSub')+'</small>';
+    diffBtns[5].innerHTML=T('diffNightmare')+'<br><small>'+T('diffNightmareSub')+'</small>';
+  }
   set('troopsLabel',T('troopsLabel'));
   const troopsBtns=document.querySelectorAll('#menu button[data-troops]');
   if(troopsBtns.length===4){
@@ -808,7 +847,7 @@ function applyStaticTexts(){
   const hdTitle=document.querySelector('#helpDialog .dialog h1');if(hdTitle)hdTitle.textContent=T('helpTitle');
   const hdSub=document.querySelector('#helpDialog .dialog .sub');if(hdSub)hdSub.textContent=T('helpSub');
   const hdH4=document.querySelectorAll('#helpDialog h4');
-  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hAiStyle','hTroops'];
+  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hAiStyle','hDifficulty','hTroops'];
   hdH4.forEach((h,i)=>{if(hKeys[i])h.textContent=T(hKeys[i]);});
   // 单位表
   const utable=document.querySelector('#helpDialog .utable');
@@ -857,7 +896,8 @@ function applyStaticTexts(){
     hdPs[6].innerHTML=T('combatRule');
     if(hdPs[7])hdPs[7].innerHTML=T('ecoRule');
     if(hdPs[8])hdPs[8].innerHTML=T('aiStyleRule');
-    if(hdPs[9])hdPs[9].innerHTML=T('troopsRule');
+    if(hdPs[9])hdPs[9].innerHTML=T('difficultyRule');
+    if(hdPs[10])hdPs[10].innerHTML=T('troopsRule');
   }
   set('helpClose',T('knowBtn'));
   set('prodTitle',T('prodTitle'));set('prodClose',T('prodCancel'));
@@ -1002,6 +1042,7 @@ const BGM=(function(){
 let G=null, uid=0, aiStyleChoice='balanced'; // 主菜单选中的 AI 风格，newGame 时写入 G.aiStyle
 let troopsChoice='none'; // 主菜单选中的初始部队数目档位：none/few/mid/many，newGame 时读取
 let sizeChoice=10; // 主菜单选中的地图规模，默认 10（原本点击尺寸按钮即开局，现改为先选后按「开始游戏」）
+let difficultyChoice='normal'; // 主菜单选中的敌方强度档位，newGame 时读取（makeUnit 按此给敌方单位 HP 加成）
 // 初始部队数目档位：数量 + 随机兵种池（必选步兵不计入池内数量，池内随机抽取时步兵也可能被重复抽到）
 // 少=4 种非载具兵种（不含运兵车）；中=7 种（加入侦察车/火炮/运兵车，不含坦克/火箭炮）；多=全部 9 种
 const TROOPS_TIERS={
@@ -1009,6 +1050,15 @@ const TROOPS_TIERS={
   few: {count:3, pool:['infantry','heavy','engineer','medic']},
   mid: {count:6, pool:['infantry','heavy','recon','artillery','engineer','medic','transport']},
   many:{count:9, pool:['infantry','heavy','recon','artillery','engineer','medic','tank','rocket','transport']},
+};
+// 敌方强度档位：只调敌方单位 HP 倍率，不影响我方、不影响 AI 决策风格（两者完全独立，可任意组合）
+const DIFFICULTY_TIERS={
+  trivial:  {hpMult:0.8},
+  easy:     {hpMult:0.9},
+  normal:   {hpMult:1.0},
+  hard:     {hpMult:1.1},
+  hell:     {hpMult:1.2},
+  nightmare:{hpMult:1.5},
 };
 const $=s=>document.querySelector(s);
 const board=$('#board');
@@ -1899,12 +1949,15 @@ function log(msg,cls='info'){
 // ================= 流程 =================
 function makeUnit(side,type,x,y){
   const b=UNIT_TYPES[type];
-  return{id:++uid,side,type,x,y,hp:b.hp,maxHp:b.hp,atk:b.atk,def:b.def,
+  // 敌方强度：只放大敌方单位的 HP 上限（我方恒定 ×1.0），四舍五入且最低 1，避免出现 0/负数 HP
+  const mult=side==='E'?(DIFFICULTY_TIERS[G&&G.difficulty]||DIFFICULTY_TIERS.normal).hpMult:1;
+  const maxHp=Math.max(1,Math.round(b.hp*mult));
+  return{id:++uid,side,type,x,y,hp:maxHp,maxHp,atk:b.atk,def:b.def,
          move:b.move,minR:b.minR,maxR:b.maxR,level:1,xp:0,acted:false};
 }
 function newGame(size){
   const map=genMap(size);
-  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS},aiStyle:aiStyleChoice};
+  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS},aiStyle:aiStyleChoice,difficulty:difficultyChoice};
   uid=0;
   // 出生点按与己方 HQ([1,size-2]) 的距离升序排列，数量少的档位优先使用离 HQ 最近的点，
   // 保证"少/中"档的部队围绕 HQ 分布而不是散落到边缘（原 8 个固定坐标点 + 1 个军医点，合并后统一排序）
@@ -1996,6 +2049,13 @@ document.querySelectorAll('#menu button[data-troops]').forEach(b=>{
   b.addEventListener('click',()=>{
     troopsChoice=b.dataset.troops;
     document.querySelectorAll('#menu button[data-troops]').forEach(x=>x.classList.toggle('primary',x===b));
+  });
+});
+// 敌方强度选择按钮（主菜单，默认"普通"）
+document.querySelectorAll('#menu button[data-diff]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    difficultyChoice=b.dataset.diff;
+    document.querySelectorAll('#menu button[data-diff]').forEach(x=>x.classList.toggle('primary',x===b));
   });
 });
 $('#againBtn').addEventListener('click',()=>newGame(G.size));
