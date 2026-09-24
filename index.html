@@ -258,9 +258,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 </head>
 <body>
 <header>
-  <span class="title">⚔️ 迷你高级战争</span>
+  <span id="gameTitle" class="title">⚔️ 迷你高级战争</span>
   <span id="phaseLabel" class="phase p">我方行动</span>
-  <span>第 <b id="turnNum">1</b> 回合</span>
+  <span id="turnLabel">第 <b id="turnNum">1</b> 回合</span>
   <span class="funds">💰 <b id="fundsNum">300</b></span>
   <span id="aiStyleTag" style="font-size:12px;color:var(--dim)" title="敌方 AI 风格"></span>
   <span class="spacer"></span>
@@ -528,6 +528,7 @@ const I18N={
     title:'⚔️ 迷你高级战争',
     sub:'回合制战棋 · 致敬 GBA《高级战争》· 零依赖即开即玩',
     phaseP:'我方行动', phaseE:'敌方行动', turn:'回合',
+    turnPrefix:'第 ', turnSuffix:' 回合',
     sound:'音效开关', help:'帮助', menu:'主菜单', endTurn:'结束回合 ⏭',
     unit:'单位', terrain:'地形', log:'战报',
     unitHint:'点击己方单位开始行动', unitHint2:'点击任意单位可查看详情',
@@ -632,6 +633,7 @@ const I18N={
     title:'⚔️ Mini Advance Wars',
     sub:'Turn-based strategy · Inspired by GBA Advance Wars · Zero dependencies',
     phaseP:'Your turn', phaseE:'Enemy turn', turn:'Turn',
+    turnPrefix:'Turn ', turnSuffix:'',
     sound:'Sound', help:'Help', menu:'Menu', endTurn:'End Turn ⏭',
     unit:'Unit', terrain:'Terrain', log:'Battle Log',
     unitHint:'Click your unit to act', unitHint2:'Click any unit for details',
@@ -748,6 +750,18 @@ function applyStaticTexts(){
   document.documentElement.lang=LANG==='zh'?'zh-CN':'en';
   document.title=T('title');
   const set=(id,txt)=>{const el=document.getElementById(id);if(el)el.textContent=txt;};
+  set('gameTitle',T('title'));
+  // 顶栏"第 N 回合"：数字保留在 <b id="turnNum">，前后缀按语言重建（不能整段 textContent 覆盖，会连数字一起冲掉）
+  const tl=document.getElementById('turnLabel');
+  if(tl){
+    const numEl=document.getElementById('turnNum');
+    const n=numEl?numEl.textContent:'1';
+    tl.innerHTML='';
+    tl.appendChild(document.createTextNode(T('turnPrefix')));
+    const b=document.createElement('b');b.id='turnNum';b.textContent=n;
+    tl.appendChild(b);
+    tl.appendChild(document.createTextNode(T('turnSuffix')));
+  }
   set('sndBtn',muted?'🔇':'🔊');
   set('menuBtn',T('menu'));set('endTurn',T('endTurn'));
   set('helpBtn','❓ '+T('help'));

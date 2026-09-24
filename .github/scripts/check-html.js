@@ -60,6 +60,7 @@ const sandbox = {
     querySelectorAll: () => [],
     getElementById: () => makeEl(),
     createElement: () => makeEl(),
+    createTextNode: (text) => ({ textContent: text, nodeValue: text }),
     addEventListener() {},
     body: makeEl(),
     documentElement: makeEl(),
