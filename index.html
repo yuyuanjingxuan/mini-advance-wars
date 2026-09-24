@@ -181,7 +181,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .dialog .sub{color:var(--dim);font-size:13px;margin-bottom:16px}
 .help{text-align:left;background:#141c28;border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.9;color:var(--dim)}
 .help b{color:var(--text)}
-.sizes{display:flex;gap:12px;justify-content:center;margin-top:14px}
+.sizes{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .sizes button{padding:12px 18px;font-size:15px;line-height:1.5}
 .sizes small{color:var(--dim);font-size:11px}
 /* ================= 帮助面板 ================= */
@@ -280,16 +280,25 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <p>💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！</p>
     </div>
     <p style="margin:16px 0 4px">选择地图规模（随机对称地图）：</p>
-    <div class="sizes">
+    <div class="sizes" style="flex-wrap:wrap">
       <button data-size="8">小 8×8<br><small>快节奏</small></button>
       <button data-size="10" class="primary">中 10×10<br><small>标准</small></button>
       <button data-size="12">大 12×12<br><small>大地图</small></button>
+      <button data-size="14">特大 14×14<br><small>超大地图</small></button>
+      <button data-size="16">巨型 16×16<br><small>史诗规模</small></button>
     </div>
     <p style="margin:16px 0 4px" id="aiStyleLabel">选择敌方 AI 风格：</p>
     <div class="sizes">
       <button data-ai="balanced" class="primary">🛡️ 稳健<br><small>不打亏本仗，会避险</small></button>
       <button data-ai="aggressive">🔥 激进<br><small>不计代价追求击杀</small></button>
       <button data-ai="defensive">🏰 防守<br><small>占城据守，拖你犯错</small></button>
+    </div>
+    <p style="margin:16px 0 4px" id="troopsLabel">选择初始部队数目：</p>
+    <div class="sizes">
+      <button data-troops="none" class="primary">🚫 无<br><small>0 个单位，纯经济开局</small></button>
+      <button data-troops="few">🪖 少<br><small>3 个单位</small></button>
+      <button data-troops="mid">⚔️ 中<br><small>6 个单位</small></button>
+      <button data-troops="many">🎖️ 多<br><small>9 个单位</small></button>
     </div>
     <p style="margin-top:14px"><button id="menuHelpBtn">📖 详细说明（单位 / 颜色图例）</button></p>
   </div>
@@ -343,14 +352,21 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <h4>查看敌军</h4>
       <p>点击敌军单位（或已行动的我方单位）可查看其<b>移动范围（半透明蓝格）和攻击范围（橙格虚线）</b>，但不能操作。再点一次取消。</p>
       <h4>战斗规则</h4>
-      <p>命中 90%，会心一击 12%（1.5 倍伤害）；反击伤害为 70%。<b>武器与护甲系统</b>：步兵/工程师/军医用普通枪械，对轻甲载具（侦察车/运兵车）伤害打六折、对重甲（坦克）只有三折；侦察车用轻甲炮，能欺负步兵和轻载具，但打不动坦克；重装兵携带反装甲武器，打载具时切换使用（对轻甲 1.5 倍、对重甲仍有 0.7 倍），打步兵类则用普通枪械；坦克配备双武器，打载具用坦克炮、打步兵类用机枪；火炮/火箭炮为高爆炮弹，对人类目标和载具都有一定杀伤但不会秒杀。军医/工程师是非战斗单位，无护甲、攻击力很弱。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。</p>
+      <p>命中 90%，会心一击 9%（1.5 倍伤害）；反击伤害为 70%。<b>伤害浮动</b>：每次攻击的基础伤害会在 ±15% 范围内随机浮动（不含会心与反击系数），同样的兵种/血量/地形对拼，实际伤害每次会有小幅差异，这是有意为之的设计，避免数值过于死板可预测。<b>武器与护甲系统</b>：步兵/工程师/军医用普通枪械，对轻甲载具（侦察车/运兵车）伤害打六折、对重甲（坦克）只有三折；侦察车用轻甲炮，能欺负步兵和轻载具，但打不动坦克；重装兵携带反装甲武器，打载具时切换使用（对轻甲 1.5 倍、对重甲仍有 0.7 倍），打步兵类则用普通枪械；坦克配备双武器，打载具用坦克炮、打步兵类用机枪；火炮/火箭炮为高爆炮弹，对人类目标和载具都有一定杀伤但不会秒杀。军医/工程师是非战斗单位，无护甲、攻击力很弱。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。</p>
       <h4>经济与生产</h4>
-      <p>💵 每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金，初始资金 <b>300</b>。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。</p>
+      <p>💵 每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金，开局无初始资金（首回合立即结算一次已拥有建筑的收入）。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。</p>
       <h4>敌方 AI 风格</h4>
       <p>开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>
       🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>
       🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>
       🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。</p>
+      <h4>初始部队数目</h4>
+      <p>开局前可在主菜单选择双方的初始部队规模，四档均为双方对称配置：<br>
+      🚫 <b>无</b>：0 个单位，双方只有 HQ+工厂+城镇，完全靠收入慢慢造兵。<br>
+      🪖 <b>少</b>：3 个单位（1 个必选步兵 + 2 个随机，随机池：步兵/重装兵/工程师/军医）。<br>
+      ⚔️ <b>中</b>：6 个单位（1 个必选步兵 + 5 个随机，随机池：步兵/重装兵/侦察车/火炮/工程师/军医/运兵车）。<br>
+      🎖️ <b>多</b>：9 个单位（1 个必选步兵 + 8 个随机，随机池：全部 9 种兵种，坦克/火箭炮仅此档可能出现）。<br>
+      随机池均包含步兵自身在内，可能重复抽到步兵；出生点围绕各自 HQ 就近分布。</p>
     </div>
     <p style="margin-top:16px"><button id="helpClose" class="primary">知道了</button></p>
   </div>
@@ -457,7 +473,7 @@ function weaponMultiplier(attType,dfdType){
   return WEAPON_BASE[weapon]*ARMOR_DEF[armor];
 }
 const DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
-const HIT_CHANCE=0.9, CRIT_CHANCE=0.12, CRIT_MULT=1.5, COUNTER_MULT=0.7;
+const HIT_CHANCE=0.9, CRIT_CHANCE=0.09, CRIT_MULT=1.5, COUNTER_MULT=0.7;
 const CAP_NEED=20; // 占领城镇所需进度（进度=单位当前 HP × 占领速度倍率）
 const CAP_MULT={infantry:1,heavy:1,engineer:1.5}; // 占领速度倍率（工程师 1.5 倍）
 // 火炮规则：移动后不能开火，只能原地待机开火
@@ -501,10 +517,16 @@ const I18N={
     // 菜单
     mapSize:'选择地图规模（随机对称地图）：',
     sizeS:'小 8×8', sizeSsub:'快节奏', sizeM:'中 10×10', sizeMsub:'标准', sizeL:'大 12×12', sizeLsub:'大地图',
+    sizeXL:'特大 14×14', sizeXLsub:'超大地图', sizeXXL:'巨型 16×16', sizeXXLsub:'史诗规模',
     aiStyleLabel:'选择敌方 AI 风格：',
     aiBalanced:'🛡️ 稳健', aiBalancedSub:'不打亏本仗，会避险',
     aiAggressive:'🔥 激进', aiAggressiveSub:'不计代价追求击杀',
     aiDefensive:'🏰 防守', aiDefensiveSub:'占城据守，拖你犯错',
+    troopsLabel:'选择初始部队数目：',
+    troopsNone:'🚫 无', troopsNoneSub:'0 个单位，纯经济开局',
+    troopsFew:'🪖 少', troopsFewSub:'3 个单位',
+    troopsMid:'⚔️ 中', troopsMidSub:'6 个单位',
+    troopsMany:'🎖️ 多', troopsManySub:'9 个单位',
     detailHelp:'📖 详细说明（单位 / 颜色图例）',
     langLabel:'🌐 Language:',
     // 菜单帮助段落
@@ -518,7 +540,7 @@ const I18N={
     m8:'💰 <b>经济与生产</b>：占领建筑每回合获得收入（每座 +50），初始资金 300。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！',
     // 帮助对话框
     helpTitle:'📖 游戏说明', helpSub:'单位特性 · 颜色图例 · 地形效果',
-    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hAiStyle:'敌方 AI 风格',
+    hUnit:'单位特性', hLegend:'颜色图例', hTerrain:'地形效果', hCap:'占领规则', hSupport:'辅助单位', hTransport:'运输规则', hLevel:'升级规则', hView:'查看敌军', hCombat:'战斗规则', hEconomy:'经济与生产', hAiStyle:'敌方 AI 风格', hTroops:'初始部队数目',
     thUnit:'单位', thHp:'HP', thAtk:'攻', thDef:'防', thMove:'移动', thRange:'射程', thTrait:'特性',
     uInf:'多面手，可占领建筑，山地移动力好（普通枪械）', uHeavy:'高攻高防近战主力，移动迟缓，携带反装甲武器克制载具（步兵，可进山）', uRecon:'极速侦察，轻甲炮打不动坦克、装甲薄弱（森林机动尚可，不可入山地）',
     uArtillery:'高爆炮弹对各类目标均有效，移动后不能开火（履带笨重，不可入山地）', uEngineer:'占领 1.5 倍速度，修理相邻载具 +3 HP，无护甲攻击弱', uMedic:'治疗相邻步兵/重装兵/工程师 +4 HP，无护甲攻击弱',
@@ -536,7 +558,7 @@ const I18N={
     transRule:'🚚 <b>运兵车</b>：无武装载具，移动力 5，不可进山地/水域。移动到己方空运兵车所在格即可<b>上车</b>（步兵/重装兵/工程师/军医均可搭乘，限 1 人），上车后乘客不再单独占格、不能行动，直到下车。<br>选中运兵车后若相邻有空位，可点击"下车"按钮，乘客落到相邻空格且<b>当回合仍可行动</b>；运兵车本身行动结束。<b>运兵车被击毁时，车内乘客一同阵亡</b>，注意保护。',
     lvlRule:'命中 +8、击毁 +25 经验。<b>辅助单位也有升级途径</b>：占领成功 +8、修理/治疗 +6 经验。升级（上限 <b>Lv.V</b>）攻 +1 防 +1 HP 上限 +2，并恢复 3 HP；升级所需经验递增（30/40/50/60），成长曲线平滑；满级后再获得经验转为恢复 3 HP。敌军同样会升级。',
     viewRule:'点击敌军单位（或已行动的我方单位）可查看其<b>移动范围（半透明蓝格）和攻击范围（橙格虚线）</b>，但不能操作。再点一次取消。',
-    combatRule:'命中 90%，会心一击 12%（1.5 倍伤害）；反击伤害为 70%。<b>武器与护甲系统</b>：步兵/工程师/军医用普通枪械，对轻甲载具（侦察车/运兵车）伤害打六折、对重甲（坦克）只有三折；侦察车用轻甲炮，能欺负步兵和轻载具，但打不动坦克；重装兵携带反装甲武器，打载具时切换使用（对轻甲 1.5 倍、对重甲仍有 0.7 倍），打步兵类则用普通枪械；坦克配备双武器，打载具用坦克炮、打步兵类用机枪；火炮/火箭炮为高爆炮弹，对人类目标和载具都有一定杀伤但不会秒杀。军医/工程师是非战斗单位，无护甲、攻击力很弱。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。',
+    combatRule:'命中 90%，会心一击 9%（1.5 倍伤害）；反击伤害为 70%。<b>伤害浮动</b>：每次攻击的基础伤害会在 ±15% 范围内随机浮动（不含会心与反击系数），同样的兵种/血量/地形对拼，实际伤害每次会有小幅差异，这是有意为之的设计，避免数值过于死板可预测。<b>武器与护甲系统</b>：步兵/工程师/军医用普通枪械，对轻甲载具（侦察车/运兵车）伤害打六折、对重甲（坦克）只有三折；侦察车用轻甲炮，能欺负步兵和轻载具，但打不动坦克；重装兵携带反装甲武器，打载具时切换使用（对轻甲 1.5 倍、对重甲仍有 0.7 倍），打步兵类则用普通枪械；坦克配备双武器，打载具用坦克炮、打步兵类用机枪；火炮/火箭炮为高爆炮弹，对人类目标和载具都有一定杀伤但不会秒杀。军医/工程师是非战斗单位，无护甲、攻击力很弱。<b>火炮/火箭炮移动后不能开火，只能原地待机开火</b>；其他单位可移动后攻击。不同兵种有专属的攻击/移动音效。战报中我方消息蓝色、敌军消息红色。',
     knowBtn:'知道了',
     // 战斗文案
     atkLog:(a,d)=>`${sideName(a.side)} ${UNIT_TYPES[a.type].name} 攻击 ${sideName(d.side)} ${UNIT_TYPES[d.type].name}！`,
@@ -564,6 +586,7 @@ const I18N={
     prodFunds:(f)=>`💰 资金：${f}`,
     ecoRule:'💵 开局无初始资金，第 1 回合就会按开局拥有的建筑数结算一次收入；此后每回合开始时，每座己方建筑（城镇/工厂/总部）提供 <b>+50</b> 资金。点击<b>己方空工厂</b>打开生产菜单：选择兵种并支付造价（步兵/工程师/军医最便宜、火箭炮最贵），新单位当回合待机、下回合行动。每方场上单位上限 12。敌军同样会收入并生产单位。',
     aiStyleRule:'开局前可在主菜单选择敌方风格（对局中显示在顶部）：<br>🛡️ <b>稳健</b>：不打亏本仗——打不死目标且反击代价过高时会放弃进攻；残血单位会主动撤退到更安全的格子；优先补刀能击杀的目标。<br>🔥 <b>激进</b>：几乎不考虑自身安危，一切以最大化本次伤害/击杀数为目标，即使两败俱伤也会进攻。<br>🏰 <b>防守</b>：不主动追击玩家，优先占领中立/被夺走的建筑，无仗可打时原地据守，靠国力和地形拖时间。',
+    troopsRule:'开局前可在主菜单选择双方的初始部队规模，四档均为双方对称配置：<br>🚫 <b>无</b>：0 个单位，双方只有 HQ+工厂+城镇，完全靠收入慢慢造兵。<br>🪖 <b>少</b>：3 个单位（1 个必选步兵 + 2 个随机，随机池：步兵/重装兵/工程师/军医）。<br>⚔️ <b>中</b>：6 个单位（1 个必选步兵 + 5 个随机，随机池：步兵/重装兵/侦察车/火炮/工程师/军医/运兵车）。<br>🎖️ <b>多</b>：9 个单位（1 个必选步兵 + 8 个随机，随机池：全部 9 种兵种，坦克/火箭炮仅此档可能出现）。<br>随机池均包含步兵自身在内，可能重复抽到步兵；出生点围绕各自 HQ 就近分布。',
     // 结果
     winTitle:'🎉 胜利！', loseTitle:'💀 战败……',
     winText:(n,how)=>how==='hq'?`历经 ${n} 回合占领了敌方总部！`:`历经 ${n} 回合消灭了全部敌军！`, loseText:(n,how)=>how==='hq'?`己方总部于第 ${n} 回合被占领，再接再厉！`:`我军全灭于第 ${n} 回合，再接再厉！`,
@@ -596,10 +619,16 @@ const I18N={
     pickRepair:'Click a highlighted vehicle to repair it', pickHeal:'Click a highlighted unit to heal it',
     mapSize:'Choose map size (random symmetric map):',
     sizeS:'Small 8×8', sizeSsub:'Quick', sizeM:'Medium 10×10', sizeMsub:'Standard', sizeL:'Large 12×12', sizeLsub:'Big map',
+    sizeXL:'X-Large 14×14', sizeXLsub:'Huge map', sizeXXL:'Giant 16×16', sizeXXLsub:'Epic scale',
     aiStyleLabel:'Choose enemy AI style:',
     aiBalanced:'🛡️ Balanced', aiBalancedSub:'No bad trades, plays it safe',
     aiAggressive:'🔥 Aggressive', aiAggressiveSub:'Chases kills at any cost',
     aiDefensive:'🏰 Defensive', aiDefensiveSub:'Turtles and captures, waits you out',
+    troopsLabel:'Choose starting troop size:',
+    troopsNone:'🚫 None', troopsNoneSub:'0 units, pure economy start',
+    troopsFew:'🪖 Few', troopsFewSub:'3 units',
+    troopsMid:'⚔️ Medium', troopsMidSub:'6 units',
+    troopsMany:'🎖️ Many', troopsManySub:'9 units',
     detailHelp:'📖 Details (units / color legend)',
     langLabel:'🌐 Language:',
     m1:'🪖 <b>8 unit types</b>: 🪖Infantry (versatile, can capture) · 🛡️Heavy (high ATK/DEF, anti-vehicle) · 🚙Recon (fast raider) · <i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>Cannon (range 2-3) · 🔧Engineer (1.5× capture + repair) · ⚕️Medic (heals) · <i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>Tank (assault main force) · 🚀Rocket (range 3-5)',
@@ -611,7 +640,7 @@ const I18N={
     m7:'💥 Hits and crits; ⬆️ gain XP and <b>level up</b> — enemies level up too! 🎵 Battle BGM: upbeat march for you, tense minor for the enemy.',
     m8:'💰 <b>Economy & production</b>: each owned building gives income every turn (+50 each), starting funds 300. Click <b>your empty factory</b> to open the production menu and spend funds on new units (they wait this turn). The enemy saves money and builds too — expand your economy!',
     helpTitle:'📖 How to Play', helpSub:'Unit traits · Color legend · Terrain effects',
-    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production', hAiStyle:'Enemy AI Style',
+    hUnit:'Unit Traits', hLegend:'Color Legend', hTerrain:'Terrain', hCap:'Capture Rules', hSupport:'Support Units', hTransport:'Transport Rules', hLevel:'Leveling', hView:'Inspect Enemies', hCombat:'Combat Rules', hEconomy:'Economy & Production', hAiStyle:'Enemy AI Style', hTroops:'Starting Troops',
     thUnit:'Unit', thHp:'HP', thAtk:'ATK', thDef:'DEF', thMove:'MOV', thRange:'RNG', thTrait:'Trait',
     uInf:'Versatile, can capture, good mountain mobility (small arms)', uHeavy:'Strong melee main force, sluggish, carries an anti-armor weapon vs vehicles (infantry, can enter mountains)', uRecon:'Blazing-fast scout, light-armor gun can\'t dent tanks, weak armor (decent in forest, no mountains)',
     uArtillery:'High-explosive shells hurt any target, cannot fire after moving (heavy treads, no mountains)', uEngineer:'1.5× capture, repairs adjacent vehicles +3 HP, unarmored and weak in combat', uMedic:'Heals adjacent infantry/heavies/engineers +4 HP, unarmored and weak in combat',
@@ -629,7 +658,7 @@ const I18N={
     transRule:'🚚 <b>Transport</b>: unarmed vehicle, move 5, cannot enter mountains/water. Move onto a friendly empty transport\'s tile to <b>board</b> it (infantry/heavy/engineer/medic can ride, 1 at a time); the rider then no longer occupies its own tile or acts, until it disembarks.<br>Select the transport and click "Unload" if an adjacent tile is free — the rider lands there and <b>can still act this turn</b>; the transport\'s own action ends. <b>If the transport is destroyed, its cargo is destroyed too</b> — keep it protected.',
     lvlRule:'Hit +8, destroy +25 XP. <b>Support units level too</b>: capture +8, repair/heal +6 XP. Level up (cap <b>Lv.V</b>) grants +1 ATK +1 DEF +2 HP and heals 3 HP; XP needed rises each level (30/40/50/60) for a smooth curve; at max level excess XP heals 3 HP. Enemies level up too.',
     viewRule:'Click an enemy (or an acted unit of yours) to inspect its <b>move range (translucent blue) and attack range (dashed orange)</b> — view only. Click again to cancel.',
-    combatRule:'90% hit, 12% crit (1.5×); counterattack deals 70%. <b>Weapons &amp; armor</b>: infantry/engineer/medic carry small arms — 0.6× against light-armored vehicles (recon/transport), only 0.3× against heavy armor (tank); recon\'s light-armor gun bullies infantry and light vehicles but barely scratches tanks; heavy infantry switches to an anti-armor weapon against vehicles (1.5× vs light armor, still 0.7× vs heavy armor) and small arms otherwise; tanks carry two weapons — a tank gun against vehicles, a machine gun against infantry-type units; artillery/rockets fire high-explosive shells that hurt both infantry and vehicles without one-shotting anything. Engineers/medics are unarmored non-combatants with weak attack. <b>Artillery/rocket cannot fire after moving — they must wait in place to fire</b>; other units may move then attack. Each unit type has its own attack/move sound. Player log is blue, enemy log is red.',
+    combatRule:'90% hit, 9% crit (1.5×); counterattack deals 70%. <b>Damage variance</b>: every hit\'s base damage is randomized within ±15% (before crit/counter multipliers) — the same matchup at the same HP and terrain will deal slightly different damage each time, by design, so combat never feels perfectly predictable. <b>Weapons &amp; armor</b>: infantry/engineer/medic carry small arms — 0.6× against light-armored vehicles (recon/transport), only 0.3× against heavy armor (tank); recon\'s light-armor gun bullies infantry and light vehicles but barely scratches tanks; heavy infantry switches to an anti-armor weapon against vehicles (1.5× vs light armor, still 0.7× vs heavy armor) and small arms otherwise; tanks carry two weapons — a tank gun against vehicles, a machine gun against infantry-type units; artillery/rockets fire high-explosive shells that hurt both infantry and vehicles without one-shotting anything. Engineers/medics are unarmored non-combatants with weak attack. <b>Artillery/rocket cannot fire after moving — they must wait in place to fire</b>; other units may move then attack. Each unit type has its own attack/move sound. Player log is blue, enemy log is red.',
     knowBtn:'Got it',
     atkLog:(a,d)=>`${sideName(a.side)} ${UNIT_TYPES[a.type].name} attacks ${sideName(d.side)} ${UNIT_TYPES[d.type].name}!`,
     counter:'Counterattack!', dodged:'…dodged!', remain:(n,m)=>`${UNIT_TYPES[n].name} has ${m} HP left`,
@@ -655,6 +684,7 @@ const I18N={
     prodFunds:(f)=>`💰 Funds: ${f}`,
     ecoRule:'💵 No starting funds — turn 1 immediately settles income based on the buildings you own at kickoff; after that, every owned building (city/factory/HQ) grants <b>+50</b> funds at the start of each turn. Click <b>your empty factory</b> to open the production menu: pick a unit and pay its cost (infantry/engineer/medic cheapest, rocket priciest); new units wait this turn and act next turn. Max 12 units per side. The enemy collects income and builds units too.',
     aiStyleRule:'Pick the enemy\'s style before starting (shown at the top during the match):<br>🛡️ <b>Balanced</b>: avoids bad trades — skips an attack if it can\'t kill and the counter-risk is too high; retreats low-HP units to safer tiles; prioritizes finishing off weakened targets.<br>🔥 <b>Aggressive</b>: barely considers its own safety, always maximizes this turn\'s damage/kills even in a losing trade.<br>🏰 <b>Defensive</b>: doesn\'t chase you down, prioritizes capturing neutral/lost buildings, holds position when there\'s nothing to fight, and grinds you down with economy and terrain.',
+    troopsRule:'Pick both sides\' starting troop size before the match — all four tiers are symmetric for both sides:<br>🚫 <b>None</b>: 0 units, both sides start with only HQ+factory+city and build up purely from income.<br>🪖 <b>Few</b>: 3 units (1 mandatory infantry + 2 random, pool: infantry/heavy/engineer/medic).<br>⚔️ <b>Medium</b>: 6 units (1 mandatory infantry + 5 random, pool: infantry/heavy/recon/artillery/engineer/medic/transport).<br>🎖️ <b>Many</b>: 9 units (1 mandatory infantry + 8 random, pool: all 9 unit types — tanks/rockets can only appear at this tier).<br>The random pool always includes infantry itself, so it may be picked more than once; spawn points cluster near each side\'s own HQ.',
     winTitle:'🎉 Victory!', loseTitle:'💀 Defeat…',
     winText:(n,how)=>how==='hq'?`Captured the enemy HQ in ${n} turns!`:`Destroyed all enemies in ${n} turns!`, loseText:(n,how)=>how==='hq'?`Your HQ was captured on turn ${n}. Try again!`:`Your army fell on turn ${n}. Try again!`,
     again:'Play Again', backMenu:'Main Menu', backConfirm:'Return to main menu? Current progress will be lost',
@@ -712,10 +742,12 @@ function applyStaticTexts(){
   const sizePs=document.querySelectorAll('#menu p');
   for(const p of sizePs){if(p.textContent.includes('地图规模')||p.textContent.includes('map size')||p.textContent.includes('Choose map'))p.innerHTML=T('mapSize');}
   const sizeBtns=document.querySelectorAll('#menu button[data-size]');
-  if(sizeBtns.length===3){
+  if(sizeBtns.length===5){
     sizeBtns[0].innerHTML=T('sizeS')+'<br><small>'+T('sizeSsub')+'</small>';
     sizeBtns[1].innerHTML=T('sizeM')+'<br><small>'+T('sizeMsub')+'</small>';
     sizeBtns[2].innerHTML=T('sizeL')+'<br><small>'+T('sizeLsub')+'</small>';
+    sizeBtns[3].innerHTML=T('sizeXL')+'<br><small>'+T('sizeXLsub')+'</small>';
+    sizeBtns[4].innerHTML=T('sizeXXL')+'<br><small>'+T('sizeXXLsub')+'</small>';
   }
   set('aiStyleLabel',T('aiStyleLabel'));
   const aiBtns=document.querySelectorAll('#menu button[data-ai]');
@@ -725,12 +757,20 @@ function applyStaticTexts(){
     aiBtns[2].innerHTML=T('aiDefensive')+'<br><small>'+T('aiDefensiveSub')+'</small>';
   }
   updateAiStyleTag();
+  set('troopsLabel',T('troopsLabel'));
+  const troopsBtns=document.querySelectorAll('#menu button[data-troops]');
+  if(troopsBtns.length===4){
+    troopsBtns[0].innerHTML=T('troopsNone')+'<br><small>'+T('troopsNoneSub')+'</small>';
+    troopsBtns[1].innerHTML=T('troopsFew')+'<br><small>'+T('troopsFewSub')+'</small>';
+    troopsBtns[2].innerHTML=T('troopsMid')+'<br><small>'+T('troopsMidSub')+'</small>';
+    troopsBtns[3].innerHTML=T('troopsMany')+'<br><small>'+T('troopsManySub')+'</small>';
+  }
   set('menuHelpBtn',T('detailHelp'));
   // 帮助对话框
   const hdTitle=document.querySelector('#helpDialog .dialog h1');if(hdTitle)hdTitle.textContent=T('helpTitle');
   const hdSub=document.querySelector('#helpDialog .dialog .sub');if(hdSub)hdSub.textContent=T('helpSub');
   const hdH4=document.querySelectorAll('#helpDialog h4');
-  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hAiStyle'];
+  const hKeys=['hUnit','hLegend','hTerrain','hCap','hSupport','hTransport','hLevel','hView','hCombat','hEconomy','hAiStyle','hTroops'];
   hdH4.forEach((h,i)=>{if(hKeys[i])h.textContent=T(hKeys[i]);});
   // 单位表
   const utable=document.querySelector('#helpDialog .utable');
@@ -779,6 +819,7 @@ function applyStaticTexts(){
     hdPs[6].innerHTML=T('combatRule');
     if(hdPs[7])hdPs[7].innerHTML=T('ecoRule');
     if(hdPs[8])hdPs[8].innerHTML=T('aiStyleRule');
+    if(hdPs[9])hdPs[9].innerHTML=T('troopsRule');
   }
   set('helpClose',T('knowBtn'));
   set('prodTitle',T('prodTitle'));set('prodClose',T('prodCancel'));
@@ -921,6 +962,15 @@ const BGM=(function(){
 'use strict';
 // ================= 状态 =================
 let G=null, uid=0, aiStyleChoice='balanced'; // 主菜单选中的 AI 风格，newGame 时写入 G.aiStyle
+let troopsChoice='none'; // 主菜单选中的初始部队数目档位：none/few/mid/many，newGame 时读取
+// 初始部队数目档位：数量 + 随机兵种池（必选步兵不计入池内数量，池内随机抽取时步兵也可能被重复抽到）
+// 少=4 种非载具兵种（不含运兵车）；中=7 种（加入侦察车/火炮/运兵车，不含坦克/火箭炮）；多=全部 9 种
+const TROOPS_TIERS={
+  none:{count:0, pool:[]},
+  few: {count:3, pool:['infantry','heavy','engineer','medic']},
+  mid: {count:6, pool:['infantry','heavy','recon','artillery','engineer','medic','transport']},
+  many:{count:9, pool:['infantry','heavy','recon','artillery','engineer','medic','tank','rocket','transport']},
+};
 const $=s=>document.querySelector(s);
 const board=$('#board');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1117,7 +1167,7 @@ function genMap(size){
     const m=Array.from({length:size},()=>Array(size).fill('plain'));
     const half=Math.ceil(size/2);
     // --- 山脉：从地图一侧向另一侧随机游走形成山脊（地理上山脉成脉状而非散点） ---
-    const ridges=size>=10?2:1;
+    const ridges=size>=14?3:size>=10?2:1;
     for(let r=0;r<ridges;r++){
       let rx=Math.floor(Math.random()*half*0.4), ry=Math.floor(Math.random()*size*0.3);
       const len=Math.floor(size*0.55+Math.random()*size*0.3);
@@ -1159,8 +1209,8 @@ function genMap(size){
         cx+=dx;cy+=dy;
       }
     }
-    // --- 出生点强制平原（与 newGame 的 8 个出生点完全一致，仅左半边，稍后镜像） ---
-    const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[2,size-1],[3,size-1]];
+    // --- 出生点强制平原（与 newGame 的 9 个出生点完全一致，仅左半边，稍后镜像） ---
+    const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[2,size-1],[3,size-1],[3,size-3]];
     for(const[x,y]of spawns)m[y][x]='plain';
     // --- 出生点周边清障：保证载具（不可入山地/水）出生后能移动，不被地形卡死 ---
     // 每个出生点周围 1 格内的山地/水都改为平原，确保所有兵种（含履带/轮胎）都有出路
@@ -1779,15 +1829,17 @@ function newGame(size){
   const map=genMap(size);
   G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS},aiStyle:aiStyleChoice};
   uid=0;
-  const spawns=[[0,size-1],[1,size-1],[0,size-2],[1,size-2],[2,size-2],[0,size-3],[2,size-1],[3,size-1]];
-  const types=['infantry','heavy','recon','infantry','artillery','engineer','tank','rocket'];
+  // 出生点按与己方 HQ([1,size-2]) 的距离升序排列，数量少的档位优先使用离 HQ 最近的点，
+  // 保证"少/中"档的部队围绕 HQ 分布而不是散落到边缘（原 8 个固定坐标点 + 1 个军医点，合并后统一排序）
+  const spawnPool=[[1,size-3],[0,size-2],[2,size-2],[0,size-1],[1,size-1],[0,size-3],[2,size-1],[3,size-1],[3,size-3]];
+  const tier=TROOPS_TIERS[troopsChoice]||TROOPS_TIERS.none;
+  const spawns=spawnPool.slice(0,tier.count);
+  const types=['infantry']; // 必选步兵放在离 HQ 最近的出生点
+  for(let i=1;i<tier.count;i++)types.push(tier.pool[Math.floor(Math.random()*tier.pool.length)]);
   spawns.forEach((p,i)=>{
     G.units.push(makeUnit('P',types[i],p[0],p[1]));
     G.units.push(makeUnit('E',types[i],size-1-p[0],size-1-p[1]));
   });
-  // 军医：双方各 1 名，放在出生点附近
-  G.units.push(makeUnit('P','medic',1,size-3));
-  G.units.push(makeUnit('E','medic',size-2,2));
   // 建筑归属：每方固定的 1 总部+1 工厂+1 城镇开局即归属该方（坐标须与 genMap 的 fixedBuilds 公式一致）；
   // 地图上随机分布的中立建筑、奇数尺寸的中心争夺城镇均开局中立
   const fixedCoords=[[2,size-3],[1,size-2],[3,size-2]]; // 左半场（我方）三座固定建筑
@@ -1800,7 +1852,7 @@ function newGame(size){
     G.caps.set(k,{owner,prog:owner?CAP_NEED:0});
   }
   board.style.setProperty('--n',size);
-  board.style.setProperty('--cell',(size<=8?54:size<=10?46:38)+'px');
+  board.style.setProperty('--cell',(size<=8?54:size<=10?46:size<=12?38:size<=14?32:28)+'px');
   $('#menu').classList.add('hidden');
   $('#overlay').classList.add('hidden');
   $('#log').innerHTML='';
@@ -1855,6 +1907,13 @@ document.querySelectorAll('#menu button[data-ai]').forEach(b=>{
   b.addEventListener('click',()=>{
     aiStyleChoice=b.dataset.ai;
     document.querySelectorAll('#menu button[data-ai]').forEach(x=>x.classList.toggle('primary',x===b));
+  });
+});
+// 初始部队数目选择按钮（主菜单，默认"无"）
+document.querySelectorAll('#menu button[data-troops]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    troopsChoice=b.dataset.troops;
+    document.querySelectorAll('#menu button[data-troops]').forEach(x=>x.classList.toggle('primary',x===b));
   });
 });
 $('#againBtn').addEventListener('click',()=>newGame(G.size));
