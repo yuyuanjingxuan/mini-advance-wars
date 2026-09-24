@@ -593,7 +593,7 @@ const I18N={
     phaseLog:(n,who)=>`—— 第 ${n} 回合：${who} ——`,
     startLog:'⚔️ 战斗开始！消灭所有敌军或占领敌方总部即可获胜。',
     // 经济与生产
-    incomeLog:(inc,n)=>`💵 收入 +${inc}（${n} 座建筑 × ${INCOME_PER}）`,
+    incomeLog:(s,inc,n)=>`${sideName(s)} 💵 收入 +${inc}（${n} 座建筑 × ${INCOME_PER}）`,
     buildLog:(s,t)=>`🏭 ${sideName(s)} 生产了 ${UNIT_TYPES[t].name}！`,
     prodTitle:'🏭 生产单位', prodCancel:'取消', prodHint:'点击工厂生产单位',
     prodFunds:(f)=>`💰 资金：${f}`,
@@ -692,7 +692,7 @@ const I18N={
     waitLog:(t)=>`${UNIT_TYPES[t].name} waits.`,
     phaseLog:(n,who)=>`—— Turn ${n}: ${who} ——`,
     startLog:'⚔️ Battle start! Destroy all enemies or capture the enemy HQ to win.',
-    incomeLog:(inc,n)=>`💵 Income +${inc} (${n} buildings × ${INCOME_PER})`,
+    incomeLog:(s,inc,n)=>`${sideName(s)} 💵 Income +${inc} (${n} buildings × ${INCOME_PER})`,
     buildLog:(s,t)=>`🏭 ${sideName(s)} built a ${UNIT_TYPES[t].name}!`,
     prodTitle:'🏭 Build Unit', prodCancel:'Cancel', prodHint:'Click factory to build',
     prodFunds:(f)=>`💰 Funds: ${f}`,
@@ -1110,12 +1110,34 @@ function updateFunds(){
   const el=$('#fundsNum');
   if(el&&G)el.textContent=G.funds.P;
 }
+// ================= 棋盘自适应缩放 =================
+// 根据浏览器视口剩余空间动态算格子像素大小，尽量铺满窗口又不会溢出需要滚动条；
+// 侧栏固定 270px + gap，boardWrap 有 padding/border，board 格子间有 3px gap，这些都要从预算里扣掉
+function fitBoard(){
+  if(!G)return;
+  const size=G.size;
+  const headerH=document.querySelector('header')?.offsetHeight||60;
+  const mainPad=32; // #main padding 16px×2
+  const sideW=270+16; // #side 宽度 + #main 的 gap
+  const wrapPad=26; // #boardWrap padding 12px×2 + border
+  const availW=window.innerWidth-sideW-mainPad-wrapPad;
+  const availH=window.innerHeight-headerH-mainPad-wrapPad;
+  const gapTotal=(size-1)*3; // #board 格子间 gap
+  const raw=Math.floor((Math.min(availW,availH)-gapTotal)/size);
+  const cell=Math.max(20,Math.min(64,raw)); // 格子太小看不清、太大失真，设上下限
+  board.style.setProperty('--cell',cell+'px');
+}
+let fitBoardTimer=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(fitBoardTimer);
+  fitBoardTimer=setTimeout(fitBoard,150); // 防抖，避免拖拽窗口时高频重算
+});
 function collectIncome(side){
   const n=countOwned(side);
   if(!n)return;
   const inc=n*INCOME_PER;
   G.funds[side]+=inc;
-  log(T('incomeLog')(inc,n),'dim');
+  log(T('incomeLog')(side,inc,n),'dim');
 }
 // AI 建造：敌方回合结束时在己方空工厂造兵（新单位下回合行动）
 function aiBuild(){
@@ -1868,7 +1890,7 @@ function newGame(size){
     G.caps.set(k,{owner,prog:owner?CAP_NEED:0});
   }
   board.style.setProperty('--n',size);
-  board.style.setProperty('--cell',(size<=8?54:size<=10?46:size<=12?38:size<=14?32:28)+'px');
+  fitBoard();
   $('#menu').classList.add('hidden');
   $('#overlay').classList.add('hidden');
   $('#log').innerHTML='';
