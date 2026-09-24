@@ -79,11 +79,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
 /* 坦克：车体 + 履带 + 炮塔炮管 */
 .uicon.tank::before{content:'';position:absolute;left:6%;bottom:10%;width:88%;height:34%;background:#3a3f4a;border-radius:4px;box-shadow:inset 0 -3px 0 #23262e}
 .uicon.tank::after{content:'';position:absolute;left:30%;top:12%;width:40%;height:30%;background:#4a505e;border-radius:3px;box-shadow:14px 6px 0 -2px #3a3f4a}
-/* 城镇归属底色：中立米白 / 我方淡蓝 / 敌军淡红（三色区分） */
+/* 城镇归属底色：中立纯白 / 我方淡蓝 / 敌军淡红（三色区分，中立刻意选纯白避免跟淡红混淆） */
 .cell.t-city.cap-neutral{background:
   linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
   linear-gradient(#5d6779,#5d6779) 56% 38%/30% 60% no-repeat,
-  #cfc8b8}
+  #f4f2ee}
 .cell.t-city.cap-p{background:
   linear-gradient(#79839a,#79839a) 18% 24%/26% 50% no-repeat,
   linear-gradient(#5d6779,#5d6779) 56% 38%/30% 60% no-repeat,
@@ -184,6 +184,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .sizes{display:flex;gap:12px;justify-content:center;margin-top:14px;flex-wrap:wrap}
 .sizes button{padding:12px 18px;font-size:15px;line-height:1.5}
 .sizes small{color:var(--dim);font-size:11px}
+/* 主菜单专用更宽对话框：5 档地图尺寸 + AI 风格 + 部队数目三排按钮，560px 太挤 */
+#menu .dialog{max-width:760px}
 /* ================= 帮助面板 ================= */
 .legend{display:flex;flex-direction:column;gap:5px;margin:6px 0 10px}
 .legend .row{display:flex;align-items:center;gap:8px;font-size:13px}
@@ -204,7 +206,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
 /* ================= 经济与生产 ================= */
 /* 顶栏资金显示 */
 .funds{font-size:14px;font-weight:700;color:var(--gold);background:rgba(255,210,87,.12);border:1px solid rgba(255,210,87,.4);border-radius:10px;padding:3px 10px}
-/* 工厂归属底色（与城镇同款三色：我方淡蓝/敌军淡红） */
+/* 工厂归属底色（与城镇同款三色：中立纯白/我方淡蓝/敌军淡红） */
+.cell.t-factory.cap-neutral{background:
+  linear-gradient(#8d7a5e,#8d7a5e) 12% 18%/16% 40% no-repeat,
+  linear-gradient(#a08a68,#a08a68) 30% 46%/62% 46% no-repeat,
+  repeating-linear-gradient(90deg,transparent 0 8%,#6e5c42 8% 12%) 30% 58%/62% 26% no-repeat,
+  #f4f2ee}
 .cell.t-factory.cap-p{background:
   linear-gradient(#8d7a5e,#8d7a5e) 12% 18%/16% 40% no-repeat,
   linear-gradient(#a08a68,#a08a68) 30% 46%/62% 46% no-repeat,
@@ -215,7 +222,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
   linear-gradient(#a08a68,#a08a68) 30% 46%/62% 46% no-repeat,
   repeating-linear-gradient(90deg,transparent 0 8%,#6e5c42 8% 12%) 30% 58%/62% 26% no-repeat,
   #e8a3a0}
-/* 总部归属底色 */
+/* 总部归属底色（总部开局即归属，理论上不会中立，但保留规则确保一致性） */
+.cell.t-hq.cap-neutral{background:
+  linear-gradient(#8a93a8,#8a93a8) 50% 62%/56% 44% no-repeat,
+  linear-gradient(#6b7488,#6b7488) 50% 40%/34% 30% no-repeat,
+  #f4f2ee}
 .cell.t-hq.cap-p{background:
   linear-gradient(#8a93a8,#8a93a8) 50% 62%/56% 44% no-repeat,
   linear-gradient(#6b7488,#6b7488) 50% 40%/34% 30% no-repeat,
@@ -301,6 +312,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button data-troops="many">🎖️ 多<br><small>9 个单位</small></button>
     </div>
     <p style="margin-top:14px"><button id="menuHelpBtn">📖 详细说明（单位 / 颜色图例）</button></p>
+    <p style="margin-top:14px"><button id="startGameBtn" class="primary" style="padding:12px 32px;font-size:17px">⚔️ 选择好了，开始游戏！</button></p>
   </div>
 </div>
 
@@ -528,6 +540,7 @@ const I18N={
     troopsMid:'⚔️ 中', troopsMidSub:'6 个单位',
     troopsMany:'🎖️ 多', troopsManySub:'9 个单位',
     detailHelp:'📖 详细说明（单位 / 颜色图例）',
+    startGameBtn:'⚔️ 选择好了，开始游戏！',
     langLabel:'🌐 Language:',
     // 菜单帮助段落
     m1:'🪖 <b>8 种兵种</b>：🪖步兵（多面手·可占领）· 🛡️重装兵（高攻高防·克制载具）· 🚙侦察车（高速突袭）· <i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>火炮（射程 2-3）· 🔧工程师（占领×1.5+修理）· ⚕️军医（治疗）· <i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>坦克（突击主力）· 🚀火箭炮（射程 3-5）',
@@ -630,6 +643,7 @@ const I18N={
     troopsMid:'⚔️ Medium', troopsMidSub:'6 units',
     troopsMany:'🎖️ Many', troopsManySub:'9 units',
     detailHelp:'📖 Details (units / color legend)',
+    startGameBtn:'⚔️ Ready — Start Game!',
     langLabel:'🌐 Language:',
     m1:'🪖 <b>8 unit types</b>: 🪖Infantry (versatile, can capture) · 🛡️Heavy (high ATK/DEF, anti-vehicle) · 🚙Recon (fast raider) · <i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>Cannon (range 2-3) · 🔧Engineer (1.5× capture + repair) · ⚕️Medic (heals) · <i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>Tank (assault main force) · 🚀Rocket (range 3-5)',
     m2:'💣 <b>Goal</b>: destroy all enemies or capture the enemy <b>HQ</b>! Click your unit → <b>blue tile</b> to move → <b>red-outlined enemy</b> to attack.',
@@ -766,6 +780,7 @@ function applyStaticTexts(){
     troopsBtns[3].innerHTML=T('troopsMany')+'<br><small>'+T('troopsManySub')+'</small>';
   }
   set('menuHelpBtn',T('detailHelp'));
+  set('startGameBtn',T('startGameBtn'));
   // 帮助对话框
   const hdTitle=document.querySelector('#helpDialog .dialog h1');if(hdTitle)hdTitle.textContent=T('helpTitle');
   const hdSub=document.querySelector('#helpDialog .dialog .sub');if(hdSub)hdSub.textContent=T('helpSub');
@@ -963,6 +978,7 @@ const BGM=(function(){
 // ================= 状态 =================
 let G=null, uid=0, aiStyleChoice='balanced'; // 主菜单选中的 AI 风格，newGame 时写入 G.aiStyle
 let troopsChoice='none'; // 主菜单选中的初始部队数目档位：none/few/mid/many，newGame 时读取
+let sizeChoice=10; // 主菜单选中的地图规模，默认 10（原本点击尺寸按钮即开局，现改为先选后按「开始游戏」）
 // 初始部队数目档位：数量 + 随机兵种池（必选步兵不计入池内数量，池内随机抽取时步兵也可能被重复抽到）
 // 少=4 种非载具兵种（不含运兵车）；中=7 种（加入侦察车/火炮/运兵车，不含坦克/火箭炮）；多=全部 9 种
 const TROOPS_TIERS={
@@ -1885,9 +1901,14 @@ function toMenu(){
 }
 
 // ================= 事件绑定 =================
+// 地图规模选择按钮（主菜单，默认 10；不再点击即开局，改为先选后按「开始游戏」）
 document.querySelectorAll('#menu button[data-size]').forEach(b=>{
-  b.addEventListener('click',()=>newGame(+b.dataset.size));
+  b.addEventListener('click',()=>{
+    sizeChoice=+b.dataset.size;
+    document.querySelectorAll('#menu button[data-size]').forEach(x=>x.classList.toggle('primary',x===b));
+  });
 });
+$('#startGameBtn').addEventListener('click',()=>newGame(sizeChoice));
 $('#endTurn').addEventListener('click',()=>{
   if(G&&!G.busy&&!G.over&&G.phase==='P')startEnemyPhase();
 });
