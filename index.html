@@ -323,12 +323,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
     </div>
     <p style="margin:16px 0 4px" id="difficultyLabel">选择敌方强度：</p>
     <div class="sizes" style="flex-wrap:wrap">
-      <button data-diff="trivial">😴 白痴<br><small>敌方 HP ×0.8</small></button>
-      <button data-diff="easy">🙂 简单<br><small>敌方 HP ×0.9</small></button>
-      <button data-diff="normal" class="primary">⚖️ 普通<br><small>敌方 HP ×1.0</small></button>
-      <button data-diff="hard">🔥 困难<br><small>敌方 HP ×1.1</small></button>
-      <button data-diff="hell">💀 地狱<br><small>敌方 HP ×1.2</small></button>
-      <button data-diff="nightmare">☠️ 噩梦<br><small>敌方 HP ×1.5</small></button>
+      <button data-diff="trivial">😴 白痴<br><small>敌方 HP/收入 ×0.8</small></button>
+      <button data-diff="easy">🙂 简单<br><small>敌方 HP/收入 ×0.9</small></button>
+      <button data-diff="normal" class="primary">⚖️ 普通<br><small>敌方 HP/收入 ×1.0</small></button>
+      <button data-diff="hard">🔥 困难<br><small>敌方 HP/收入 ×1.1</small></button>
+      <button data-diff="hell">💀 地狱<br><small>敌方 HP/收入 ×1.2</small></button>
+      <button data-diff="nightmare">☠️ 噩梦<br><small>敌方 HP/收入 ×1.5</small></button>
     </div>
     <p style="margin:16px 0 4px" id="troopsLabel">选择初始部队数目：</p>
     <div class="sizes">
@@ -586,12 +586,12 @@ const I18N={
     aiAggressive:'🔥 激进', aiAggressiveSub:'不计代价追求击杀',
     aiDefensive:'🏰 防守', aiDefensiveSub:'占城据守，拖你犯错',
     difficultyLabel:'选择敌方强度：',
-    diffTrivial:'😴 白痴', diffTrivialSub:'敌方 HP ×0.8',
-    diffEasy:'🙂 简单', diffEasySub:'敌方 HP ×0.9',
-    diffNormal:'⚖️ 普通', diffNormalSub:'敌方 HP ×1.0',
-    diffHard:'🔥 困难', diffHardSub:'敌方 HP ×1.1',
-    diffHell:'💀 地狱', diffHellSub:'敌方 HP ×1.2',
-    diffNightmare:'☠️ 噩梦', diffNightmareSub:'敌方 HP ×1.5',
+    diffTrivial:'😴 白痴', diffTrivialSub:'敌方 HP/收入 ×0.8',
+    diffEasy:'🙂 简单', diffEasySub:'敌方 HP/收入 ×0.9',
+    diffNormal:'⚖️ 普通', diffNormalSub:'敌方 HP/收入 ×1.0',
+    diffHard:'🔥 困难', diffHardSub:'敌方 HP/收入 ×1.1',
+    diffHell:'💀 地狱', diffHellSub:'敌方 HP/收入 ×1.2',
+    diffNightmare:'☠️ 噩梦', diffNightmareSub:'敌方 HP/收入 ×1.5',
     troopsLabel:'选择初始部队数目：',
     troopsNone:'🚫 无', troopsNoneSub:'0 个单位，纯经济开局',
     troopsFew:'🪖 少', troopsFewSub:'3 个单位',
@@ -707,12 +707,12 @@ const I18N={
     aiAggressive:'🔥 Aggressive', aiAggressiveSub:'Chases kills at any cost',
     aiDefensive:'🏰 Defensive', aiDefensiveSub:'Turtles and captures, waits you out',
     difficultyLabel:'Choose enemy difficulty:',
-    diffTrivial:'😴 Trivial', diffTrivialSub:'Enemy HP ×0.8',
-    diffEasy:'🙂 Easy', diffEasySub:'Enemy HP ×0.9',
-    diffNormal:'⚖️ Normal', diffNormalSub:'Enemy HP ×1.0',
-    diffHard:'🔥 Hard', diffHardSub:'Enemy HP ×1.1',
-    diffHell:'💀 Hell', diffHellSub:'Enemy HP ×1.2',
-    diffNightmare:'☠️ Nightmare', diffNightmareSub:'Enemy HP ×1.5',
+    diffTrivial:'😴 Trivial', diffTrivialSub:'Enemy HP/income ×0.8',
+    diffEasy:'🙂 Easy', diffEasySub:'Enemy HP/income ×0.9',
+    diffNormal:'⚖️ Normal', diffNormalSub:'Enemy HP/income ×1.0',
+    diffHard:'🔥 Hard', diffHardSub:'Enemy HP/income ×1.1',
+    diffHell:'💀 Hell', diffHellSub:'Enemy HP/income ×1.2',
+    diffNightmare:'☠️ Nightmare', diffNightmareSub:'Enemy HP/income ×1.5',
     troopsLabel:'Choose starting troop size:',
     troopsNone:'🚫 None', troopsNoneSub:'0 units, pure economy start',
     troopsFew:'🪖 Few', troopsFewSub:'3 units',
