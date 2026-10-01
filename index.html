@@ -221,10 +221,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .advanced-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}
 .advanced-grid fieldset{min-width:0;border:0}
 .advanced-grid fieldset:last-child{grid-column:1/-1}
-.menu-actions{position:sticky;bottom:-24px;display:flex;justify-content:flex-end;align-items:center;gap:8px;margin:16px -24px -24px;padding:14px 24px;background:rgba(27,36,48,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px);z-index:2}
+.menu-actions{position:sticky;bottom:-24px;display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px;margin:16px -24px -24px;padding:14px 24px 10px;background:rgba(27,36,48,.96);border-top:1px solid var(--line);backdrop-filter:blur(8px);z-index:2}
 #saveActions{display:none;gap:8px}
 #startGameBtn{padding:11px 24px;font-size:16px}
-.menu-credit{text-align:center;margin:12px 0 -8px;font-size:11px;color:var(--dim)}
+.menu-credit{flex-basis:100%;text-align:center;margin:0;font-size:11px;color:var(--dim)}
 .menu-credit a{color:var(--dim)}
 /* ================= 帮助面板 ================= */
 .legend{display:flex;flex-direction:column;gap:5px;margin:6px 0 10px}
@@ -404,8 +404,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button id="menuHelpBtn">📖 详细说明（单位 / 颜色图例）</button>
       <span id="saveActions"><button id="continueBtn" class="primary">▶️ 继续游戏</button><button id="deleteSaveBtn">🗑️ 删除存档</button></span>
       <button id="startGameBtn" class="primary">⚔️ 选择好了，开始游戏！</button>
+      <p class="menu-credit">Created by <a href="https://github.com/yuyuanjingxuan" target="_blank" rel="noopener">@yuyuanjingxuan</a></p>
     </div>
-    <p class="menu-credit">Created by <a href="https://github.com/yuyuanjingxuan" target="_blank" rel="noopener">@yuyuanjingxuan</a></p>
   </div>
 </div>
 
