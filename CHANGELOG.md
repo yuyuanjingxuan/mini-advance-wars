@@ -4,6 +4,20 @@ All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Fixed
+
+- Enemy units now perform at most one main action per turn instead of attacking and then also capturing, repairing, or healing
+- Enemy HQ captures now trigger the win condition immediately
+- Enemy artillery and rockets no longer plan attacks that would require moving and firing in the same turn
+- Owned-building healing now applies symmetrically at the start of each side's turn
+- Chinese and English rules now accurately describe the explicit Capture action, nine unit types, and zero starting funds
+
+### Changed
+
+- Expanded the zero-dependency CI script with regression checks for bilingual key parity, indirect-fire planning, AI action priority, enemy building healing, and HQ capture victory
+
 ## [1.0.1] - 2026-09-25
 
 ### Added

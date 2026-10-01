@@ -117,6 +117,68 @@ try {
   fail(`newGame() smoke test threw: ${e.message}`);
 }
 
+// --- Regression checks for rules that have previously drifted or broken ---
+try {
+  const missingKeys = vm.runInContext(`Object.keys(I18N.zh).filter(k=>!(k in I18N.en))
+    .concat(Object.keys(I18N.en).filter(k=>!(k in I18N.zh)))`, sandbox);
+  if (missingKeys.length) fail(`i18n key mismatch: ${missingKeys.join(', ')}`);
+  else ok('Chinese and English i18n keys match');
+
+  vm.runInContext(`
+    newGame(8);
+    G.map=Array.from({length:8},()=>Array(8).fill('plain'));
+    G.caps=new Map();
+    const gun=makeUnit('E','artillery',1,1);
+    const target=makeUnit('P','infantry',5,1);
+    G.units=[gun,target];
+  `, sandbox);
+  const indirectTarget = vm.runInContext('aiPlan(gun).target', sandbox);
+  if (indirectTarget) fail('indirect-fire AI planned an attack that requires moving first');
+  else ok('indirect-fire AI does not plan move-and-fire attacks');
+
+  vm.runInContext(`
+    newGame(8);
+    G.map[1][1]='city';
+    G.caps=new Map([['1,1',{owner:'P',prog:0}]]);
+    const actor=makeUnit('E','engineer',1,1);
+    const victim=makeUnit('P','infantry',2,1);
+    const damaged=makeUnit('E','tank',1,2); damaged.hp=4;
+    G.units=[actor,victim,damaged];
+  `, sandbox);
+  const mainAction = vm.runInContext('aiMainActionKind(actor,victim,true)', sandbox);
+  if (mainAction !== 'attack') fail(`AI selected ${mainAction} instead of its single attack action`);
+  else ok('AI chooses exactly one prioritized main action');
+
+  vm.runInContext(`
+    newGame(8);
+    const owned=[...G.caps].find(([,cap])=>cap.owner==='E');
+    const [hx,hy]=owned[0].split(',').map(Number);
+    const resting=makeUnit('E','infantry',hx,hy); resting.hp=4;
+    G.units=[resting];
+    healOwnedUnits('E');
+  `, sandbox);
+  const healedHp = vm.runInContext('resting.hp', sandbox);
+  if (healedHp !== 6) fail(`enemy-owned building healed to ${healedHp}, expected 6`);
+  else ok('owned-building healing applies to the enemy side');
+
+  vm.runInContext(`
+    newGame(8);
+    const enemyHq=[...G.caps].find(([key,cap])=>{
+      const [x,y]=key.split(',').map(Number);
+      return cap.owner==='E'&&G.map[y][x]==='hq';
+    });
+    const [qx,qy]=enemyHq[0].split(',').map(Number);
+    const capturer=makeUnit('P','infantry',qx,qy); capturer.hp=20;
+    G.units=[capturer,makeUnit('E','infantry',0,0)];
+    tryCapture(capturer); checkEnd();
+  `, sandbox);
+  const hqWon = vm.runInContext("G.over&&capAt(qx,qy).owner==='P'", sandbox);
+  if (!hqWon) fail('capturing the enemy HQ did not end the game immediately');
+  else ok('enemy HQ capture ends the game immediately');
+} catch (e) {
+  fail(`rule regression checks threw: ${e.message}`);
+}
+
 if (failed) {
   console.error('\nCI check failed.');
   process.exit(1);
