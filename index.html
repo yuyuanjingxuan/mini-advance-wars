@@ -289,12 +289,25 @@ button:disabled{opacity:.45;cursor:not-allowed}
 #scenarioBanner{display:none;padding:9px 14px;background:#172554;border-bottom:1px solid #31529a;color:#dbeafe;font-size:13px}
 #scenarioBanner b{color:#fff;margin-right:6px}
 #scenarioPicker{display:none;margin:10px auto 0;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:#111827;color:var(--text);font:inherit}
+.story-dialog{width:min(720px,calc(100vw - 24px));max-width:720px;text-align:left}
+.story-dialog-compact{max-width:620px}
+.story-kicker{color:var(--gold);font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.story-lines{display:flex;flex-direction:column;gap:9px;margin:18px 0;text-align:left}
+.story-line{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#141c28;line-height:1.55}
+.story-badge{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#31529a;color:#fff;font-weight:800}
+.story-line b{display:block;color:#b9d9ff;font-size:12px;margin-bottom:2px}
+.story-line span{color:var(--text);font-size:14px}
+.story-objectives{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.story-objectives div{padding:10px;border-radius:9px;background:#111827;border:1px solid var(--line)}
+.story-objectives b,.story-objectives span{display:block}
+.story-objectives b{color:var(--gold);font-size:12px;margin-bottom:5px}
+.story-objectives span{color:var(--dim);font-size:13px;line-height:1.45}
 .audio-setting{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim)}
 .audio-setting input{width:72px;accent-color:var(--blue)}
 @media(max-width:700px){
   header{gap:8px;padding:8px}header .title{width:100%}#main{display:block;padding:8px}#boardWrap{padding:8px;margin:auto}#side{width:100%;margin-top:10px}#log{height:150px}
   button{min-height:44px}.cell{min-width:36px;min-height:36px}.dialog{width:calc(100vw - 16px);padding:18px 12px}.sizes{gap:7px}.sizes button{padding:9px 10px}
-  #menu{padding:8px}#menu .dialog{padding:16px 12px}.menu-head{display:block}.language-picker{margin-top:10px}.quick-guide{grid-template-columns:1fr}.menu-section{padding:12px}.advanced-grid{grid-template-columns:1fr;padding:12px}.advanced-grid fieldset:last-child{grid-column:auto}.map-code-row{grid-template-columns:1fr}.menu-actions{position:static;display:grid;grid-template-columns:1fr;margin:14px 0 0;padding:14px 0 0;background:none;backdrop-filter:none}.menu-actions>*{width:100%}#saveActions{grid-template-columns:1fr 1fr}#saveActions button{width:100%}
+  #menu{padding:8px}#menu .dialog{padding:16px 12px}.menu-head{display:block}.language-picker{margin-top:10px}.quick-guide{grid-template-columns:1fr}.menu-section{padding:12px}.advanced-grid{grid-template-columns:1fr;padding:12px}.advanced-grid fieldset:last-child{grid-column:auto}.map-code-row{grid-template-columns:1fr}.menu-actions{position:static;display:grid;grid-template-columns:1fr;margin:14px 0 0;padding:14px 0 0;background:none;backdrop-filter:none}.menu-actions>*{width:100%}#saveActions{grid-template-columns:1fr 1fr}#saveActions button{width:100%}.story-objectives{grid-template-columns:1fr}.story-line{grid-template-columns:30px minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 
@@ -351,10 +364,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button data-mode="artilleryDuel">💥 炮兵对决<br><small>双方只能出火炮/火箭炮</small></button>
       <button data-mode="siege">🏰 坚守阵地<br><small>存活 15 回合，敌方持续刷新</small></button>
       <button data-mode="academy">🎓 战术学院<br><small>五个教学与挑战场景</small></button>
+      <button data-mode="story">📜 灰烬之环<br><small>固定关卡的剧情战役</small></button>
       </div>
       <select id="scenarioPicker" aria-label="教学场景"></select>
     </section>
-    <section class="menu-section" aria-labelledby="mapSizeLabel">
+    <section id="mapSettings" class="menu-section" aria-labelledby="mapSizeLabel">
       <h2 id="mapSizeLabel">选择地图规模（随机对称地图）</h2>
       <div class="sizes compact-options">
         <button data-size="8">小 8×8<br><small>快节奏</small></button>
@@ -370,7 +384,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       </div>
       <p id="mapCodeHint" class="field-hint"></p>
     </section>
-    <details class="menu-section advanced-options">
+    <details id="advancedSettings" class="menu-section advanced-options">
       <summary id="advancedLabel">高级对局设置</summary>
       <div class="advanced-grid">
         <fieldset><legend id="aiStyleLabel">选择敌方 AI 风格</legend>
@@ -406,6 +420,29 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button id="startGameBtn" class="primary">⚔️ 选择好了，开始游戏！</button>
       <p class="menu-credit">Created by <a href="https://github.com/yuyuanjingxuan" target="_blank" rel="noopener">@yuyuanjingxuan</a></p>
     </div>
+  </div>
+</div>
+
+<div id="storyBriefing" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="storyBriefingTitle">
+  <div class="dialog story-dialog">
+    <p id="storyAct" class="story-kicker"></p>
+    <h1 id="storyBriefingTitle"></h1>
+    <p id="storyWhen" class="sub"></p>
+    <div id="storyBriefingLines" class="story-lines"></div>
+    <div class="story-objectives">
+      <div><b id="storyPrimaryLabel">主要目标</b><span id="storyPrimary"></span></div>
+      <div><b id="storyFailureLabel">失败条件</b><span id="storyFailure"></span></div>
+      <div><b id="storyIntelLabel">情报</b><span id="storyIntel"></span></div>
+    </div>
+    <div class="sizes"><button id="storyBriefingBack">返回选关</button><button id="storyBriefingStart" class="primary">开始作战</button></div>
+  </div>
+</div>
+
+<div id="storyDialogue" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="storyDialogueTitle">
+  <div class="dialog story-dialog story-dialog-compact">
+    <h1 id="storyDialogueTitle">战场通讯</h1>
+    <div id="storyDialogueLines" class="story-lines"></div>
+    <p style="margin-top:16px"><button id="storyDialogueContinue" class="primary">继续</button></p>
   </div>
 </div>
 
@@ -650,6 +687,9 @@ const I18N={
     modeArtilleryDuel:'💥 炮兵对决', modeArtilleryDuelSub:'双方只能出火炮/火箭炮',
     modeSiege:'🏰 坚守阵地', modeSiegeSub:'存活 15 回合，敌方持续刷新',
     modeAcademy:'🎓 战术学院', modeAcademySub:'五个教学与挑战场景', scenarioLabel:'教学场景',
+    modeStory:'📜 灰烬之环', modeStorySub:'固定关卡的剧情战役', storyScenarioLabel:'故事任务', storyLocked:'尚未解锁', storyCompleted:'已完成',
+    storyPrimaryLabel:'主要目标', storyFailureLabel:'失败条件', storyIntelLabel:'情报', storyStart:'开始作战', storyBack:'返回选关', storyContinue:'继续', storyComms:'战场通讯',
+    storyRetry:'重新开始', storyNext:'下一任务', storyDebrief:'战后报告', storyLosses:(n)=>`我方损失：${n} 个单位`,
     scBasics:'基础行动', scBasicsObj:'移动、攻击，并占领标记城镇',
     scTerrain:'地形与克制', scTerrainObj:'利用森林、山地与重装兵消灭敌军',
     scIndirect:'间接火力', scIndirectObj:'使用火炮在射程外消灭全部目标',
@@ -780,6 +820,9 @@ const I18N={
     modeArtilleryDuel:'💥 Artillery Duel', modeArtilleryDuelSub:'Both sides: artillery/rocket only',
     modeSiege:'🏰 Hold the Line', modeSiegeSub:'Survive 15 turns, enemy respawns endlessly',
     modeAcademy:'🎓 Tactics Academy', modeAcademySub:'Five guided scenarios and challenges', scenarioLabel:'Tutorial scenario',
+    modeStory:'📜 The Ashen Ring', modeStorySub:'A fixed-mission story campaign', storyScenarioLabel:'Story mission', storyLocked:'Locked', storyCompleted:'Completed',
+    storyPrimaryLabel:'Primary Objective', storyFailureLabel:'Failure Conditions', storyIntelLabel:'Intel', storyStart:'Begin Operation', storyBack:'Mission Select', storyContinue:'Continue', storyComms:'Battlefield Transmission',
+    storyRetry:'Restart Mission', storyNext:'Next Mission', storyDebrief:'After-action Report', storyLosses:(n)=>`Units lost: ${n}`,
     scBasics:'Core Actions', scBasicsObj:'Move, attack, and capture the marked city',
     scTerrain:'Terrain & Counters', scTerrainObj:'Use forests, mountains, and heavies to defeat the enemy',
     scIndirect:'Indirect Fire', scIndirectObj:'Use artillery range to destroy every target',
@@ -940,15 +983,8 @@ function applyStaticTexts(){
     sizeBtns[4].innerHTML=T('sizeXXL')+'<br><small>'+T('sizeXXLsub')+'</small>';
   }
   set('gameModeLabel',T('gameModeLabel'));
-  const modeBtns=document.querySelectorAll('#menu button[data-mode]');
-  if(modeBtns.length===6){
-    modeBtns[0].innerHTML=T('modeSkirmish')+'<br><small>'+T('modeSkirmishSub')+'</small>';
-    modeBtns[1].innerHTML=T('modeInfantryDuel')+'<br><small>'+T('modeInfantryDuelSub')+'</small>';
-    modeBtns[2].innerHTML=T('modeArmorDuel')+'<br><small>'+T('modeArmorDuelSub')+'</small>';
-    modeBtns[3].innerHTML=T('modeArtilleryDuel')+'<br><small>'+T('modeArtilleryDuelSub')+'</small>';
-    modeBtns[4].innerHTML=T('modeSiege')+'<br><small>'+T('modeSiegeSub')+'</small>';
-    modeBtns[5].innerHTML=T('modeAcademy')+'<br><small>'+T('modeAcademySub')+'</small>';
-  }
+  const modeText={skirmish:['modeSkirmish','modeSkirmishSub'],infantryDuel:['modeInfantryDuel','modeInfantryDuelSub'],armorDuel:['modeArmorDuel','modeArmorDuelSub'],artilleryDuel:['modeArtilleryDuel','modeArtilleryDuelSub'],siege:['modeSiege','modeSiegeSub'],academy:['modeAcademy','modeAcademySub'],story:['modeStory','modeStorySub']};
+  document.querySelectorAll('#menu button[data-mode]').forEach(btn=>{const keys=modeText[btn.dataset.mode];if(keys)btn.innerHTML=T(keys[0])+'<br><small>'+T(keys[1])+'</small>';});
   updateScenarioMenu();updateScenarioBanner();
   set('aiStyleLabel',T('aiStyleLabel'));
   const aiBtns=document.querySelectorAll('#menu button[data-ai]');
@@ -980,6 +1016,8 @@ function applyStaticTexts(){
   set('startGameBtn',T('startGameBtn'));
   set('mapCodeLabel',T('mapCodeLabel'));set('randomMapBtn',T('randomMapBtn'));
   set('continueBtn',T('continueBtn'));set('deleteSaveBtn',T('deleteSaveBtn'));
+  set('storyPrimaryLabel',T('storyPrimaryLabel'));set('storyFailureLabel',T('storyFailureLabel'));set('storyIntelLabel',T('storyIntelLabel'));
+  set('storyBriefingStart',T('storyStart'));set('storyBriefingBack',T('storyBack'));set('storyDialogueTitle',T('storyComms'));set('storyDialogueContinue',T('storyContinue'));
   const mapCodeHint=document.getElementById('mapCodeHint');
   if(mapCodeHint&&G?.mapCode)mapCodeHint.textContent=T('mapCodeReady')(G.mapCode);
   updateSaveActions();
@@ -1045,8 +1083,7 @@ function applyStaticTexts(){
   set('prodTitle',T('prodTitle'));set('prodClose',T('prodCancel'));
   // 结果对话框
   set('againBtn',T('again'));set('toMenuBtn',T('backMenu'));
-  const rt=document.getElementById('resultTitle');if(rt&&G&&G.over)rt.textContent=G.resultWin?T('winTitle'):T('loseTitle');
-  const rx=document.getElementById('resultText');if(rx&&G&&G.over)rx.textContent=G.resultWin?T('winText')(G.turn):T('loseText')(G.turn);
+  if(G&&G.over)renderResult();
   // 语言按钮状态
   document.querySelectorAll('.langBtn').forEach(b=>{
     b.classList.toggle('primary',b.dataset.lang===LANG);
@@ -1198,6 +1235,8 @@ let difficultyChoice='normal'; // 主菜单选中的敌方强度档位，newGame
 const MAP_GEN_VERSION=1;
 const SAVE_SCHEMA_VERSION=2;
 const SAVE_KEY='mini-advance-wars-save';
+const CAMPAIGN_SCHEMA_VERSION=1;
+const CAMPAIGN_KEY='mini-advance-wars-campaign';
 const VALID_MAP_SIZES=[8,10,12,14,16];
 function createRng(seed){
   let state=seed>>>0;
@@ -1241,6 +1280,7 @@ const DIFFICULTY_TIERS={
 };
 let gameModeChoice='skirmish'; // 主菜单选中的游戏模式，newGame 时写入 G.gameMode
 let scenarioChoice='basics';
+let missionChoice=0;
 let boardFocus={x:0,y:0};
 // 游戏模式：pool=null 表示遭遇战不限制兵种（沿用 TROOPS_TIERS 各档原有池子）；
 // 三种对决模式限制双方（含工厂生产）只能用列出的兵种，运兵车三种对决都不开放（无战斗力，对决模式里没有意义）
@@ -1251,6 +1291,7 @@ const GAME_MODES={
   artilleryDuel: {pool:['artillery','rocket']},
   siege:         {pool:null}, // 坚守阵地不限制玩家/初始兵种池，敌方刷新兵种池单独在 SIEGE 里定义
   academy:       {pool:null},
+  story:         {pool:null},
 };
 // 当前对局允许的兵种列表（null=不限制，返回全部 UNIT_TYPES 键）；生产菜单、初始部队随机池、AI 造兵都统一走这个函数
 function allowedUnitTypes(){
@@ -1272,21 +1313,70 @@ const SCENARIOS={
   indirect:{title:'scIndirect',objective:'scIndirectObj',size:8,seed:0xACAD0003,goal:{type:'eliminate'},
     tiles:[[1,6,'hq'],[2,6,'forest'],[4,4,'forest']],units:[['P','artillery',1,6],['P','infantry',2,5],['E','heavy',4,6],['E','infantry',5,4],['E','tank',6,2]]},
   transport:{title:'scTransport',objective:'scTransportObj',size:8,seed:0xACAD0004,goal:{type:'capture',x:6,y:1},
-    tiles:[[1,6,'hq'],[6,1,'city'],[3,5,'river'],[3,4,'ford'],[3,3,'river'],[4,2,'forest'],[5,2,'forest']],units:[['P','transport',1,5],['P','infantry',2,5],['E','infantry',5,3],['E','recon',6,2]]},
+    tiles:[[1,6,'hq'],[6,1,'city'],[3,5,'water'],[3,4,'plain'],[3,3,'water'],[4,2,'forest'],[5,2,'forest']],units:[['P','transport',1,5],['P','infantry',2,5],['E','infantry',5,3],['E','recon',6,2]]},
   siege:{title:'scSiege',objective:'scSiegeObj',size:8,seed:0xACAD0005,goal:{type:'survive',turns:15},
     tiles:[[1,6,'hq'],[2,6,'city'],[1,5,'factory'],[3,5,'forest'],[4,4,'forest'],[3,3,'mountain']],units:[['P','infantry',1,5],['P','heavy',2,5],['P','artillery',2,6]]},
 };
+const STORY_ORDER=[0,3,6];
+const S=(zh,en)=>({zh,en});
+const MISSION_DEFS={
+  0:{id:0,act:S('序章','Prologue'),title:S('第三百年的操练','The Three-Hundredth Drill'),when:S('静历三百年 三月初五 · 第七锚塔操练场','S.R. 300, Third Month, Day 5 · Anchor Seven Drill Ground'),size:8,seed:0xA5000000,aiStyle:'balanced',difficulty:'normal',economy:{income:false,playerProduction:false,enemyProduction:false},
+    briefing:[["卫长庚","Wei Changgeng",S('指挥官，欢迎来到第七锚塔。按老规矩，新指挥官到任要打一场完全对等的操练。','Commander, welcome to Anchor Seven. By old custom, every new commander begins with a perfectly matched drill.')],["苏檀","Su Tan",S('档案员苏檀。提醒一句，士官长每次都说这是最后一次讲这个笑话。','Archivist Su Tan. A reminder: the sergeant major says every time that this is the last time he tells that joke.')],["卫长庚","Wei Changgeng",S('打吧。让我看看新来的指挥官会不会走路。','Let us see whether the new commander knows how to move.')]],
+    objective:S('歼灭二连或占领二连总部。','Eliminate Second Company or capture its HQ.'),failure:S('我方全灭或总部被占。','All player units lost or your HQ captured.'),intel:S('二连的阵型和你完全对称。','Second Company is a perfect mirror of your formation.'),
+    tiles:[[1,6,'hq','P'],[2,6,'factory','P'],[1,5,'city','P'],[6,1,'hq','E'],[5,1,'factory','E'],[6,2,'city','E'],[3,3,'forest'],[4,4,'forest']],
+    units:{P:[['infantry',1,5],['infantry',2,5],['heavy',1,4],['recon',2,6]],E:'mirror'},objectives:[{kind:'eliminateOrCaptureHq'}],failures:['allDead','hqLost'],
+    events:[{id:'m0-r1',on:{roundStart:1},do:[{type:'showDialog',lines:[["卫长庚","Wei Changgeng",S('蓝格可以移动，红框是当前能攻击的目标。步兵类站上建筑后可以执行占领。','Blue tiles show movement; red outlines mark targets. Foot units can capture buildings.')]]}]},{id:'m0-r3',on:{roundStart:3},do:[{type:'showDialog',lines:[["苏檀","Su Tan",S('指挥官，锚塔的钟响了。','Commander, the Anchor Tower bell is ringing.')],["卫长庚","Wei Changgeng",S('那口钟挂了三百年，从来没响过。','That bell has hung there for three hundred years. It has never rung.')]]}]}],
+    debrief:S('操练结束得很快，但东边哨所报告：边境线外出现了一支没有旗帜、不回应呼叫的部队。天快亮时，那支部队开始移动了。','The drill ended quickly, but the eastern outpost reported an unmarked force beyond the border. Near dawn, it began to move.')},
+  3:{id:3,act:S('第一幕 · 静默之后','Act I · After the Silence'),title:S('越界','Crossing the Line'),when:S('静历三百年 三月初八 · 衡朔边境','S.R. 300, Third Month, Day 8 · Heng–Shuo Border'),size:12,seed:0xA5000003,aiStyle:'defensive',difficulty:'normal',economy:{income:false,playerProduction:false,enemyProduction:false},
+    briefing:[["严峥","Yan Zheng",S('命令：越过边境，拿下朔国第三前哨。','Orders: cross the border and take Shuo Third Outpost.')],["卫长庚","Wei Changgeng",S('元帅，越界意味着三百年来第一次对别的国家开战。','Marshal, crossing the line means the first war between nations in three hundred years.')],["严峥","Yan Zheng",S('我知道。这是命令。','I know. That is an order.')]],
+    objective:S('占领朔国第三前哨总部。','Capture Shuo Third Outpost HQ.'),failure:S('我方全灭或总部被占。','All player units lost or your HQ captured.'),intel:S('朔军据险防守；第 4 回合局势可能改变。','Shuo is entrenched; the situation may change on round 4.'),
+    tiles:[[1,10,'hq','P'],[2,10,'factory','P'],[10,1,'hq','E'],[9,1,'city','E'],[10,2,'city','E'],[7,1,'forest'],[8,1,'mountain'],[6,2,'forest'],[7,2,'forest'],[8,2,'mountain'],[7,3,'water'],[8,3,'plain'],[9,3,'water'],[6,3,'water'],[5,3,'water']],
+    units:{P:[['infantry',1,9],['infantry',2,9],['infantry',2,10],['heavy',1,8],['heavy',2,8],['tank',3,9],['artillery',3,10]],E:[['tank',10,2,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3,criticalRule:'retreatAtOneHp'}],['infantry',9,2],['infantry',10,3],['infantry',8,2],['artillery',9,3]]},objectives:[{kind:'captureHq'}],failures:['allDead','hqLost'],
+    events:[{id:'m3-r1',on:{roundStart:1},do:[{type:'showDialog',lines:[["霍岚","Huo Lan",S('衡国的指挥官，你越界了。退回去，我不想开第一枪。','Heng commander, you crossed the line. Turn back. I do not want to fire the first shot.')]]}]},{id:'m3-r4',on:{roundStart:4},do:[{type:'removeUnits',factionTag:'shuo'},{type:'spawnMirror'},{type:'setAiStyle',value:'balanced'},{type:'setObjective',value:{kind:'eliminate'}},{type:'showDialog',lines:[["霍岚","Huo Lan",S('你也看见了？那些东西是冲着你来的。朔国撤了。','You see them too? Those things came for you. Shuo is withdrawing.')],["苏檀","Su Tan",S('协议记录了一次镜像事件。它复制的是我们。','The Accord recorded a mirror event. It copied us.')]]}]}],debrief:S('朔国撤走后，苏檀确认镜像部队出现的时刻与我军越界只差十一秒。严峥的电报只有三个字：做得好。','After Shuo withdrew, Su Tan confirmed the mirror force appeared eleven seconds after the crossing. Yan Zheng sent only three words: well done.')},
+  6:{id:6,act:S('第二幕 · 镜子里的国家','Act II · The Nation in the Mirror'),title:S('第七营','The Seventh Battalion'),when:S('静历三百年 三月二十 · 第七锚塔西侧山地','S.R. 300, Third Month, Day 20 · Western Mountains'),size:14,seed:0xA5000006,aiStyle:'balanced',difficulty:'normal',economy:{income:false,playerProduction:false,enemyProduction:false},
+    briefing:[["卫长庚","Wei Changgeng",S('敌人第一次打出了旗号：衡国第七营。那是三百年前的番号。','For the first time, the enemy raised a banner: Heng Seventh Battalion, a designation three centuries old.')],["苏檀","Su Tan",S('他们的指挥官叫卫苍。','Their commander calls himself Wei Cang.')],["卫长庚","Wei Changgeng",S('我家族谱第一页就是这个名字。指挥官，这一仗我得上。','That name is on the first page of my family register. Commander, I must fight this battle.')]],
+    objective:S('击败卫苍。','Defeat Wei Cang.'),failure:S('卫长庚阵亡；我方全灭；总部被占。','Wei Changgeng defeated; all player units lost; or your HQ captured.'),intel:S('卫苍是卫长庚的镜像。','Wei Cang replaces Wei Changgeng in the mirrored force.'),
+    tiles:[[1,12,'hq','P'],[12,1,'hq','E'],[2,12,'factory','P'],[11,1,'factory','E'],[4,4,'mountain'],[5,4,'mountain'],[6,4,'mountain'],[7,9,'mountain'],[8,9,'mountain'],[9,9,'mountain'],[3,7,'forest'],[4,7,'forest'],[9,6,'forest'],[10,6,'forest']],
+    units:{P:[['heavy',1,11,{rank:'hero',characterId:'weiChanggeng',missionRef:'weiChanggeng',level:3,criticalRule:'failOnDefeat'}],['infantry',2,11],['infantry',1,10],['infantry',2,10],['heavy',3,11],['artillery',3,12],['medic',1,12],['engineer',3,10]],E:'mirror',mirrorReplace:{weiChanggeng:{type:'heavy',rank:'boss',characterId:'weiCang',missionRef:'weiCang',level:3,criticalRule:'retreatOnDefeat'}}},objectives:[{kind:'defeatUnit',unitRef:'weiCang'}],failures:[{kind:'unitDefeated',unitRef:'weiChanggeng'},'allDead','hqLost'],
+    events:[{id:'m6-r1',on:{roundStart:1},do:[{type:'showDialog',lines:[["卫苍","Wei Cang",S('第七营卫苍在此。你们是哪一路的援军，为什么不回应军令？','Wei Cang of the Seventh Battalion. Which relief force are you, and why do you ignore orders?')]]}]},{id:'m6-r4',on:{roundStart:4},do:[{type:'showDialog',lines:[["卫长庚","Wei Changgeng",S('卫苍！我是卫家第十二代，卫长庚！','Wei Cang! I am Wei Changgeng, twelfth generation of the Wei family!')],["卫苍","Wei Cang",S('我没有第十二代。我儿子还不到三岁。','There is no twelfth generation. My son is not yet three.')]]}]}],debrief:S('苏檀核对了旗号与阵亡名册：他们不是复制品，而是三百年前真正的第七营。我们之所以与他们一样，是因为边境军团照着他们的手册操练了三百年。','Su Tan checked the banner and casualty rolls: they are not copies, but the true Seventh Battalion from three centuries ago. We mirror them because the Marchguard trained from their manual for three hundred years.')},
+};
+const txt=value=>value&&typeof value==='object'?(value[LANG]||value.zh):String(value||'');
+function defaultCampaignProgress(){return{schemaVersion:CAMPAIGN_SCHEMA_VERSION,unlocked:[0],completed:[],endings:[],best:{},lastMission:0};}
+function readCampaignProgress(){
+  try{const p=JSON.parse(localStorage.getItem(CAMPAIGN_KEY));if(!p||p.schemaVersion!==CAMPAIGN_SCHEMA_VERSION||!Array.isArray(p.unlocked)||!Array.isArray(p.completed))return defaultCampaignProgress();return p;}catch(e){return defaultCampaignProgress();}
+}
+function saveCampaignProgress(p){try{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify(p));}catch(e){}}
+function completeCampaignMission(id,turns,losses){
+  const p=readCampaignProgress();if(!p.completed.includes(id))p.completed.push(id);
+  const next=STORY_ORDER[STORY_ORDER.indexOf(id)+1];if(next!==undefined&&!p.unlocked.includes(next))p.unlocked.push(next);
+  const old=p.best[id];if(!old||turns<old.turns||(turns===old.turns&&losses<old.losses))p.best[id]={turns,losses};
+  p.lastMission=next===undefined?id:next;saveCampaignProgress(p);return p;
+}
 function updateScenarioMenu(){
   const picker=document.getElementById('scenarioPicker');if(!picker)return;
-  picker.style.display=gameModeChoice==='academy'?'block':'none';
-  picker.setAttribute('aria-label',T('scenarioLabel'));
-  picker.innerHTML=Object.entries(SCENARIOS).map(([id,s])=>`<option value="${id}"${id===scenarioChoice?' selected':''}>${T(s.title)} — ${T(s.objective)}</option>`).join('');
+  const fixedStory=gameModeChoice==='story';
+  document.getElementById('mapSettings').hidden=fixedStory;
+  const advanced=document.getElementById('advancedSettings');advanced.hidden=fixedStory;if(fixedStory)advanced.open=false;
+  picker.style.display=['academy','story'].includes(gameModeChoice)?'block':'none';
+  if(gameModeChoice==='story'){
+    const progress=readCampaignProgress();picker.setAttribute('aria-label',T('storyScenarioLabel'));
+    picker.innerHTML=STORY_ORDER.map(id=>{const m=MISSION_DEFS[id],open=progress.unlocked.includes(id),done=progress.completed.includes(id);return`<option value="${id}"${id===missionChoice?' selected':''}${open?'':' disabled'}>${id}. ${txt(m.title)}${done?' — '+T('storyCompleted'):open?'':' — '+T('storyLocked')}</option>`;}).join('');
+  }else{
+    picker.setAttribute('aria-label',T('scenarioLabel'));
+    picker.innerHTML=Object.entries(SCENARIOS).map(([id,s])=>`<option value="${id}"${id===scenarioChoice?' selected':''}>${T(s.title)} — ${T(s.objective)}</option>`).join('');
+  }
 }
 function updateScenarioBanner(){
-  const banner=document.getElementById('scenarioBanner'),s=G&&G.scenario&&SCENARIOS[G.scenario.id];
+  const banner=document.getElementById('scenarioBanner'),s=G&&G.scenario&&SCENARIOS[G.scenario.id],m=G&&G.gameMode==='story'&&MISSION_DEFS[G.story.missionId];
   if(!banner)return;
-  banner.style.display=s?'block':'none';
+  banner.style.display=s||m?'block':'none';
   if(s){document.getElementById('scenarioTitle').textContent=T(s.title);document.getElementById('scenarioObjective').textContent=T(s.objective);}
+  if(m){document.getElementById('scenarioTitle').textContent=`${m.id}. ${txt(m.title)}`;document.getElementById('scenarioObjective').textContent=storyObjectiveText(m,G.story.objective);}
+}
+function storyObjectiveText(m,o){
+  if(o.kind===m.objectives[0].kind)return txt(m.objective);
+  if(o.kind==='eliminate')return LANG==='zh'?'歼灭镜像部队。':'Eliminate the mirror force.';
+  return txt(m.objective);
 }
 function applyScenario(id){
   const s=SCENARIOS[id];if(!s)return;
@@ -1298,6 +1388,78 @@ function applyScenario(id){
   G.scenario={id,goal:{...s.goal}};
   G.funds={P:0,E:0};
   if(s.goal.type==='survive')G.siege={nextWaveTurn:SIEGE.waveInterval};
+}
+function storyUnitFrom(def,side,mirrorSize,replace){
+  let[type,x,y,meta={}]=def;meta={...meta};
+  const replacement=replace&&meta.missionRef&&replace[meta.missionRef];
+  if(replacement){type=replacement.type||type;meta={...meta,...replacement};}
+  if(mirrorSize){x=mirrorSize-1-x;y=mirrorSize-1-y;if(!replacement){meta.missionRef=meta.missionRef?`mirror-${meta.missionRef}`:null;meta.characterId=meta.characterId?`mirror-${meta.characterId}`:null;meta.rank=meta.rank==='hero'?'boss':meta.rank;}}
+  return makeUnit(side,type,x,y,meta);
+}
+function deployStoryUnits(m){
+  const pDefs=m.units.P,Gp=pDefs.map(d=>storyUnitFrom(d,'P'));
+  const eDefs=m.units.E==='mirror'?pDefs:m.units.E;
+  const Ge=eDefs.map(d=>storyUnitFrom(d,'E',m.units.E==='mirror'?m.size:0,m.units.mirrorReplace));
+  if(m.id===3)Ge.forEach(u=>u.factionTag='shuo');
+  G.units=[...Gp,...Ge];
+}
+function buildStoryMap(m){
+  G.map=Array.from({length:m.size},()=>Array(m.size).fill('plain'));G.caps=new Map();
+  for(const[x,y,t,owner]of m.tiles){G.map[y][x]=t;if(CAPTURABLE.includes(t))G.caps.set(capKey(x,y),{owner:owner||null,prog:owner?CAP_NEED:0});}
+}
+function showStoryLines(lines){
+  const box=$('#storyDialogueLines');box.innerHTML=lines.map(([zhName,enName,line])=>`<div class="story-line"><i class="story-badge">${(LANG==='zh'?zhName:enName).slice(0,1)}</i><div><b>${LANG==='zh'?zhName:enName}</b><span>${txt(line)}</span></div></div>`).join('');
+  return new Promise(resolve=>{const btn=$('#storyDialogueContinue');btn.onclick=()=>{closeDialog($('#storyDialogue'));resolve();};openDialog($('#storyDialogue'));});
+}
+function showStoryBriefing(m){
+  $('#storyAct').textContent=txt(m.act);$('#storyBriefingTitle').textContent=`${m.id}. ${txt(m.title)}`;$('#storyWhen').textContent=txt(m.when);
+  $('#storyBriefingLines').innerHTML=m.briefing.map(([zhName,enName,line])=>`<div class="story-line"><i class="story-badge">${(LANG==='zh'?zhName:enName).slice(0,1)}</i><div><b>${LANG==='zh'?zhName:enName}</b><span>${txt(line)}</span></div></div>`).join('');
+  $('#storyPrimary').textContent=txt(m.objective);$('#storyFailure').textContent=txt(m.failure);$('#storyIntel').textContent=txt(m.intel);
+  closeDialog($('#menu'));openDialog($('#storyBriefing'));
+}
+function startStoryMission(id){
+  const m=MISSION_DEFS[id];if(!m||!readCampaignProgress().unlocked.includes(id))return false;
+  const seed=m.seed>>>0;mapRng=createRng(seed);gameRng=createRng((seed^0x9E3779B9)>>>0);uid=0;
+  G={size:m.size,map:[],mapSeed:seed,mapCode:encodeMapCode(m.size,seed),units:[],turn:1,phase:'P',sel:null,reach:null,hover:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:0,E:0},aiStyle:m.aiStyle,difficulty:m.difficulty,gameMode:'story',troopsTier:'none',story:{missionId:id,objective:{...m.objectives[0]},firedEventIds:[],initialPlayerUnits:m.units.P.length,playerLosses:0}};
+  buildStoryMap(m);deployStoryUnits(m);board.style.setProperty('--n',m.size);fitBoard();
+  $('#menu').classList.add('hidden');$('#storyBriefing').classList.add('hidden');$('#overlay').classList.add('hidden');$('#log').innerHTML='';
+  log(T('startLog'),'phase');updateAiStyleTag();updateScenarioBanner();SFX.start();BGM.start('P');render();showInfo(null);saveGame();runStoryEvents('roundStart',{round:1});return true;
+}
+function storyUnit(ref){return G.units.find(u=>u.missionRef===ref);}
+function matchesStoryTrigger(on,trigger,data){
+  if(!Object.prototype.hasOwnProperty.call(on,trigger))return false;
+  if(trigger==='roundStart')return on.roundStart===data.round;
+  if(['playerPhaseEnd','enemyPhaseStart','enemyPhaseEnd','roundEnd'].includes(trigger))return on[trigger]===true;
+  if(['unitRetreat','unitDefeated','unitRemoved'].includes(trigger))return on[trigger]===data.unitRef;
+  if(trigger==='capture'){const c=on.capture;return c&&['x','y','terrain','toOwner'].every(k=>c[k]===undefined||c[k]===data[k]);}
+  return false;
+}
+async function runStoryEvents(trigger,data={}){
+  if(!G||G.gameMode!=='story')return;
+  const m=MISSION_DEFS[G.story.missionId];
+  for(const event of m.events.filter(e=>!G.story.firedEventIds.includes(e.id)&&matchesStoryTrigger(e.on,trigger,data))){
+    G.story.firedEventIds.push(event.id);
+    saveGame();
+    for(const action of event.do){
+      if(action.type==='showDialog')await showStoryLines(action.lines);
+      else if(action.type==='removeUnits')G.units=G.units.filter(u=>u.factionTag!==action.factionTag);
+      else if(action.type==='spawnMirror'){
+        const survivors=G.units.filter(u=>u.side==='P'&&!u.aboard);
+        G.units.push(...survivors.map(u=>{const v=makeUnit('E',u.type,G.size-1-u.x,G.size-1-u.y,{level:u.level,rank:u.rank});v.hp=Math.min(v.maxHp,u.hp);v.missionRef=`mirror-${u.id}`;return v;}));
+      }else if(action.type==='setAiStyle')G.aiStyle=action.value;
+      else if(action.type==='setObjective')G.story.objective={...action.value};
+    }
+    render();updateAiStyleTag();saveGame();
+  }
+}
+function checkStoryEnd(){
+  const m=MISSION_DEFS[G.story.missionId],players=G.units.filter(u=>u.side==='P'),enemy=G.units.filter(u=>u.side==='E');
+  const hqOwner=owner=>[...G.caps].some(([key,c])=>{const[x,y]=key.split(',').map(Number);return G.map[y][x]==='hq'&&c.owner===owner;});
+  const failed=m.failures.some(f=>f==='allDead'?!players.length:f==='hqLost'?!hqOwner('P'):f.kind==='unitDefeated'&&!storyUnit(f.unitRef));
+  if(failed){G.over=true;showResult(false);return;}
+  const o=G.story.objective;
+  const won=o.kind==='eliminateOrCaptureHq'?(!enemy.length||!hqOwner('E')):o.kind==='captureHq'?!hqOwner('E'):o.kind==='eliminate'?!enemy.length:o.kind==='defeatUnit'&&!storyUnit(o.unitRef);
+  if(won){G.over=true;showResult(true,o.kind==='captureHq'?'hq':undefined);}
 }
 const $=s=>document.querySelector(s);
 const board=$('#board');
@@ -1447,6 +1609,7 @@ window.addEventListener('resize',()=>{
   fitBoardTimer=setTimeout(fitBoard,150); // 防抖，避免拖拽窗口时高频重算
 });
 function collectIncome(side){
+  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy.income)return;
   const n=countOwned(side);
   if(!n)return;
   // 敌方强度：难度档位同时放大敌方收入（跟 HP 倍率同一档位、同一数值），我方恒定 ×1.0
@@ -1466,6 +1629,7 @@ function healOwnedUnits(side){
 }
 // AI 建造：敌方回合结束时在己方空工厂造兵（新单位下回合行动）
 function aiBuild(){
+  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy.enemyProduction)return;
   if(G.units.filter(u=>u.side==='E').length>=MAX_SIDE_UNITS)return;
   const factories=[];
   for(let y=0;y<G.size;y++)for(let x=0;x<G.size;x++){
@@ -1523,6 +1687,7 @@ function openDialog(dialog,trigger=document.activeElement){
 }
 function closeDialog(dialog){dialog.classList.add('hidden');dialogTrigger?.focus?.();dialogTrigger=null;}
 function openProdMenu(x,y){
+  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy.playerProduction)return;
   prodFactory={x,y};
   $('#prodFunds').textContent=T('prodFunds')(G.funds.P);
   const list=$('#prodList');
@@ -1540,7 +1705,7 @@ function openProdMenu(x,y){
   openDialog($('#prodDialog'));
 }
 function buyUnit(type){
-  if(!prodFactory||!G||G.funds.P<UNIT_COSTS[type])return;
+  if(!prodFactory||!G||G.funds.P<UNIT_COSTS[type]||G.units.filter(u=>u.side==='P').length>=MAX_SIDE_UNITS)return;
   G.funds.P-=UNIT_COSTS[type];
   const u=makeUnit('P',type,prodFactory.x,prodFactory.y);
   u.acted=true; // 当回合待机
@@ -1563,7 +1728,7 @@ function createSaveDto(){
     game:{
       size:G.size,map:G.map,mapSeed:G.mapSeed,mapCode:G.mapCode,units:G.units,turn:G.turn,phase:G.phase,
       caps:[...G.caps.entries()],funds:G.funds,aiStyle:G.aiStyle,difficulty:G.difficulty,gameMode:G.gameMode,
-      troopsTier:G.troopsTier,siege:G.siege||null,scenario:G.scenario||null,
+      troopsTier:G.troopsTier,siege:G.siege||null,scenario:G.scenario||null,story:G.story||null,
     },
   };
 }
@@ -1601,6 +1766,7 @@ function restoreGame(dto=readSave()){
   mapRng=createRng(G.mapSeed);
   aiStyleChoice=G.aiStyle;difficultyChoice=G.difficulty;gameModeChoice=G.gameMode;troopsChoice=G.troopsTier||'none';sizeChoice=G.size;
   if(G.scenario&&SCENARIOS[G.scenario.id])scenarioChoice=G.scenario.id;
+  if(G.story&&MISSION_DEFS[G.story.missionId])missionChoice=G.story.missionId;
   syncMenuChoices();
   prodFactory=null;
   board.style.setProperty('--n',G.size);fitBoard();
@@ -1614,6 +1780,7 @@ function syncMenuChoices(){
   for(const key in choices)document.querySelectorAll(`#menu button[data-${key}]`).forEach(b=>b.classList.toggle('primary',b.dataset[key]===choices[key]));
   const input=document.getElementById('mapCodeInput');if(input&&G)input.value=G.mapCode;
   const hint=document.getElementById('mapCodeHint');if(hint&&G)hint.textContent=T('mapCodeReady')(G.mapCode);
+  updateScenarioMenu();
 }
 
 // ================= 地图生成（地理化：山脉山脊 + 河流浅滩 + 森林集群，180° 对称 + 连通性校验） =================
@@ -1795,25 +1962,36 @@ async function resolveHit(a,d,counterMult){
   let dmg=Math.round(calcDamage(a,d,a.x,a.y,0.85+gameRandom()*0.3)*counterMult);
   if(crit)dmg=Math.round(dmg*CRIT_MULT);
   dmg=Math.max(1,dmg);
-  d.hp=Math.max(0,d.hp-dmg);
+  const storyRule=G.gameMode==='story'&&d.criticalRule;
+  d.hp=Math.max(storyRule==='retreatAtOneHp'?1:0,d.hp-dmg);
   render();
   floatText(d.x,d.y,'-'+dmg+(crit?' 会心!':''),crit?'crit':'dmg');
   crit?SFX.crit():SFX.hit();
   await sleep(320);
   gainXp(a,8);
-  if(d.hp<=0){
+  if(storyRule==='retreatAtOneHp'&&d.hp===1){
+    G.units=G.units.filter(u=>u.id!==d.id);render();
+    await runStoryEvents('unitRetreat',{unitRef:d.missionRef});
+  }else if(d.hp<=0){
     log(T('killLog')(a,d),'kill');
     SFX.destroy();
     gainXp(a,25);
     const rider=riderOf(d); // 运兵车被击毁：车内乘客一同阵亡
     G.units=G.units.filter(u=>u.id!==d.id&&(!rider||u.id!==rider.id));
+    if(G.gameMode==='story'&&d.side==='P')G.story.playerLosses++;
+    if(G.gameMode==='story'&&rider?.side==='P')G.story.playerLosses++;
     if(rider)log(T('cargoLostLog')(rider.type),'kill');
     render();
+    if(G.gameMode==='story'){
+      await runStoryEvents(storyRule==='retreatOnDefeat'?'unitRetreat':'unitDefeated',{unitRef:d.missionRef});
+      await runStoryEvents('unitRemoved',{unitRef:d.missionRef});
+    }
   }else{
     log(T('remain')(d.type,d.hp),'dim');
   }
 }
 function gainXp(u,n){
+  if(G&&G.gameMode==='story')return;
   u.xp+=n;
   let need=30+(u.level-1)*10;
   while(u.xp>=need){
@@ -1834,6 +2012,7 @@ function gainXp(u,n){
   }
 }
 function checkEnd(){
+  if(G.gameMode==='story'){checkStoryEnd();return;}
   const p=G.units.some(u=>u.side==='P');
   const e=G.units.some(u=>u.side==='E');
   if(!p){G.over=true;showResult(false);return;} // 我方全灭永远直接战败，坚守阵地也不例外
@@ -2142,13 +2321,17 @@ async function aiAct(u){
   render();
 }
 async function startEnemyPhase(){
-  G.phase='E';G.busy=true;deselect();
+  G.busy=true;deselect();
+  await runStoryEvents('playerPhaseEnd',{});
+  if(G.over)return;
+  G.phase='E';
   BGM.setSide('E'); // 敌方回合切换为敌方主题
   render();updateTop();
   log(T('phaseLog')(G.turn,T('phaseE')),'phase');
   SFX.turn();
   collectIncome('E');updateFunds(); // 敌方建筑收入
   healOwnedUnits('E'); // 敌方同样在自己回合开始时由所属建筑回复 2 HP
+  await runStoryEvents('enemyPhaseStart',{});
   await sleep(450);
   for(const u of G.units.filter(v=>v.side==='E'&&!v.aboard)){
     if(u.hp<=0||G.over)continue;
@@ -2158,6 +2341,8 @@ async function startEnemyPhase(){
     await sleep(220);
   }
   aiBuild(); // 敌方回合结束：在己方空工厂造兵（下回合行动，坚守阵地模式下敌方没有工厂，自然跳过）
+  await runStoryEvents('enemyPhaseEnd',{});
+  await runStoryEvents('roundEnd',{});
   // 坚守阵地：每 waveInterval 回合刷新一波敌方单位，达到总回合数后即存活获胜
   if((G.gameMode==='siege'||G.scenario?.goal.type==='survive')&&G.siege){
     if(G.turn>=G.siege.nextWaveTurn){
@@ -2168,7 +2353,7 @@ async function startEnemyPhase(){
     if(G.turn+1>total){G.over=true;showResult(true,'survive');return;}
   }
   // 新回合：本方建筑回血（只有己方占领的建筑才回血）
-  G.turn++;G.phase='P';G.busy=false;
+  G.turn++;G.phase='P';
   BGM.setSide('P'); // 我方回合切换回我方主题
   collectIncome('P');updateFunds(); // 我方建筑收入
   for(const u of G.units.filter(v=>v.side==='P'))u.acted=false;
@@ -2178,6 +2363,8 @@ async function startEnemyPhase(){
   log(T('phaseLog')(G.turn,T('phaseP')),'phase');
   SFX.turn();
   render();updateTop();
+  await runStoryEvents('roundStart',{round:G.turn});
+  G.busy=false;render();
   saveGame();
 }
 
@@ -2307,7 +2494,7 @@ function showInfo(u){
     <div class="uhead"><span class="uemoji">${uicon}</span>
       <span><span class="uname">${b.name}</span><span class="uside ${u.side==='P'?'p':'e'}">${sideName(u.side)} Lv.${u.level}</span></span>
     </div>
-    <div style="font-size:12px;color:var(--dim)">HP ${u.hp}/${u.maxHp}　经验 ${u.xp}/${30+(u.level-1)*10}</div>
+    <div style="font-size:12px;color:var(--dim)">HP ${u.hp}/${u.maxHp}${G.gameMode==='story'?'':'　经验 '+u.xp+'/'+(30+(u.level-1)*10)}</div>
     <div class="statbar"><b class="${hc}" style="width:${Math.round(ratio*100)}%"></b></div>
     <div class="stats">
       <span>${T('thAtk')} <b>${u.atk}</b></span><span>${T('thDef')} <b>${u.def}</b></span>
@@ -2329,15 +2516,17 @@ function log(msg,cls='info'){
 }
 
 // ================= 流程 =================
-function makeUnit(side,type,x,y){
+function makeUnit(side,type,x,y,meta={}){
   const b=UNIT_TYPES[type];
   // 敌方强度：只放大敌方单位的 HP 上限（我方恒定 ×1.0），四舍五入且最低 1，避免出现 0/负数 HP
   const mult=side==='E'?(DIFFICULTY_TIERS[G&&G.difficulty]||DIFFICULTY_TIERS.normal).hpMult:1;
   const maxHp=Math.max(1,Math.round(b.hp*mult));
-  return{id:++uid,side,type,x,y,hp:maxHp,maxHp,atk:b.atk,def:b.def,
-         move:b.move,minR:b.minR,maxR:b.maxR,level:1,xp:0,acted:false};
+    const level=Math.max(1,meta.level||1),bonus=level-1,storyMaxHp=maxHp+bonus*2;
+    return{id:++uid,side,type,x,y,hp:storyMaxHp,maxHp:storyMaxHp,atk:b.atk+bonus,def:b.def+bonus,
+      move:b.move,minR:b.minR,maxR:b.maxR,level,xp:0,acted:false,rank:meta.rank||'regular',characterId:meta.characterId||null,missionRef:meta.missionRef||null,criticalRule:meta.criticalRule||null,factionTag:meta.factionTag||null};
 }
 function newGame(size,seed=freshSeed()){
+    if(gameModeChoice==='story'){startStoryMission(missionChoice);return;}
   if(gameModeChoice==='academy'){
     const scenario=SCENARIOS[scenarioChoice]||SCENARIOS.basics;
     size=scenario.size;seed=scenario.seed;
@@ -2421,17 +2610,29 @@ function updateAiStyleTag(){
   const mapTag=$('#mapCodeTag');if(mapTag)mapTag.textContent=G.mapCode;
 }
 function showResult(win,how){
-  G.busy=true;G.resultWin=win;
+  G.busy=true;G.resultWin=win;G.resultHow=how;
+  if(G.gameMode==='story'&&win){
+    const losses=G.story.playerLosses||0;
+    completeCampaignMission(G.story.missionId,G.turn,losses);
+    updateScenarioMenu();
+  }
   deleteSave();
   BGM.stop(); // 结束时停止 BGM
   win?SFX.win():SFX.lose();
-  $('#resultTitle').textContent=win?T('winTitle'):T('loseTitle');
-  $('#resultText').textContent=win?T('winText')(G.turn,how):T('loseText')(G.turn,how);
+  renderResult();
   openDialog($('#overlay'));
+}
+function renderResult(){
+  if(!G||!G.over)return;
+  const story=G.gameMode==='story',next=story&&G.resultWin?STORY_ORDER[STORY_ORDER.indexOf(G.story.missionId)+1]:undefined;
+  $('#resultTitle').textContent=story?(G.resultWin?T('storyDebrief'):T('loseTitle')):(G.resultWin?T('winTitle'):T('loseTitle'));
+  $('#resultText').textContent=story&&G.resultWin?`${txt(MISSION_DEFS[G.story.missionId].debrief)} ${T('storyLosses')(G.story.playerLosses||0)}`:(G.resultWin?T('winText')(G.turn,G.resultHow):T('loseText')(G.turn,G.resultHow));
+  $('#againBtn').textContent=story?(G.resultWin&&next!==undefined?T('storyNext'):T('storyRetry')):T('again');
 }
 function toMenu(){
   BGM.stop(); // 返回菜单停止 BGM
   closeDialog($('#overlay'));
+  syncMenuChoices();
   openDialog($('#menu'));
   const banner=document.getElementById('scenarioBanner');if(banner)banner.style.display='none';
 }
@@ -2445,6 +2646,7 @@ document.querySelectorAll('#menu button[data-size]').forEach(b=>{
   });
 });
 $('#startGameBtn').addEventListener('click',()=>{
+  if(gameModeChoice==='story'){showStoryBriefing(MISSION_DEFS[missionChoice]);return;}
   if(gameModeChoice==='academy'){
     const scenario=SCENARIOS[scenarioChoice]||SCENARIOS.basics;
     newGame(scenario.size,scenario.seed);return;
@@ -2505,8 +2707,15 @@ document.querySelectorAll('#menu button[data-mode]').forEach(b=>{
     updateScenarioMenu();
   });
 });
-$('#scenarioPicker').addEventListener('change',e=>{scenarioChoice=e.target.value;});
-$('#againBtn').addEventListener('click',()=>newGame(G.size));
+$('#scenarioPicker').addEventListener('change',e=>{if(gameModeChoice==='story')missionChoice=+e.target.value;else scenarioChoice=e.target.value;});
+$('#storyBriefingBack').addEventListener('click',()=>{closeDialog($('#storyBriefing'));openDialog($('#menu'));});
+$('#storyBriefingStart').addEventListener('click',()=>startStoryMission(missionChoice));
+$('#againBtn').addEventListener('click',()=>{
+  if(G.gameMode!=='story'){newGame(G.size);return;}
+  const current=G.story.missionId,next=STORY_ORDER[STORY_ORDER.indexOf(current)+1];
+  if(G.resultWin&&next!==undefined){missionChoice=next;closeDialog($('#overlay'));showStoryBriefing(MISSION_DEFS[next]);}
+  else startStoryMission(current);
+});
 $('#toMenuBtn').addEventListener('click',toMenu);
 $('#sndBtn').addEventListener('click',()=>{
   muted=!muted;

@@ -26,6 +26,9 @@ const I18N={
     modeArtilleryDuel:'💥 炮兵对决', modeArtilleryDuelSub:'双方只能出火炮/火箭炮',
     modeSiege:'🏰 坚守阵地', modeSiegeSub:'存活 15 回合，敌方持续刷新',
     modeAcademy:'🎓 战术学院', modeAcademySub:'五个教学与挑战场景', scenarioLabel:'教学场景',
+    modeStory:'📜 灰烬之环', modeStorySub:'固定关卡的剧情战役', storyScenarioLabel:'故事任务', storyLocked:'尚未解锁', storyCompleted:'已完成',
+    storyPrimaryLabel:'主要目标', storyFailureLabel:'失败条件', storyIntelLabel:'情报', storyStart:'开始作战', storyBack:'返回选关', storyContinue:'继续', storyComms:'战场通讯',
+    storyRetry:'重新开始', storyNext:'下一任务', storyDebrief:'战后报告', storyLosses:(n)=>`我方损失：${n} 个单位`,
     scBasics:'基础行动', scBasicsObj:'移动、攻击，并占领标记城镇',
     scTerrain:'地形与克制', scTerrainObj:'利用森林、山地与重装兵消灭敌军',
     scIndirect:'间接火力', scIndirectObj:'使用火炮在射程外消灭全部目标',
@@ -156,6 +159,9 @@ const I18N={
     modeArtilleryDuel:'💥 Artillery Duel', modeArtilleryDuelSub:'Both sides: artillery/rocket only',
     modeSiege:'🏰 Hold the Line', modeSiegeSub:'Survive 15 turns, enemy respawns endlessly',
     modeAcademy:'🎓 Tactics Academy', modeAcademySub:'Five guided scenarios and challenges', scenarioLabel:'Tutorial scenario',
+    modeStory:'📜 The Ashen Ring', modeStorySub:'A fixed-mission story campaign', storyScenarioLabel:'Story mission', storyLocked:'Locked', storyCompleted:'Completed',
+    storyPrimaryLabel:'Primary Objective', storyFailureLabel:'Failure Conditions', storyIntelLabel:'Intel', storyStart:'Begin Operation', storyBack:'Mission Select', storyContinue:'Continue', storyComms:'Battlefield Transmission',
+    storyRetry:'Restart Mission', storyNext:'Next Mission', storyDebrief:'After-action Report', storyLosses:(n)=>`Units lost: ${n}`,
     scBasics:'Core Actions', scBasicsObj:'Move, attack, and capture the marked city',
     scTerrain:'Terrain & Counters', scTerrainObj:'Use forests, mountains, and heavies to defeat the enemy',
     scIndirect:'Indirect Fire', scIndirectObj:'Use artillery range to destroy every target',
@@ -316,15 +322,8 @@ function applyStaticTexts(){
     sizeBtns[4].innerHTML=T('sizeXXL')+'<br><small>'+T('sizeXXLsub')+'</small>';
   }
   set('gameModeLabel',T('gameModeLabel'));
-  const modeBtns=document.querySelectorAll('#menu button[data-mode]');
-  if(modeBtns.length===6){
-    modeBtns[0].innerHTML=T('modeSkirmish')+'<br><small>'+T('modeSkirmishSub')+'</small>';
-    modeBtns[1].innerHTML=T('modeInfantryDuel')+'<br><small>'+T('modeInfantryDuelSub')+'</small>';
-    modeBtns[2].innerHTML=T('modeArmorDuel')+'<br><small>'+T('modeArmorDuelSub')+'</small>';
-    modeBtns[3].innerHTML=T('modeArtilleryDuel')+'<br><small>'+T('modeArtilleryDuelSub')+'</small>';
-    modeBtns[4].innerHTML=T('modeSiege')+'<br><small>'+T('modeSiegeSub')+'</small>';
-    modeBtns[5].innerHTML=T('modeAcademy')+'<br><small>'+T('modeAcademySub')+'</small>';
-  }
+  const modeText={skirmish:['modeSkirmish','modeSkirmishSub'],infantryDuel:['modeInfantryDuel','modeInfantryDuelSub'],armorDuel:['modeArmorDuel','modeArmorDuelSub'],artilleryDuel:['modeArtilleryDuel','modeArtilleryDuelSub'],siege:['modeSiege','modeSiegeSub'],academy:['modeAcademy','modeAcademySub'],story:['modeStory','modeStorySub']};
+  document.querySelectorAll('#menu button[data-mode]').forEach(btn=>{const keys=modeText[btn.dataset.mode];if(keys)btn.innerHTML=T(keys[0])+'<br><small>'+T(keys[1])+'</small>';});
   updateScenarioMenu();updateScenarioBanner();
   set('aiStyleLabel',T('aiStyleLabel'));
   const aiBtns=document.querySelectorAll('#menu button[data-ai]');
@@ -356,6 +355,8 @@ function applyStaticTexts(){
   set('startGameBtn',T('startGameBtn'));
   set('mapCodeLabel',T('mapCodeLabel'));set('randomMapBtn',T('randomMapBtn'));
   set('continueBtn',T('continueBtn'));set('deleteSaveBtn',T('deleteSaveBtn'));
+  set('storyPrimaryLabel',T('storyPrimaryLabel'));set('storyFailureLabel',T('storyFailureLabel'));set('storyIntelLabel',T('storyIntelLabel'));
+  set('storyBriefingStart',T('storyStart'));set('storyBriefingBack',T('storyBack'));set('storyDialogueTitle',T('storyComms'));set('storyDialogueContinue',T('storyContinue'));
   const mapCodeHint=document.getElementById('mapCodeHint');
   if(mapCodeHint&&G?.mapCode)mapCodeHint.textContent=T('mapCodeReady')(G.mapCode);
   updateSaveActions();
@@ -421,8 +422,7 @@ function applyStaticTexts(){
   set('prodTitle',T('prodTitle'));set('prodClose',T('prodCancel'));
   // 结果对话框
   set('againBtn',T('again'));set('toMenuBtn',T('backMenu'));
-  const rt=document.getElementById('resultTitle');if(rt&&G&&G.over)rt.textContent=G.resultWin?T('winTitle'):T('loseTitle');
-  const rx=document.getElementById('resultText');if(rx&&G&&G.over)rx.textContent=G.resultWin?T('winText')(G.turn):T('loseText')(G.turn);
+  if(G&&G.over)renderResult();
   // 语言按钮状态
   document.querySelectorAll('.langBtn').forEach(b=>{
     b.classList.toggle('primary',b.dataset.lang===LANG);

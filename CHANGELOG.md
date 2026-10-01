@@ -6,8 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-01
+
 ### Added
 
+- 《灰烬之环》 Story campaign architecture with independent progression, stable mission references, fixed-level units, and no campaign XP or persistent regular-unit roster
+- Playable vertical-slice missions 0, 3, and 6 with fixed maps and rosters, bilingual briefings/dialogue, explicit objectives and failures, and declarative one-shot events
+- Story autosave restoration, tracked losses and best records, mission unlocks, debrief results, retry, and next-mission flow
+- VM and Playwright regression coverage for Story mission schemas, initialization, events, progression, saving, victory, and menu behavior
 - Maintainable development sources under `src/` plus a zero-dependency generator that preserves the directly playable single-file `index.html` release
 - CI, Pages, and release checks that reject stale generated output; tagged releases now attach `index.html` as a downloadable asset
 - Keyboard-operable grid navigation, accessible cell names/states, semantic dialogs with focus management, and live objective/battle-log announcements
@@ -35,6 +41,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - The committed `index.html` is now generated from an HTML template, CSS, and four ordered classic scripts while retaining `file://` compatibility and zero runtime dependencies
 - Expanded the zero-dependency CI script with regression checks for bilingual key parity, indirect-fire planning, AI action priority, enemy building healing, and HQ capture victory
 - Reorganized the opening menu around a short quick-start guide, clearer mode/map sections, and collapsible advanced match settings
+- Story mode now hides random-map and advanced match controls because every campaign mission owns its map, roster, AI, and difficulty settings
 
 ## [1.0.1] - 2026-09-25
 
@@ -77,5 +84,6 @@ First stable release. Zero-dependency, single-file, turn-based strategy game ins
 - Income log lines are now color-coded by side, matching every other combat log line
 - Riders disembarking from a transport are no longer stuck permanently "acted" and unable to move afterward
 
+[1.1.0]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.1.0
 [1.0.1]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.0.1
 [1.0.0]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.0.0

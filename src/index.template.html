@@ -67,10 +67,11 @@
       <button data-mode="artilleryDuel">💥 炮兵对决<br><small>双方只能出火炮/火箭炮</small></button>
       <button data-mode="siege">🏰 坚守阵地<br><small>存活 15 回合，敌方持续刷新</small></button>
       <button data-mode="academy">🎓 战术学院<br><small>五个教学与挑战场景</small></button>
+      <button data-mode="story">📜 灰烬之环<br><small>固定关卡的剧情战役</small></button>
       </div>
       <select id="scenarioPicker" aria-label="教学场景"></select>
     </section>
-    <section class="menu-section" aria-labelledby="mapSizeLabel">
+    <section id="mapSettings" class="menu-section" aria-labelledby="mapSizeLabel">
       <h2 id="mapSizeLabel">选择地图规模（随机对称地图）</h2>
       <div class="sizes compact-options">
         <button data-size="8">小 8×8<br><small>快节奏</small></button>
@@ -86,7 +87,7 @@
       </div>
       <p id="mapCodeHint" class="field-hint"></p>
     </section>
-    <details class="menu-section advanced-options">
+    <details id="advancedSettings" class="menu-section advanced-options">
       <summary id="advancedLabel">高级对局设置</summary>
       <div class="advanced-grid">
         <fieldset><legend id="aiStyleLabel">选择敌方 AI 风格</legend>
@@ -122,6 +123,29 @@
       <button id="startGameBtn" class="primary">⚔️ 选择好了，开始游戏！</button>
       <p class="menu-credit">Created by <a href="https://github.com/yuyuanjingxuan" target="_blank" rel="noopener">@yuyuanjingxuan</a></p>
     </div>
+  </div>
+</div>
+
+<div id="storyBriefing" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="storyBriefingTitle">
+  <div class="dialog story-dialog">
+    <p id="storyAct" class="story-kicker"></p>
+    <h1 id="storyBriefingTitle"></h1>
+    <p id="storyWhen" class="sub"></p>
+    <div id="storyBriefingLines" class="story-lines"></div>
+    <div class="story-objectives">
+      <div><b id="storyPrimaryLabel">主要目标</b><span id="storyPrimary"></span></div>
+      <div><b id="storyFailureLabel">失败条件</b><span id="storyFailure"></span></div>
+      <div><b id="storyIntelLabel">情报</b><span id="storyIntel"></span></div>
+    </div>
+    <div class="sizes"><button id="storyBriefingBack">返回选关</button><button id="storyBriefingStart" class="primary">开始作战</button></div>
+  </div>
+</div>
+
+<div id="storyDialogue" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="storyDialogueTitle">
+  <div class="dialog story-dialog story-dialog-compact">
+    <h1 id="storyDialogueTitle">战场通讯</h1>
+    <div id="storyDialogueLines" class="story-lines"></div>
+    <p style="margin-top:16px"><button id="storyDialogueContinue" class="primary">继续</button></p>
   </div>
 </div>
 

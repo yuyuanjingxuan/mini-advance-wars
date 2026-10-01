@@ -56,3 +56,58 @@ test('mobile board remains usable and audio settings persist independently', asy
   await expect(page.locator('.cell').first()).toHaveCSS('min-width', '36px');
   await expect(page.locator('#boardWrap')).toHaveCSS('overflow-x', 'auto');
 });
+
+test('story mission opens briefing, starts dialogue, and resumes from autosave', async ({ page }) => {
+  await page.getByRole('button', { name: /灰烬之环/ }).click();
+  await expect(page.locator('#scenarioPicker')).toBeVisible();
+  await expect(page.locator('#mapSettings')).toBeHidden();
+  await expect(page.locator('#advancedSettings')).toBeHidden();
+  await expect(page.locator('#scenarioPicker option')).toHaveCount(3);
+  await expect(page.locator('#scenarioPicker option').nth(1)).toBeDisabled();
+
+  await page.getByRole('button', { name: /开始游戏/ }).click();
+  await expect(page.getByRole('dialog', { name: /第三百年的操练/ })).toBeVisible();
+  await expect(page.locator('#storyPrimary')).toContainText('歼灭二连');
+  await page.getByRole('button', { name: /开始作战/ }).click();
+  await expect(page.getByRole('dialog', { name: /战场通讯/ })).toBeVisible();
+  await page.getByRole('button', { name: /^继续$/ }).click();
+  await expect(page.locator('#board .unit')).toHaveCount(8);
+  await expect(page.locator('#scenarioObjective')).toContainText('歼灭二连');
+
+  await page.reload();
+  await page.getByRole('button', { name: /继续游戏/ }).click();
+  await expect(page.locator('#board .unit')).toHaveCount(8);
+  await expect(page.getByRole('dialog', { name: /战场通讯/ })).toBeHidden();
+});
+
+test('leaving story mode restores map and advanced match settings', async ({ page }) => {
+  await page.getByRole('button', { name: /灰烬之环/ }).click();
+  await expect(page.locator('#mapSettings')).toBeHidden();
+  await page.getByRole('button', { name: /遭遇战/ }).click();
+  await expect(page.locator('#mapSettings')).toBeVisible();
+  await expect(page.locator('#advancedSettings')).toBeVisible();
+});
+
+test('story victory unlocks the next mission without erasing campaign progress', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem('mini-advance-wars-campaign', JSON.stringify({ schemaVersion: 1, unlocked: [0], completed: [], endings: [], best: {}, lastMission: 0 }));
+    localStorage.setItem('mini-advance-wars-save', JSON.stringify({ invalid: true }));
+  });
+  await page.reload();
+  await page.getByRole('button', { name: /灰烬之环/ }).click();
+  await page.getByRole('button', { name: /开始游戏/ }).click();
+  await page.getByRole('button', { name: /开始作战/ }).click();
+  await page.getByRole('button', { name: /^继续$/ }).click();
+  await page.evaluate(() => {
+    G.units = G.units.filter(unit => unit.side === 'P');
+    checkEnd();
+  });
+  await expect(page.getByRole('dialog', { name: /战后报告/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /下一任务/ })).toBeVisible();
+  await page.getByRole('button', { name: /下一任务/ }).click();
+  await expect(page.getByRole('dialog', { name: /越界/ })).toBeVisible();
+  const progress = await page.evaluate(() => JSON.parse(localStorage.getItem('mini-advance-wars-campaign')));
+  expect(progress.completed).toContain(0);
+  expect(progress.unlocked).toContain(3);
+  expect(await page.evaluate(() => localStorage.getItem('mini-advance-wars-save'))).toBeNull();
+});

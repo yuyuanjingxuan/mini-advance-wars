@@ -157,6 +157,7 @@ try {
 
   const scenariosValid = vm.runInContext(`Object.keys(SCENARIOS).length===5&&Object.values(SCENARIOS).every(s=>
     VALID_MAP_SIZES.includes(s.size)&&Number.isInteger(s.seed)&&s.goal&&Array.isArray(s.tiles)&&Array.isArray(s.units)&&
+    s.tiles.every(t=>t[0]>=0&&t[0]<s.size&&t[1]>=0&&t[1]<s.size&&TERRAINS[t[2]])&&
     s.units.every(u=>['P','E'].includes(u[0])&&UNIT_TYPES[u[1]]&&u[2]>=0&&u[2]<s.size&&u[3]>=0&&u[3]<s.size))`, sandbox);
   if (!scenariosValid) fail('academy scenario definitions are invalid');
   else ok('all five academy scenario definitions are structurally valid');
@@ -167,6 +168,70 @@ try {
   })`, sandbox);
   if (!scenarioStarts) fail('one or more academy scenarios failed to initialize');
   else ok('all academy scenarios initialize from their data definitions');
+
+  const storyDefsValid = vm.runInContext(`STORY_ORDER.join(',')==='0,3,6'&&STORY_ORDER.every(id=>{
+    const m=MISSION_DEFS[id];return m&&m.id===id&&VALID_MAP_SIZES.includes(m.size)&&Number.isInteger(m.seed)&&
+      Array.isArray(m.tiles)&&m.tiles.every(t=>t[0]>=0&&t[0]<m.size&&t[1]>=0&&t[1]<m.size&&TERRAINS[t[2]])&&
+      Array.isArray(m.units.P)&&Array.isArray(m.events)&&m.events.every(e=>e.id&&e.on&&Array.isArray(e.do)&&e.do.every(a=>['showDialog','removeUnits','spawnMirror','setAiStyle','setObjective'].includes(a.type)));
+  })`, sandbox);
+  if (!storyDefsValid) fail('story mission definitions or event actions are invalid');
+  else ok('story missions 0, 3, and 6 use valid declarative data and whitelisted actions');
+
+  const storyStarts = vm.runInContext(`STORY_ORDER.every(id=>{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:[0,3,6],completed:[],endings:[],best:{},lastMission:id}));return startStoryMission(id)&&G.story.missionId===id&&G.size===MISSION_DEFS[id].size&&G.gameMode==='story';})`, sandbox);
+  if (!storyStarts) fail('one or more story missions failed to initialize');
+  else ok('story missions 0, 3, and 6 initialize from mission definitions');
+
+  const noStoryXp = vm.runInContext(`startStoryMission(0);const u=G.units[0],before=[u.level,u.xp,u.atk,u.maxHp].join(',');gainXp(u,999);before===[u.level,u.xp,u.atk,u.maxHp].join(',')`, sandbox);
+  if (!noStoryXp) fail('story mode allowed XP or leveling');
+  else ok('story mode preserves fixed levels and ignores XP');
+
+  const missionThreeTransforms = vm.runInContext(`
+    startStoryMission(3);G.turn=4;runStoryEvents('roundStart',{round:4});
+    G.aiStyle==='balanced'&&G.story.objective.kind==='eliminate'&&!G.units.some(u=>u.factionTag==='shuo')&&G.units.some(u=>u.side==='E'&&String(u.missionRef).startsWith('mirror-'));
+  `, sandbox);
+  if (!missionThreeTransforms) fail('mission 3 round-four mirror transformation failed');
+  else ok('mission 3 removes Shuo, mirrors survivors, and changes objective/AI');
+
+  const missionSixRefs = vm.runInContext(`startStoryMission(6);storyUnit('weiChanggeng')?.level===3&&storyUnit('weiCang')?.level===3&&storyUnit('weiCang')?.rank==='boss'`, sandbox);
+  if (!missionSixRefs) fail('mission 6 hero/boss stable references are missing');
+  else ok('mission 6 deploys fixed-level hero and boss with stable references');
+
+  const storyPolicies = vm.runInContext(`
+    startStoryMission(0);const p=G.units.find(u=>u.side==='P'),e=G.units.find(u=>u.side==='E'&&u.type===p.type);
+    const symmetric=p.hp===e.hp&&p.maxHp===e.maxHp;
+    collectIncome('P');collectIncome('E');aiBuild();
+    symmetric&&G.funds.P===0&&G.funds.E===0&&MISSION_DEFS[0].economy.playerProduction===false;
+  `, sandbox);
+  if (!storyPolicies) fail('story fixed-roster economy or mission 0 symmetry is invalid');
+  else ok('story missions use fixed rosters and mission 0 begins symmetrically');
+
+  const unrelatedEventIgnored = vm.runInContext(`
+    startStoryMission(3);const storyEventCountBefore=G.story.firedEventIds.length;runStoryEvents('unitRetreat',{unitRef:'someoneElse'});G.story.firedEventIds.length===storyEventCountBefore;
+  `, sandbox);
+  if (!unrelatedEventIgnored) fail('unrelated story trigger fired an event');
+  else ok('story events match only explicitly declared trigger data');
+
+  const bossRetreats = vm.runInContext(`
+    startStoryMission(6);const storyBoss=storyUnit('weiCang');storyBoss.criticalRule==='retreatOnDefeat';
+  `, sandbox);
+  if (!bossRetreats) fail('mission 6 boss is missing its retreat-on-defeat rule');
+  else ok('mission 6 marks Wei Cang to retreat on defeat');
+
+  const corruptCampaignFallback = vm.runInContext(`localStorage.setItem(CAMPAIGN_KEY,'{bad');JSON.stringify(readCampaignProgress().unlocked)==='[0]'`, sandbox);
+  if (!corruptCampaignFallback) fail('corrupt campaign progress did not fall back safely');
+  else ok('corrupt campaign progress falls back to mission 0 only');
+
+  const campaignIndependent = vm.runInContext(`const independentProgress=defaultCampaignProgress();saveCampaignProgress(independentProgress);localStorage.setItem(SAVE_KEY,'battle');deleteSave();!!localStorage.getItem(CAMPAIGN_KEY)&&!localStorage.getItem(SAVE_KEY)`, sandbox);
+  if (!campaignIndependent) fail('deleting battle autosave erased campaign progress');
+  else ok('campaign progress is independent from battle autosave');
+
+  const campaignResult = vm.runInContext(`
+    localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:[0],completed:[],endings:[],best:{},lastMission:0}));
+    startStoryMission(0);G.over=true;G.resultWin=true;G.resultHow=undefined;G.story.playerLosses=2;renderResult();
+    STORY_ORDER[STORY_ORDER.indexOf(G.story.missionId)+1]===3&&G.story.playerLosses===2;
+  `, sandbox);
+  if (!campaignResult) fail('story result state did not identify the next mission or tracked losses');
+  else ok('story victory state identifies the next mission and tracked losses');
 
   const scenarioGoal = vm.runInContext(`
     gameModeChoice='academy';scenarioChoice='basics';newGame(8);
@@ -263,6 +328,13 @@ try {
   const saveRoundTrip = vm.runInContext(`restoredSnapshot.turn===4&&restoredSnapshot.funds===777&&restoredSnapshot.hp===3&&restoredSnapshot.caps&&restoredSnapshot.rng===expectedNext&&G.scenario.id==='transport'`, sandbox);
   if (!saveRoundTrip) fail('versioned save did not round-trip gameplay state and RNG');
   else ok('versioned save round-trips gameplay state, Map data, and RNG state');
+
+  const storySaveRoundTrip = vm.runInContext(`
+    localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:[0,3,6],completed:[],endings:[],best:{},lastMission:3}));
+    startStoryMission(3);G.story.firedEventIds=['m3-r1'];saveGame();G=null;restoreGame();G.gameMode==='story'&&G.story.missionId===3&&G.story.firedEventIds[0]==='m3-r1';
+  `, sandbox);
+  if (!storySaveRoundTrip) fail('story runtime did not round-trip through battle autosave');
+  else ok('story mission and fired event IDs round-trip through autosave');
 
   const badSaveRejected = vm.runInContext(`
     localStorage.setItem(SAVE_KEY,'{bad json');const badJson=readSave()===null;
