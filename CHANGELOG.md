@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Seeded map generation with versioned, shareable map codes that reproduce identical terrain
+- Versioned automatic saves with Continue and Delete Save menu actions
+- Save restoration for units, funds, building capture progress, transports, game settings, siege state, and the future gameplay RNG sequence
+- Deterministic regression coverage for map seeds, RNG restoration, map-code validation, save round-trips, corrupt saves, and bare random calls
+
 ### Fixed
 
 - Enemy units now perform at most one main action per turn instead of attacking and then also capturing, repairing, or healing

@@ -265,6 +265,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <span id="turnLabel">第 <b id="turnNum">1</b> 回合</span>
   <span class="funds">💰 <b id="fundsNum">0</b></span>
   <span id="aiStyleTag" style="font-size:12px;color:var(--dim)" title="敌方 AI 风格"></span>
+  <span id="mapCodeTag" style="font-size:11px;color:var(--dim)" title="地图码"></span>
   <span class="spacer"></span>
   <button id="sndBtn" title="音效开关">🔊</button>
   <button id="helpBtn" title="单位与规则说明">❓ 帮助</button>
@@ -315,6 +316,12 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button data-size="14">特大 14×14<br><small>超大地图</small></button>
       <button data-size="16">巨型 16×16<br><small>史诗规模</small></button>
     </div>
+    <p style="margin:12px 0 4px" id="mapCodeLabel">地图码（留空则随机）：</p>
+    <p style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <input id="mapCodeInput" maxlength="20" placeholder="MAW-M1-10-7F3A91C2" style="padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:#111827;color:var(--text);font:inherit;text-transform:uppercase">
+      <button id="randomMapBtn">🎲 随机地图码</button>
+    </p>
+    <p id="mapCodeHint" style="font-size:12px;color:var(--dim)"></p>
     <p style="margin:16px 0 4px" id="aiStyleLabel">选择敌方 AI 风格：</p>
     <div class="sizes">
       <button data-ai="balanced" class="primary">🛡️ 稳健<br><small>不打亏本仗，会避险</small></button>
@@ -338,6 +345,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button data-troops="many">🎖️ 多<br><small>9 个单位</small></button>
     </div>
     <p style="margin-top:14px"><button id="menuHelpBtn">📖 详细说明（单位 / 颜色图例）</button></p>
+    <p id="saveActions" style="margin-top:14px;display:none;gap:8px;justify-content:center"><button id="continueBtn" class="primary">▶️ 继续游戏</button><button id="deleteSaveBtn">🗑️ 删除存档</button></p>
     <p style="margin-top:14px"><button id="startGameBtn" class="primary" style="padding:12px 32px;font-size:17px">⚔️ 选择好了，开始游戏！</button></p>
     <p style="margin-top:16px;font-size:11px;color:var(--dim)">Created by <a href="https://github.com/yuyuanjingxuan" target="_blank" rel="noopener" style="color:var(--dim)">@yuyuanjingxuan</a></p>
   </div>
@@ -599,6 +607,8 @@ const I18N={
     troopsMany:'🎖️ 多', troopsManySub:'9 个单位',
     detailHelp:'📖 详细说明（单位 / 颜色图例）',
     startGameBtn:'⚔️ 选择好了，开始游戏！',
+    mapCodeLabel:'地图码（留空则随机）：', randomMapBtn:'🎲 随机地图码', mapCodeInvalid:'地图码无效，请使用当前版本的完整地图码。',
+    mapCodeReady:(code)=>`本局地图码：${code}`, continueBtn:'▶️ 继续游戏', deleteSaveBtn:'🗑️ 删除存档',
     langLabel:'🌐 Language:',
     // 菜单帮助段落
     m1:'🪖 <b>9 种兵种</b>：🪖步兵（多面手·可占领）· 🛡️重装兵（高攻高防·克制载具）· 🚙侦察车（高速突袭）· <i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>火炮（射程 2-3）· 🔧工程师（占领×1.5+修理）· ⚕️军医（治疗）· <i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>坦克（突击主力）· 🚀火箭炮（射程 3-5）· 🚚运兵车（搭载步兵类）',
@@ -720,6 +730,8 @@ const I18N={
     troopsMany:'🎖️ Many', troopsManySub:'9 units',
     detailHelp:'📖 Details (units / color legend)',
     startGameBtn:'⚔️ Ready — Start Game!',
+    mapCodeLabel:'Map code (blank = random):', randomMapBtn:'🎲 Random Map Code', mapCodeInvalid:'Invalid map code. Enter a complete code for the current version.',
+    mapCodeReady:(code)=>`Current map code: ${code}`, continueBtn:'▶️ Continue', deleteSaveBtn:'🗑️ Delete Save',
     langLabel:'🌐 Language:',
     m1:'🪖 <b>9 unit types</b>: 🪖Infantry (versatile, can capture) · 🛡️Heavy (high ATK/DEF, anti-vehicle) · 🚙Recon (fast raider) · <i class="uicon cannon" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>Cannon (range 2-3) · 🔧Engineer (1.5× capture + repair) · ⚕️Medic (heals) · <i class="uicon tank" style="display:inline-block;width:18px;height:18px;vertical-align:-3px"></i>Tank (assault main force) · 🚀Rocket (range 3-5) · 🚚Transport (carries foot units)',
     m2:'💣 <b>Goal</b>: destroy all enemies or capture the enemy <b>HQ</b>! Click your unit → <b>blue tile</b> to move → <b>red-outlined enemy</b> to attack.',
@@ -892,6 +904,11 @@ function applyStaticTexts(){
   }
   set('menuHelpBtn',T('detailHelp'));
   set('startGameBtn',T('startGameBtn'));
+  set('mapCodeLabel',T('mapCodeLabel'));set('randomMapBtn',T('randomMapBtn'));
+  set('continueBtn',T('continueBtn'));set('deleteSaveBtn',T('deleteSaveBtn'));
+  const mapCodeHint=document.getElementById('mapCodeHint');
+  if(mapCodeHint&&G?.mapCode)mapCodeHint.textContent=T('mapCodeReady')(G.mapCode);
+  updateSaveActions();
   // 帮助对话框
   const hdTitle=document.querySelector('#helpDialog .dialog h1');if(hdTitle)hdTitle.textContent=T('helpTitle');
   const hdSub=document.querySelector('#helpDialog .dialog .sub');if(hdSub)hdSub.textContent=T('helpSub');
@@ -1094,6 +1111,33 @@ let G=null, uid=0, aiStyleChoice='balanced'; // 主菜单选中的 AI 风格，n
 let troopsChoice='none'; // 主菜单选中的初始部队数目档位：none/few/mid/many，newGame 时读取
 let sizeChoice=10; // 主菜单选中的地图规模，默认 10（原本点击尺寸按钮即开局，现改为先选后按「开始游戏」）
 let difficultyChoice='normal'; // 主菜单选中的敌方强度档位，newGame 时读取（makeUnit 按此给敌方单位 HP 加成）
+const MAP_GEN_VERSION=1;
+const SAVE_SCHEMA_VERSION=1;
+const SAVE_KEY='mini-advance-wars-save';
+const VALID_MAP_SIZES=[8,10,12,14,16];
+function createRng(seed){
+  let state=seed>>>0;
+  return{
+    next(){state=(state+0x6D2B79F5)>>>0;let t=state;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296;},
+    getState(){return state>>>0;},
+    setState(value){state=value>>>0;},
+  };
+}
+function freshSeed(){
+  const values=new Uint32Array(1);
+  if(globalThis.crypto&&globalThis.crypto.getRandomValues)globalThis.crypto.getRandomValues(values);
+  else values[0]=(Date.now()^((globalThis.performance&&performance.now?performance.now():0)*1000))>>>0;
+  return values[0]>>>0;
+}
+function encodeMapCode(size,seed){return`MAW-M${MAP_GEN_VERSION}-${size}-${(seed>>>0).toString(16).toUpperCase().padStart(8,'0')}`;}
+function decodeMapCode(code){
+  const match=String(code||'').trim().toUpperCase().match(/^MAW-M(\d+)-(\d+)-([0-9A-F]{8})$/);
+  if(!match||+match[1]!==MAP_GEN_VERSION||!VALID_MAP_SIZES.includes(+match[2]))return null;
+  return{version:+match[1],size:+match[2],seed:parseInt(match[3],16)>>>0};
+}
+let mapRng=createRng(0),gameRng=createRng(0);
+const mapRandom=()=>mapRng.next();
+const gameRandom=()=>gameRng.next();
 // 初始部队数目档位：数量 + 随机兵种池（必选步兵不计入池内数量，池内随机抽取时步兵也可能被重复抽到）
 // 少=4 种非载具兵种（不含运兵车）；中=7 种（加入侦察车/火炮/运兵车，不含坦克/火箭炮）；多=全部 9 种
 const TROOPS_TIERS={
@@ -1315,7 +1359,7 @@ function aiBuild(){
     else{
       const prefs=['tank','artillery','heavy','recon','rocket','infantry','engineer','medic'].filter(t=>allowed.includes(t));
       const afford=prefs.filter(t=>UNIT_COSTS[t]<=G.funds.E);
-      if(afford.length)pick=afford[Math.floor(Math.random()*Math.min(3,afford.length))];
+      if(afford.length)pick=afford[Math.floor(gameRandom()*Math.min(3,afford.length))];
     }
     if(!pick)continue;
     G.funds.E-=UNIT_COSTS[pick];
@@ -1333,13 +1377,13 @@ function siegeWave(){
     .map(([x,y])=>[size-1-x,size-1-y]); // 镜像到敌方半场，跟正常开局出生点是同一批已清障坐标
   const openSpots=spawnPool.filter(([x,y])=>!unitAt(x,y));
   if(!openSpots.length)return;
-  const budget=SIEGE.budgetMin+Math.floor(Math.random()*(SIEGE.budgetMax-SIEGE.budgetMin+1));
+  const budget=SIEGE.budgetMin+Math.floor(gameRandom()*(SIEGE.budgetMax-SIEGE.budgetMin+1));
   let spent=0,placed=0;
   const pool=SIEGE.pool;
   while(spent<budget&&placed<openSpots.length&&G.units.filter(u=>u.side==='E').length<MAX_SIDE_UNITS){
     const candidates=pool.filter(t=>UNIT_COSTS[t]<=budget-spent);
     if(!candidates.length)break; // 剩余预算连最便宜的都买不起，结束这一波
-    const type=candidates[Math.floor(Math.random()*candidates.length)];
+    const type=candidates[Math.floor(gameRandom()*candidates.length)];
     const[x,y]=openSpots[placed];
     G.units.push(makeUnit('E',type,x,y));
     spent+=UNIT_COSTS[type];
@@ -1376,7 +1420,70 @@ function buyUnit(type){
   log(T('buildLog')('P',type),'p');
   $('#prodDialog').classList.add('hidden');
   prodFactory=null;
-  updateFunds();render();
+  updateFunds();render();saveGame();
+}
+
+// ================= 版本化自动存档 =================
+function createSaveDto(){
+  if(!G||G.over)return null;
+  return{
+    schema:SAVE_SCHEMA_VERSION,
+    savedAt:Date.now(),
+    uid,
+    gameRngState:gameRng.getState(),
+    game:{
+      size:G.size,map:G.map,mapSeed:G.mapSeed,mapCode:G.mapCode,units:G.units,turn:G.turn,phase:G.phase,
+      caps:[...G.caps.entries()],funds:G.funds,aiStyle:G.aiStyle,difficulty:G.difficulty,gameMode:G.gameMode,
+      troopsTier:G.troopsTier,siege:G.siege||null,
+    },
+  };
+}
+function validateSaveDto(dto){
+  const g=dto&&dto.game;
+  return!!(dto&&dto.schema===SAVE_SCHEMA_VERSION&&Number.isInteger(dto.uid)&&Number.isInteger(dto.gameRngState)&&g&&
+    VALID_MAP_SIZES.includes(g.size)&&Array.isArray(g.map)&&g.map.length===g.size&&g.map.every(row=>Array.isArray(row)&&row.length===g.size)&&
+    Array.isArray(g.units)&&Array.isArray(g.caps)&&g.funds&&['P','E'].includes(g.phase)&&decodeMapCode(g.mapCode)&&
+    g.mapSeed===decodeMapCode(g.mapCode).seed&&g.size===decodeMapCode(g.mapCode).size);
+}
+function readSave(){
+  try{const dto=JSON.parse(localStorage.getItem(SAVE_KEY));return validateSaveDto(dto)?dto:null;}catch(e){return null;}
+}
+function saveGame(){
+  const dto=createSaveDto();
+  if(!dto)return;
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(dto));}catch(e){}
+  updateSaveActions();
+}
+function deleteSave(){
+  try{localStorage.removeItem(SAVE_KEY);}catch(e){}
+  updateSaveActions();
+}
+function updateSaveActions(){
+  const actions=document.getElementById('saveActions');
+  if(actions)actions.style.display=readSave()?'flex':'none';
+}
+function restoreGame(dto=readSave()){
+  if(!validateSaveDto(dto))return false;
+  const s=dto.game;
+  G={...s,caps:new Map(s.caps),sel:null,reach:null,hover:null,mode:'idle',busy:false,over:false};
+  if(!G.siege)delete G.siege;
+  uid=Math.max(dto.uid,...G.units.map(u=>u.id||0));
+  gameRng=createRng(dto.gameRngState);
+  mapRng=createRng(G.mapSeed);
+  aiStyleChoice=G.aiStyle;difficultyChoice=G.difficulty;gameModeChoice=G.gameMode;troopsChoice=G.troopsTier||'none';sizeChoice=G.size;
+  syncMenuChoices();
+  prodFactory=null;
+  board.style.setProperty('--n',G.size);fitBoard();
+  $('#menu').classList.add('hidden');$('#overlay').classList.add('hidden');$('#prodDialog').classList.add('hidden');
+  $('#log').innerHTML='';
+  updateAiStyleTag();SFX.start();BGM.start(G.phase);render();showInfo(null);
+  return true;
+}
+function syncMenuChoices(){
+  const choices={size:String(sizeChoice),ai:aiStyleChoice,diff:difficultyChoice,mode:gameModeChoice,troops:troopsChoice};
+  for(const key in choices)document.querySelectorAll(`#menu button[data-${key}]`).forEach(b=>b.classList.toggle('primary',b.dataset[key]===choices[key]));
+  const input=document.getElementById('mapCodeInput');if(input&&G)input.value=G.mapCode;
+  const hint=document.getElementById('mapCodeHint');if(hint&&G)hint.textContent=T('mapCodeReady')(G.mapCode);
 }
 
 // ================= 地图生成（地理化：山脉山脊 + 河流浅滩 + 森林集群，180° 对称 + 连通性校验） =================
@@ -1387,43 +1494,43 @@ function genMap(size){
     // --- 山脉：从地图一侧向另一侧随机游走形成山脊（地理上山脉成脉状而非散点） ---
     const ridges=size>=14?3:size>=10?2:1;
     for(let r=0;r<ridges;r++){
-      let rx=Math.floor(Math.random()*half*0.4), ry=Math.floor(Math.random()*size*0.3);
-      const len=Math.floor(size*0.55+Math.random()*size*0.3);
+      let rx=Math.floor(mapRandom()*half*0.4), ry=Math.floor(mapRandom()*size*0.3);
+      const len=Math.floor(size*0.55+mapRandom()*size*0.3);
       for(let i=0;i<len;i++){
         if(rx>=0&&rx<half&&ry>=0&&ry<size)m[ry][rx]='mountain';
         // 山脊走向：偏向水平延伸，偶尔上下起伏、分叉出小支脉
-        const dir=Math.random();
+        const dir=mapRandom();
         if(dir<0.55)rx++;
-        else if(dir<0.75)ry+=Math.random()<0.5?1:-1;
-        else if(dir<0.85){rx++;ry+=Math.random()<0.5?1:-1;}
-        if(Math.random()<0.12&&ry+1<size)m[ry+1][Math.min(rx,half-1)]='mountain'; // 支脉
+        else if(dir<0.75)ry+=mapRandom()<0.5?1:-1;
+        else if(dir<0.85){rx++;ry+=mapRandom()<0.5?1:-1;}
+        if(mapRandom()<0.12&&ry+1<size)m[ry+1][Math.min(rx,half-1)]='mountain'; // 支脉
         ry=Math.max(0,Math.min(size-1,ry));
       }
     }
     // --- 河流：从上边缘流向右边缘的连通水线，中途留 1-2 处浅滩（可通行）保证两岸可达 ---
     {
-      let wx=Math.floor(Math.random()*half*0.6+half*0.2), wy=0;
-      let fords=1+Math.floor(Math.random()*2), fordAt=[];
-      for(let i=0;i<fords;i++)fordAt.push(Math.floor(size*(0.3+0.4*Math.random())));
+      let wx=Math.floor(mapRandom()*half*0.6+half*0.2), wy=0;
+      let fords=1+Math.floor(mapRandom()*2), fordAt=[];
+      for(let i=0;i<fords;i++)fordAt.push(Math.floor(size*(0.3+0.4*mapRandom())));
       while(wy<size){
         if(wx>=0&&wx<half){
           m[wy][wx]=fordAt.includes(wy)?'plain':'water';
           if(fordAt.includes(wy)&&wx+1<half)m[wy][wx+1]='plain'; // 浅滩加宽
         }
         wy++;
-        if(Math.random()<0.45)wx+=Math.random()<0.5?1:-1; // 河道蜿蜒
+        if(mapRandom()<0.45)wx+=mapRandom()<0.5?1:-1; // 河道蜿蜒
         wx=Math.max(0,Math.min(half-1,wx));
       }
     }
     // --- 森林：以种子点向外生长成片（林地集群，符合植被成片分布） ---
     const blobs=Math.floor(size*0.5);
     for(let b=0;b<blobs;b++){
-      const bx=Math.floor(Math.random()*half), by=Math.floor(Math.random()*size);
-      const n=2+Math.floor(Math.random()*4);
+      const bx=Math.floor(mapRandom()*half), by=Math.floor(mapRandom()*size);
+      const n=2+Math.floor(mapRandom()*4);
       let cx=bx,cy=by;
       for(let i=0;i<n;i++){
         if(cx>=0&&cx<half&&cy>=0&&cy<size&&m[cy][cx]==='plain')m[cy][cx]='forest';
-        const[dx,dy]=DIRS[Math.floor(Math.random()*4)];
+        const[dx,dy]=DIRS[Math.floor(mapRandom()*4)];
         cx+=dx;cy+=dy;
       }
     }
@@ -1457,7 +1564,7 @@ function genMap(size){
       const type=i<neutralFactories?'factory':'city';
       let placed=false;
       for(let tries=0;tries<40&&!placed;tries++){
-        const x=Math.floor(Math.random()*placeMax),y=Math.floor(Math.random()*size);
+        const x=Math.floor(mapRandom()*placeMax),y=Math.floor(mapRandom()*size);
         if(!isFreeSpot(x,y))continue;
         m[y][x]=type;usedPts.add(x+','+y);placed=true;
       }
@@ -1549,13 +1656,13 @@ function canCounter(d,att){
   return inRange(d,d.x,d.y,att.x,att.y);
 }
 async function resolveHit(a,d,counterMult){
-  if(Math.random()>HIT_CHANCE){
+  if(gameRandom()>HIT_CHANCE){
     floatText(d.x,d.y,'MISS','miss');SFX.miss();
     log(T('dodged'),'dim');
     return;
   }
-  const crit=Math.random()<CRIT_CHANCE;
-  let dmg=Math.round(calcDamage(a,d,a.x,a.y,0.85+Math.random()*0.3)*counterMult);
+  const crit=gameRandom()<CRIT_CHANCE;
+  let dmg=Math.round(calcDamage(a,d,a.x,a.y,0.85+gameRandom()*0.3)*counterMult);
   if(crit)dmg=Math.round(dmg*CRIT_MULT);
   dmg=Math.max(1,dmg);
   d.hp=Math.max(0,d.hp-dmg);
@@ -1640,7 +1747,7 @@ function finishUnitAction(u,action){
   else log(T('waitLog')(u.type),'dim');
   G.sel=null;G.reach=null;G.mode='idle';
   checkEnd();
-  if(!G.over){render();showInfo(null);}
+  if(!G.over){render();showInfo(null);saveGame();}
 }
 function waitUnit(){ if(G.sel)finishUnitAction(G.sel); }
 function captureAction(){ if(G.sel)finishUnitAction(G.sel,tryCapture); }
@@ -1711,6 +1818,7 @@ async function playerAttack(a,d){
   if(a.hp>0)a.acted=true;
   G.sel=null;G.busy=false;
   render();showInfo(a.hp>0?a:null);
+  if(!G.over)saveGame();
 }
 board.addEventListener('click',async e=>{
   if(!G||G.busy||G.over||G.phase!=='P')return;
@@ -1928,6 +2036,7 @@ async function startEnemyPhase(){
   log(T('phaseLog')(G.turn,T('phaseP')),'phase');
   SFX.turn();
   render();updateTop();
+  saveGame();
 }
 
 // ================= 渲染 =================
@@ -2081,9 +2190,12 @@ function makeUnit(side,type,x,y){
   return{id:++uid,side,type,x,y,hp:maxHp,maxHp,atk:b.atk,def:b.def,
          move:b.move,minR:b.minR,maxR:b.maxR,level:1,xp:0,acted:false};
 }
-function newGame(size){
+function newGame(size,seed=freshSeed()){
+  seed=seed>>>0;
+  mapRng=createRng(seed);
+  gameRng=createRng((seed^0x9E3779B9)>>>0);
   const map=genMap(size);
-  G={size,map,units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS},aiStyle:aiStyleChoice,difficulty:difficultyChoice,gameMode:gameModeChoice};
+  G={size,map,mapSeed:seed,mapCode:encodeMapCode(size,seed),units:[],turn:1,phase:'P',sel:null,reach:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:START_FUNDS,E:START_FUNDS},aiStyle:aiStyleChoice,difficulty:difficultyChoice,gameMode:gameModeChoice,troopsTier:troopsChoice};
   uid=0;
   // 出生点按与己方 HQ([1,size-2]) 的距离升序排列，数量少的档位优先使用离 HQ 最近的点，
   // 保证"少/中"档的部队围绕 HQ 分布而不是散落到边缘（原 8 个固定坐标点 + 1 个军医点，合并后统一排序）
@@ -2096,8 +2208,8 @@ function newGame(size){
   const modePool=GAME_MODES[gameModeChoice]&&GAME_MODES[gameModeChoice].pool?allowed:tier.pool;
   const types=[];
   if(tier.count>0){
-    types.push(allowed.includes('infantry')?'infantry':modePool[Math.floor(Math.random()*modePool.length)]);
-    for(let i=1;i<tier.count;i++)types.push(modePool[Math.floor(Math.random()*modePool.length)]);
+    types.push(allowed.includes('infantry')?'infantry':modePool[Math.floor(gameRandom()*modePool.length)]);
+    for(let i=1;i<tier.count;i++)types.push(modePool[Math.floor(gameRandom()*modePool.length)]);
   }
   const isSiege=gameModeChoice==='siege';
   spawns.forEach((p,i)=>{
@@ -2146,7 +2258,7 @@ function newGame(size){
   updateAiStyleTag();
   SFX.start();
   BGM.start('P'); // 开局播放我方主题 BGM
-  render();showInfo(null);
+  render();showInfo(null);saveGame();
 }
 // header 显示当前对局的敌方 AI 风格（切换语言时也要刷新，故独立成函数供 applyStaticTexts 调用）
 function updateAiStyleTag(){
@@ -2154,9 +2266,11 @@ function updateAiStyleTag(){
   if(!el||!G)return;
   const nameKey={balanced:'aiBalanced',aggressive:'aiAggressive',defensive:'aiDefensive'}[G.aiStyle]||'aiBalanced';
   el.textContent=`🤖 ${T(nameKey)}`;
+  const mapTag=$('#mapCodeTag');if(mapTag)mapTag.textContent=G.mapCode;
 }
 function showResult(win,how){
   G.busy=true;G.resultWin=win;
+  deleteSave();
   BGM.stop(); // 结束时停止 BGM
   win?SFX.win():SFX.lose();
   $('#resultTitle').textContent=win?T('winTitle'):T('loseTitle');
@@ -2177,7 +2291,20 @@ document.querySelectorAll('#menu button[data-size]').forEach(b=>{
     document.querySelectorAll('#menu button[data-size]').forEach(x=>x.classList.toggle('primary',x===b));
   });
 });
-$('#startGameBtn').addEventListener('click',()=>newGame(sizeChoice));
+$('#startGameBtn').addEventListener('click',()=>{
+  const input=$('#mapCodeInput'),raw=input.value.trim();
+  const parsed=raw?decodeMapCode(raw):{size:sizeChoice,seed:freshSeed()};
+  if(!parsed){$('#mapCodeHint').textContent=T('mapCodeInvalid');return;}
+  sizeChoice=parsed.size;input.value=encodeMapCode(parsed.size,parsed.seed);
+  $('#mapCodeHint').textContent=T('mapCodeReady')(input.value);
+  newGame(parsed.size,parsed.seed);
+});
+$('#randomMapBtn').addEventListener('click',()=>{
+  const code=encodeMapCode(sizeChoice,freshSeed());
+  $('#mapCodeInput').value=code;$('#mapCodeHint').textContent=T('mapCodeReady')(code);
+});
+$('#continueBtn').addEventListener('click',()=>restoreGame());
+$('#deleteSaveBtn').addEventListener('click',deleteSave);
 $('#endTurn').addEventListener('click',()=>{
   if(G&&!G.busy&&!G.over&&G.phase==='P')startEnemyPhase();
 });

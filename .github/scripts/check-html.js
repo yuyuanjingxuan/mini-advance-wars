@@ -53,6 +53,8 @@ function makeEl() {
   };
 }
 
+const storage = new Map();
+
 const sandbox = {
   window: {},
   document: {
@@ -65,7 +67,12 @@ const sandbox = {
     body: makeEl(),
     documentElement: makeEl(),
   },
-  localStorage: { getItem: () => null, setItem() {} },
+  localStorage: {
+    getItem: key => storage.has(key) ? storage.get(key) : null,
+    setItem: (key, value) => storage.set(key, String(value)),
+    removeItem: key => storage.delete(key),
+    clear: () => storage.clear(),
+  },
   navigator: { language: 'en' },
   AudioContext: function () {
     return {
@@ -82,6 +89,7 @@ const sandbox = {
   setTimeout: (fn) => 0,
   clearTimeout() {},
   console,
+  crypto: { getRandomValues(values) { values[0] = 0x12345678; return values; } },
 };
 sandbox.window.innerWidth = 1920;
 sandbox.window.innerHeight = 1080;
@@ -175,6 +183,49 @@ try {
   const hqWon = vm.runInContext("G.over&&capAt(qx,qy).owner==='P'", sandbox);
   if (!hqWon) fail('capturing the enemy HQ did not end the game immediately');
   else ok('enemy HQ capture ends the game immediately');
+
+  const bareRandom = scripts.some(code => /Math\.random\s*\(/.test(code));
+  if (bareRandom) fail('production code contains a bare Math.random() call');
+  else ok('all gameplay randomness uses explicit seeded RNG streams');
+
+  vm.runInContext(`newGame(10,0x7F3A91C2); deterministicMapA=JSON.stringify(G.map); deterministicUnitsA=JSON.stringify(G.units);`, sandbox);
+  vm.runInContext(`newGame(10,0x7F3A91C2); deterministicMapB=JSON.stringify(G.map); deterministicUnitsB=JSON.stringify(G.units);`, sandbox);
+  const deterministic = vm.runInContext('deterministicMapA===deterministicMapB&&deterministicUnitsA===deterministicUnitsB', sandbox);
+  if (!deterministic) fail('same seed did not reproduce the same map and starting roster');
+  else ok('same seed reproduces the same map and starting roster');
+
+  const mapCodeOk = vm.runInContext(`
+    const code=encodeMapCode(10,0x7F3A91C2), parsed=decodeMapCode(code);
+    code==='MAW-M1-10-7F3A91C2'&&parsed.size===10&&parsed.seed===0x7F3A91C2&&!decodeMapCode('MAW-M9-10-7F3A91C2')&&!decodeMapCode('bad');
+  `, sandbox);
+  if (!mapCodeOk) fail('map-code encode/decode validation failed');
+  else ok('map-code encode/decode accepts current codes and rejects invalid versions/input');
+
+  const rngRestored = vm.runInContext(`
+    const r=createRng(123);r.next();const state=r.getState();const expected=r.next();
+    const restored=createRng(state);restored.next()===expected;
+  `, sandbox);
+  if (!rngRestored) fail('RNG state did not restore the next value');
+  else ok('RNG state restoration preserves the future sequence');
+
+  vm.runInContext(`
+    newGame(8,0x10203040);
+    G.turn=4;G.funds.P=777;G.units[0].hp=3;
+    const savedRngState=gameRng.getState();saveGame();
+    const expectedNext=gameRandom();
+    G=null;restoreGame();
+    restoredSnapshot={turn:G.turn,funds:G.funds.P,hp:G.units[0].hp,caps:G.caps instanceof Map,rng:gameRandom(),state:savedRngState};
+  `, sandbox);
+  const saveRoundTrip = vm.runInContext(`restoredSnapshot.turn===4&&restoredSnapshot.funds===777&&restoredSnapshot.hp===3&&restoredSnapshot.caps&&restoredSnapshot.rng===expectedNext`, sandbox);
+  if (!saveRoundTrip) fail('versioned save did not round-trip gameplay state and RNG');
+  else ok('versioned save round-trips gameplay state, Map data, and RNG state');
+
+  const badSaveRejected = vm.runInContext(`
+    localStorage.setItem(SAVE_KEY,'{bad json');const badJson=readSave()===null;
+    localStorage.setItem(SAVE_KEY,JSON.stringify({schema:999}));badJson&&readSave()===null;
+  `, sandbox);
+  if (!badSaveRejected) fail('bad JSON or unsupported save schema was accepted');
+  else ok('bad JSON and unsupported save schemas are rejected safely');
 } catch (e) {
   fail(`rule regression checks threw: ${e.message}`);
 }
