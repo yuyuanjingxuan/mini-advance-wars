@@ -45,6 +45,8 @@ A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No 
 | ☠️ **Enemy difficulty** | Pick one of six tiers before starting: 😴 Trivial (×0.8) · 🙂 Easy (×0.9) · ⚖️ Normal (×1.0, default) · 🔥 Hard (×1.1) · 💀 Hell (×1.2) · ☠️ Nightmare (×1.5), scaling both enemy unit max HP and per-turn income — fully independent of AI style and freely combinable |
 | 🖱️ **Move path preview** | Hover to see the move path with direction arrows after selecting a unit |
 | 🔊 **Sound & BGM** | WebAudio chiptune SFX (per-unit attack/move sounds, crit, destroy, level-up, capture, etc.) + dual-theme BGM: upbeat march for the player, tense minor for the enemy, auto-switching with turn phases (mute toggle included) |
+| ♿ **Accessibility & mobile** | Arrow-key board navigation, Enter/Space activation, Escape cancellation, semantic dialogs with focus containment/restoration, announced logs/objectives, 36px mobile touch cells, scrollable large boards, and reduced-motion support |
+| 🎚️ **Persistent audio settings** | BGM and SFX volumes are independently adjustable; master mute, volumes, and interface language persist separately from game saves |
 | 📜 **Battle log & unit cards** | Real-time combat log (player blue / enemy red) and detailed unit info panel |
 | 🌐 **Bilingual UI** | Choose 中文/English in the main menu (default Chinese); the whole UI translates instantly |
 | 📖 **In-game help** | Unit stats table, color legend, terrain effects and combat rules |

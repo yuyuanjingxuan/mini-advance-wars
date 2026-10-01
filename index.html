@@ -21,7 +21,7 @@
 body{
   background:radial-gradient(1200px 800px at 50% -10%,#1c2735,#0d131b);
   color:var(--text);font-family:"Segoe UI",system-ui,"Microsoft YaHei",sans-serif;
-  min-height:100vh;display:flex;flex-direction:column;user-select:none;
+  min-height:100vh;display:flex;flex-direction:column;
 }
 header{display:flex;align-items:center;gap:14px;padding:10px 18px;background:var(--panel);border-bottom:1px solid var(--line);flex-wrap:wrap}
 header .title{font-size:18px;font-weight:800}
@@ -31,13 +31,14 @@ header .title{font-size:18px;font-weight:800}
 header .spacer{flex:1}
 button{background:#2a3a50;color:var(--text);border:1px solid #3d5273;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:14px;font-family:inherit}
 button:hover{background:#35496a}
+button:focus-visible,input:focus-visible,select:focus-visible,.cell:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 button.primary{background:var(--blue);border-color:var(--blue);color:#08243f;font-weight:700}
 button.primary:hover{background:#6cb5ff}
 button:disabled{opacity:.45;cursor:not-allowed}
 #main{display:flex;gap:16px;justify-content:center;align-items:flex-start;padding:16px;flex:1;flex-wrap:wrap}
-#boardWrap{background:var(--panel);padding:12px;border-radius:12px;border:1px solid var(--line);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+#boardWrap{background:var(--panel);padding:12px;border-radius:12px;border:1px solid var(--line);box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:100%;overflow:auto;touch-action:manipulation}
 #board{display:grid;grid-template-columns:repeat(var(--n),var(--cell));grid-auto-rows:var(--cell);gap:3px}
-.cell{position:relative;border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.cell{position:relative;border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
 /* 地形：CSS 手绘（无 emoji，单位站上去地形依然可见） */
 .t-plain{background:#7cbf5e}
 .t-forest{background:
@@ -258,6 +259,13 @@ button:disabled{opacity:.45;cursor:not-allowed}
 #scenarioBanner{display:none;padding:9px 14px;background:#172554;border-bottom:1px solid #31529a;color:#dbeafe;font-size:13px}
 #scenarioBanner b{color:#fff;margin-right:6px}
 #scenarioPicker{display:none;margin:10px auto 0;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:#111827;color:var(--text);font:inherit}
+.audio-setting{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim)}
+.audio-setting input{width:72px;accent-color:var(--blue)}
+@media(max-width:700px){
+  header{gap:8px;padding:8px}header .title{width:100%}#main{display:block;padding:8px}#boardWrap{padding:8px;margin:auto}#side{width:100%;margin-top:10px}#log{height:150px}
+  button{min-height:44px}.cell{min-width:36px;min-height:36px}.dialog{width:calc(100vw - 16px);padding:18px 12px}.sizes{gap:7px}.sizes button{padding:9px 10px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
 
 </style>
 </head>
@@ -270,28 +278,30 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <span id="aiStyleTag" style="font-size:12px;color:var(--dim)" title="敌方 AI 风格"></span>
   <span id="mapCodeTag" style="font-size:11px;color:var(--dim)" title="地图码"></span>
   <span class="spacer"></span>
-  <button id="sndBtn" title="音效开关">🔊</button>
+  <button id="sndBtn" title="音效开关" aria-pressed="false">🔊</button>
+  <label class="audio-setting" for="bgmVolume">BGM <input id="bgmVolume" type="range" min="0" max="100" step="10" value="70"></label>
+  <label class="audio-setting" for="sfxVolume">SFX <input id="sfxVolume" type="range" min="0" max="100" step="10" value="80"></label>
   <button id="helpBtn" title="单位与规则说明">❓ 帮助</button>
   <button id="menuBtn">主菜单</button>
   <button id="endTurn" class="primary">结束回合 ⏭</button>
 </header>
-<div id="scenarioBanner"><b id="scenarioTitle"></b><span id="scenarioObjective"></span></div>
+<div id="scenarioBanner" role="status" aria-live="polite"><b id="scenarioTitle"></b><span id="scenarioObjective"></span></div>
 
 <div id="main">
-  <div id="boardWrap"><div id="board"></div></div>
+  <div id="boardWrap"><div id="board" role="grid" aria-label="战场"></div></div>
   <div id="side">
     <div id="unitCard" class="card"><h3>单位</h3><div id="unitInfo">点击己方单位开始行动<br><span style="color:var(--dim);font-size:12px">点击任意单位可查看详情</span></div>
       <div id="actionBtns" style="display:none;margin-top:8px"></div>
       <button id="waitBtn" style="width:100%;margin-top:8px;display:none">⏳ 待机（原地结束行动）</button>
     </div>
     <div class="card"><h3>地形</h3><div id="tileInfo">鼠标悬停查看地形</div></div>
-    <div class="card"><h3>战报</h3><div id="log"></div></div>
+    <div class="card"><h3>战报</h3><div id="log" role="log" aria-live="polite"></div></div>
   </div>
 </div>
 
-<div id="menu" class="overlay">
+<div id="menu" class="overlay" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
   <div class="dialog">
-    <h1>⚔️ 迷你高级战争</h1>
+    <h1 id="menuTitle">⚔️ 迷你高级战争</h1>
     <p class="sub">回合制战棋 · 致敬 GBA《高级战争》· 零依赖即开即玩</p>
     <p style="margin-bottom:10px"><span style="font-size:13px;color:var(--dim)">🌐 Language:</span> <button class="langBtn primary" data-lang="zh" style="padding:4px 12px;font-size:13px">中文</button> <button class="langBtn" data-lang="en" style="padding:4px 12px;font-size:13px">English</button></p>
     <div class="help">
@@ -357,9 +367,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </div>
 </div>
 
-<div id="helpDialog" class="overlay hidden">
+<div id="helpDialog" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
   <div class="dialog">
-    <h1>📖 游戏说明</h1>
+    <h1 id="helpTitle">📖 游戏说明</h1>
     <p class="sub">单位特性 · 颜色图例 · 地形效果</p>
     <div class="help">
       <h4>单位特性</h4>
@@ -441,7 +451,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </div>
 </div>
 
-<div id="prodDialog" class="overlay hidden">
+<div id="prodDialog" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="prodTitle">
   <div class="dialog">
     <h1 id="prodTitle">🏭 生产单位</h1>
     <p class="sub" id="prodFunds">💰 资金：300</p>
@@ -450,7 +460,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </div>
 </div>
 
-<div id="overlay" class="overlay hidden">
+<div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
   <div class="dialog">
     <h1 id="resultTitle"></h1>
     <p id="resultText" style="color:var(--dim);margin:10px 0 4px"></p>
@@ -1003,14 +1013,21 @@ function applyStaticTexts(){
 <script>
 'use strict';
 // ================= 音效（WebAudio，极简） =================
-let AC=null, muted=false;
+const SETTINGS_KEY='mini-advance-wars-settings',SETTINGS_SCHEMA_VERSION=1;
+let settings={version:SETTINGS_SCHEMA_VERSION,lang:'zh',muted:false,bgm:0.7,sfx:0.8};
+try{const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null');if(saved&&saved.version===SETTINGS_SCHEMA_VERSION)settings={...settings,...saved};}catch(e){}
+let AC=null, muted=!!settings.muted;
+function saveSettings(){
+  settings={version:SETTINGS_SCHEMA_VERSION,lang:LANG,muted,bgm:Math.max(0,Math.min(1,+settings.bgm||0)),sfx:Math.max(0,Math.min(1,+settings.sfx||0))};
+  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));}catch(e){}
+}
 function tone(f,d,type='square',v=0.12,delay=0){
-  if(muted)return;
+  if(muted||settings.sfx<=0)return;
   try{
     AC=AC||new (window.AudioContext||window.webkitAudioContext)();
     const o=AC.createOscillator(),g=AC.createGain();
     o.type=type;o.frequency.value=f;
-    g.gain.setValueAtTime(v,AC.currentTime+delay);
+    g.gain.setValueAtTime(v*settings.sfx,AC.currentTime+delay);
     g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+delay+d);
     o.connect(g).connect(AC.destination);
     o.start(AC.currentTime+delay);o.stop(AC.currentTime+delay+d+0.05);
@@ -1116,10 +1133,10 @@ const BGM=(function(){
   return{
     start(s){ if(!ensure())return; side=s||'P'; step=0;
       if(ac.state==='suspended')ac.resume();
-      if(timer)return; fade(muted?0:0.9,600); timer=setInterval(tick,BEAT*1000); },
+      if(timer)return; fade(muted?0:0.9*settings.bgm,600); timer=setInterval(tick,BEAT*1000); },
     setSide(s){ if(!ac||side===s)return; side=s; step=0; },
     stop(){ if(timer){clearInterval(timer);timer=null;} fade(0,400); },
-    refresh(){ fade(muted?0:0.9,200); }, // 静音开关切换时调用
+    refresh(){ fade(muted?0:0.9*settings.bgm,200); }, // 静音开关切换时调用
   };
 })();
 
@@ -1177,6 +1194,7 @@ const DIFFICULTY_TIERS={
 };
 let gameModeChoice='skirmish'; // 主菜单选中的游戏模式，newGame 时写入 G.gameMode
 let scenarioChoice='basics';
+let boardFocus={x:0,y:0};
 // 游戏模式：pool=null 表示遭遇战不限制兵种（沿用 TROOPS_TIERS 各档原有池子）；
 // 三种对决模式限制双方（含工厂生产）只能用列出的兵种，运兵车三种对决都不开放（无战斗力，对决模式里没有意义）
 const GAME_MODES={
@@ -1366,13 +1384,14 @@ function fitBoard(){
   const size=G.size;
   const headerH=document.querySelector('header')?.offsetHeight||60;
   const mainPad=32; // #main padding 16px×2
-  const sideW=270+16; // #side 宽度 + #main 的 gap
   const wrapPad=26; // #boardWrap padding 12px×2 + border
+  const stacked=window.innerWidth<=700;
+  const sideW=stacked?0:270+16; // 小屏幕侧栏换行，不再错误扣除其宽度
   const availW=window.innerWidth-sideW-mainPad-wrapPad;
   const availH=window.innerHeight-headerH-mainPad-wrapPad;
   const gapTotal=(size-1)*3; // #board 格子间 gap
   const raw=Math.floor((Math.min(availW,availH)-gapTotal)/size);
-  const cell=Math.max(20,Math.min(64,raw)); // 格子太小看不清、太大失真，设上下限
+  const cell=Math.max(stacked?36:20,Math.min(64,raw)); // 小屏幕维持触控目标，棋盘容器负责滚动
   board.style.setProperty('--cell',cell+'px');
 }
 let fitBoardTimer=null;
@@ -1450,6 +1469,12 @@ function siegeWave(){
 }
 // 玩家生产：点击己方空工厂打开生产菜单（新单位当回合待机，同高级战争）
 let prodFactory=null;
+let dialogTrigger=null;
+function openDialog(dialog,trigger=document.activeElement){
+  dialogTrigger=trigger;dialog.classList.remove('hidden');
+  (window.requestAnimationFrame||setTimeout)(()=>dialog.querySelector('button:not(:disabled),input:not(:disabled),select:not(:disabled),a[href]')?.focus());
+}
+function closeDialog(dialog){dialog.classList.add('hidden');dialogTrigger?.focus?.();dialogTrigger=null;}
 function openProdMenu(x,y){
   prodFactory={x,y};
   $('#prodFunds').textContent=T('prodFunds')(G.funds.P);
@@ -1465,7 +1490,7 @@ function openProdMenu(x,y){
     btn.addEventListener('click',()=>buyUnit(k));
     list.appendChild(btn);
   }
-  $('#prodDialog').classList.remove('hidden');
+  openDialog($('#prodDialog'));
 }
 function buyUnit(type){
   if(!prodFactory||!G||G.funds.P<UNIT_COSTS[type])return;
@@ -1475,7 +1500,7 @@ function buyUnit(type){
   G.units.push(u);
   SFX.repair();
   log(T('buildLog')('P',type),'p');
-  $('#prodDialog').classList.add('hidden');
+  closeDialog($('#prodDialog'));
   prodFactory=null;
   updateFunds();render();saveGame();
 }
@@ -2193,7 +2218,10 @@ function render(){
     if(supportSet&&u&&supportSet.has(u.id))cls+=' support';
     if(unloadSet&&unloadSet.has(x+','+y))cls+=' support';
     if(pathSet&&pathSet.has(x+','+y)&&!isSel)cls+=' path';
-    html+=`<div class="${cls}" data-x="${x}" data-y="${y}">`;
+    const owner=CAPTURABLE.includes(tk)?G.caps.get(capKey(x,y))?.owner:null;
+    const cellLabel=[`${t.name} ${x+1},${y+1}`,owner?(owner==='P'?T('myFlag'):T('enFlag')):'',u?`${sideName(u.side)} ${UNIT_TYPES[u.type].name} HP ${u.hp}/${u.maxHp}`:''].filter(Boolean).join('，').replace(/"/g,'&quot;');
+    const focused=x===boardFocus.x&&y===boardFocus.y;
+    html+=`<div class="${cls}" role="gridcell" tabindex="${focused?0:-1}" aria-label="${cellLabel}"${isSel?' aria-selected="true"':''} data-x="${x}" data-y="${y}">`;
     if(CAPTURABLE.includes(tk)){
       const cap=G.caps.get(capKey(x,y));
       if(cap&&cap.owner)html+=`<span class="flag ${cap.owner==='P'?'fp':'fe'}"></span>`;
@@ -2214,7 +2242,9 @@ function render(){
     if(pathDirs&&pathDirs.has(x+','+y))html+=`<span class="arrow a-${pathDirs.get(x+','+y)}"></span>`;
     html+='</div>';
   }
+  const restoreFocus=board.contains?.(document.activeElement);
   board.innerHTML=html;
+  if(restoreFocus)board.querySelector(`.cell[data-x="${boardFocus.x}"][data-y="${boardFocus.y}"]`)?.focus();
 }
 function showInfo(u){
   const el=$('#unitInfo');
@@ -2350,12 +2380,12 @@ function showResult(win,how){
   win?SFX.win():SFX.lose();
   $('#resultTitle').textContent=win?T('winTitle'):T('loseTitle');
   $('#resultText').textContent=win?T('winText')(G.turn,how):T('loseText')(G.turn,how);
-  $('#overlay').classList.remove('hidden');
+  openDialog($('#overlay'));
 }
 function toMenu(){
   BGM.stop(); // 返回菜单停止 BGM
-  $('#overlay').classList.add('hidden');
-  $('#menu').classList.remove('hidden');
+  closeDialog($('#overlay'));
+  openDialog($('#menu'));
   const banner=document.getElementById('scenarioBanner');if(banner)banner.style.display='none';
 }
 
@@ -2434,23 +2464,69 @@ $('#toMenuBtn').addEventListener('click',toMenu);
 $('#sndBtn').addEventListener('click',()=>{
   muted=!muted;
   $('#sndBtn').textContent=muted?'🔇':'🔊';
+  $('#sndBtn').setAttribute('aria-pressed',String(muted));
+  saveSettings();
   BGM.refresh(); // 同步 BGM 静音状态
 });
+function updateAudioSettings(){
+  settings.bgm=+$('#bgmVolume').value/100;settings.sfx=+$('#sfxVolume').value/100;
+  saveSettings();BGM.refresh();
+}
+$('#bgmVolume').addEventListener('input',updateAudioSettings);
+$('#sfxVolume').addEventListener('input',updateAudioSettings);
+$('#bgmVolume').value=Math.round(settings.bgm*100);
+$('#sfxVolume').value=Math.round(settings.sfx*100);
+$('#sndBtn').textContent=muted?'🔇':'🔊';
+$('#sndBtn').setAttribute('aria-pressed',String(muted));
 $('#helpBtn').addEventListener('click',()=>{
-  $('#helpDialog').classList.remove('hidden');
+  openDialog($('#helpDialog'));
 });
 $('#helpClose').addEventListener('click',()=>{
-  $('#helpDialog').classList.add('hidden');
+  closeDialog($('#helpDialog'));
 });
 $('#prodClose').addEventListener('click',()=>{
-  $('#prodDialog').classList.add('hidden');
+  closeDialog($('#prodDialog'));
   prodFactory=null;
 });
 $('#menuHelpBtn').addEventListener('click',()=>{
-  $('#helpDialog').classList.remove('hidden');
+  openDialog($('#helpDialog'));
+});
+board.addEventListener('focusin',e=>{
+  const c=e.target.closest('.cell');if(!c)return;
+  boardFocus={x:+c.dataset.x,y:+c.dataset.y};G.hover={...boardFocus};
+  c.dispatchEvent(new MouseEvent('mousemove',{bubbles:true}));
+});
+board.addEventListener('keydown',e=>{
+  if(!G)return;
+  const moves={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]};
+  if(moves[e.key]){
+    e.preventDefault();const[dx,dy]=moves[e.key];
+    boardFocus={x:Math.max(0,Math.min(G.size-1,boardFocus.x+dx)),y:Math.max(0,Math.min(G.size-1,boardFocus.y+dy))};
+    board.querySelectorAll('.cell').forEach(c=>c.tabIndex=-1);
+    const next=board.querySelector(`.cell[data-x="${boardFocus.x}"][data-y="${boardFocus.y}"]`);if(next){next.tabIndex=0;next.focus();}
+  }else if(e.key==='Enter'||e.key===' '){e.preventDefault();e.target.closest('.cell')?.click();}
+  else if(e.key==='Escape'){deselect();}
+});
+document.addEventListener('keydown',e=>{
+  const dialog=[...document.querySelectorAll('.overlay:not(.hidden)')].pop();if(!dialog)return;
+  if(e.key==='Escape'&&dialog.id!=='menu'){
+    e.preventDefault();const close=dialog.querySelector('#helpClose,#prodClose,#toMenuBtn');close?.click();return;
+  }
+  if(e.key==='Tab'){
+    const items=[...dialog.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),a[href]')];if(!items.length)return;
+    const first=items[0],last=items[items.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  }
+});
+document.querySelectorAll('[data-size],[data-ai],[data-troops],[data-diff],[data-mode],.langBtn').forEach(b=>b.setAttribute('aria-pressed',String(b.classList.contains('primary'))));
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-size],[data-ai],[data-troops],[data-diff],[data-mode],.langBtn');if(!b)return;
+  const key=b.dataset.size?'size':b.dataset.ai?'ai':b.dataset.troops?'troops':b.dataset.diff?'diff':b.dataset.mode?'mode':'lang';
+  document.querySelectorAll(key==='lang'?'.langBtn':`[data-${key}]`).forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
 });
 // 启动时应用静态文案（默认中文）
-applyStaticTexts();
+setLang(settings.lang);
 
 </script>
 </body>

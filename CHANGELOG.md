@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Keyboard-operable grid navigation, accessible cell names/states, semantic dialogs with focus management, and live objective/battle-log announcements
+- Responsive touch layout with minimum mobile cell targets, scrollable large boards, and reduced-motion support
+- Independent persistent BGM/SFX volume controls, master mute, and language preferences stored separately from game saves
+- Playwright Chromium end-to-end coverage for keyboard dialogs, mobile layout, and settings persistence
 - A data-driven Tactics Academy with five replayable scenarios covering core actions, terrain and counters, indirect fire, transport breakthroughs, and a standard holdout
 - Bilingual in-game objective banners and scenario selection, with scenario identity and objectives preserved by autosaves
 - Regression coverage for scenario definitions, initialization, objectives, and save restoration
