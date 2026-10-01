@@ -17,7 +17,7 @@
 
 ---
 
-A zero-dependency turn-based strategy game inspired by GBA's *Advance Wars*. No frameworks, no build step — just open `index.html` and play!
+A zero-runtime-dependency turn-based strategy game inspired by GBA's *Advance Wars*. The distributed game remains one `index.html` — just open it and play!
 
 ## ✨ Features
 
@@ -70,7 +70,7 @@ Click the badge above — it opens straight in your browser, nothing to download
 
 ### Run locally (to read the source or play offline)
 
-Zero dependencies, no build step — clone the repo and open it directly:
+The release artifact needs no install or build step — clone the repo and open it directly:
 
 ```bash
 git clone https://github.com/yuyuanjingxuan/mini-advance-wars.git
@@ -85,8 +85,10 @@ python -m http.server 8765
 
 ## 📦 Tech
 
-- Pure HTML + CSS + JavaScript (**zero dependencies**, no frameworks, no build step)
-- **Single-file architecture**: all styles and scripts (config / i18n / SFX / logic) are embedded in `index.html` — just open and play, no external files needed
+- Pure HTML + CSS + JavaScript (**zero runtime dependencies**, no frameworks)
+- **Single-file distribution**: the generated `index.html` embeds every style and script — just open and play, with no external runtime files
+- **Maintainable sources**: the HTML template, CSS, and four ordered scripts live under `src/`; after editing them, run `npm run build` and commit the regenerated `index.html`
+- `npm run check:generated` verifies that the release artifact matches its sources; CI also validates the final embedded scripts and browser paths
 - Runs in any modern browser — double-click `index.html` works too (no ES modules / fetch, file:// friendly)
 
 ## 📋 Changelog

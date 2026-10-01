@@ -18,6 +18,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Verify generated index.html is current
+        run: node scripts/build.js --check
+
       - name: Check embedded scripts parse and execute
         run: node .github/scripts/check-html.js
 
@@ -31,4 +34,5 @@ jobs:
           node-version: '20'
       - run: npm install
       - run: npx playwright install --with-deps chromium
+      - run: npm run check:generated
       - run: npm run test:e2e

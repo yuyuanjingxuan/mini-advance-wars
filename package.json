@@ -2,7 +2,11 @@
   "name": "mini-advance-wars-e2e",
   "private": true,
   "scripts": {
-    "test:e2e": "playwright test"
+    "build": "node scripts/build.js",
+    "check:generated": "node scripts/build.js --check",
+    "check:html": "node .github/scripts/check-html.js",
+    "test:e2e": "playwright test",
+    "test": "npm run check:generated && npm run check:html && npm run test:e2e"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

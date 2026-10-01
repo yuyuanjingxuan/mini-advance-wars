@@ -17,7 +17,7 @@
 
 ---
 
-零依赖回合制战棋游戏，致敬 GBA 平台《高级战争》。无框架、无构建——双击 `index.html` 即可开玩！
+零运行时依赖的回合制战棋游戏，致敬 GBA 平台《高级战争》。发布版仍是单个 `index.html`——双击即可开玩！
 
 ## ✨ 游戏特性
 
@@ -70,7 +70,7 @@
 
 ### 本地运行（想看源码或离线游玩）
 
-零依赖、无需构建，克隆仓库后即可直接打开：
+发布文件无需安装或构建，克隆仓库后即可直接打开：
 
 ```bash
 git clone https://github.com/yuyuanjingxuan/mini-advance-wars.git
@@ -85,8 +85,10 @@ python -m http.server 8765
 
 ## 📦 技术
 
-- 纯 HTML + CSS + JavaScript（**零依赖**，无框架、无构建）
-- **单文件架构**：全部样式与脚本（配置 / 多语言 / 音效 / 逻辑）均内嵌在 `index.html` 中，双击即玩，无外部依赖文件
+- 纯 HTML + CSS + JavaScript（**零运行时依赖**、无框架）
+- **单文件发布**：生成后的 `index.html` 内嵌全部样式与脚本，双击即玩，无外部依赖文件
+- **可维护源码**：HTML 模板、CSS 与四段有序脚本位于 `src/`；修改后运行 `npm run build` 重新生成并提交 `index.html`
+- `npm run check:generated` 会检查发布文件是否与源码同步；CI 还会验证最终内联脚本及浏览器关键路径
 - 任意现代浏览器直接运行，双击 `index.html` 即可（无 ES Module / fetch，file:// 协议可用）
 
 ## 📋 更新日志

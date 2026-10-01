@@ -1,4 +1,4 @@
-// Lightweight CI check for a zero-dependency single-file game.
+// Lightweight CI check for the generated zero-dependency single-file game.
 // No npm install, no test framework -- just Node's built-in vm module
 // running each embedded <script> block against a minimal DOM shim,
 // the same style of check used during manual development
@@ -11,6 +11,7 @@ const path = require('path');
 
 const file = path.join(__dirname, '..', '..', 'index.html');
 const html = fs.readFileSync(file, 'utf8');
+const sourceRoot = path.join(__dirname, '..', '..', 'src');
 
 let failed = false;
 function fail(msg) {
@@ -31,8 +32,30 @@ for (const tag of ['div', 'script', 'style', 'button']) {
 
 // --- Extract and execute every <script> block against a minimal DOM shim ---
 const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]);
-if (scripts.length === 0) fail('no <script> blocks found');
-else ok(`found ${scripts.length} <script> blocks`);
+const expectedScriptMarkers = ['@bundle config', '@bundle i18n', '@bundle audio', '@bundle game'];
+if (scripts.length !== expectedScriptMarkers.length) {
+  fail(`expected ${expectedScriptMarkers.length} <script> blocks, found ${scripts.length}`);
+} else {
+  ok(`found ${scripts.length} <script> blocks`);
+  expectedScriptMarkers.forEach((marker, index) => {
+    if (!scripts[index].includes(marker)) fail(`script block ${index} is missing ${marker}`);
+  });
+  if (!failed) ok('embedded script order matches config, i18n, audio, game');
+}
+
+const sourceFiles = [
+  'scripts/01-config.js',
+  'scripts/02-i18n.js',
+  'scripts/03-audio.js',
+  'scripts/04-game.js',
+];
+sourceFiles.forEach((relativePath, index) => {
+  const source = fs.readFileSync(path.join(sourceRoot, relativePath), 'utf8').replace(/\r\n?/g, '\n').replace(/\n*$/, '');
+  if (scripts[index] && scripts[index].replace(/\r\n?/g, '\n').trim() !== source.trim()) {
+    fail(`script block ${index} differs from src/${relativePath}`);
+  }
+});
+if (!failed) ok('embedded scripts match their development sources');
 
 function makeEl() {
   return {

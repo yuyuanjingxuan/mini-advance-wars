@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Maintainable development sources under `src/` plus a zero-dependency generator that preserves the directly playable single-file `index.html` release
+- CI, Pages, and release checks that reject stale generated output; tagged releases now attach `index.html` as a downloadable asset
 - Keyboard-operable grid navigation, accessible cell names/states, semantic dialogs with focus management, and live objective/battle-log announcements
 - Responsive touch layout with minimum mobile cell targets, scrollable large boards, and reduced-motion support
 - Independent persistent BGM/SFX volume controls, master mute, and language preferences stored separately from game saves
@@ -30,6 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- The committed `index.html` is now generated from an HTML template, CSS, and four ordered classic scripts while retaining `file://` compatibility and zero runtime dependencies
 - Expanded the zero-dependency CI script with regression checks for bilingual key parity, indirect-fire planning, AI action priority, enemy building healing, and HQ capture victory
 
 ## [1.0.1] - 2026-09-25

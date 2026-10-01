@@ -22,6 +22,16 @@ jobs:
         with:
           ref: ${{ inputs.tag || github.ref_name }}
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify release artifact
+        run: |
+          node scripts/build.js --check
+          node .github/scripts/check-html.js
+
       - name: Extract changelog section for this tag
         id: notes
         run: |
@@ -38,3 +48,4 @@ jobs:
           name: 'v${{ steps.notes.outputs.version }}'
           body_path: release-notes.md
           generate_release_notes: false
+          files: index.html
