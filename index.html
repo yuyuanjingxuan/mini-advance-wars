@@ -255,6 +255,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .prodbtn:disabled{opacity:.4}
 #actionBtns{display:flex;flex-direction:column;gap:6px}
 #actionBtns button{width:100%}
+#scenarioBanner{display:none;padding:9px 14px;background:#172554;border-bottom:1px solid #31529a;color:#dbeafe;font-size:13px}
+#scenarioBanner b{color:#fff;margin-right:6px}
+#scenarioPicker{display:none;margin:10px auto 0;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:#111827;color:var(--text);font:inherit}
 
 </style>
 </head>
@@ -272,6 +275,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   <button id="menuBtn">主菜单</button>
   <button id="endTurn" class="primary">结束回合 ⏭</button>
 </header>
+<div id="scenarioBanner"><b id="scenarioTitle"></b><span id="scenarioObjective"></span></div>
 
 <div id="main">
   <div id="boardWrap"><div id="board"></div></div>
@@ -307,7 +311,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
       <button data-mode="armorDuel">🛡️ 装甲对决<br><small>双方只能出侦察车/坦克</small></button>
       <button data-mode="artilleryDuel">💥 炮兵对决<br><small>双方只能出火炮/火箭炮</small></button>
       <button data-mode="siege">🏰 坚守阵地<br><small>存活 15 回合，敌方持续刷新</small></button>
+      <button data-mode="academy">🎓 战术学院<br><small>五个教学与挑战场景</small></button>
     </div>
+    <select id="scenarioPicker" aria-label="教学场景"></select>
     <p style="margin:16px 0 4px">选择地图规模（随机对称地图）：</p>
     <div class="sizes" style="flex-wrap:wrap">
       <button data-size="8">小 8×8<br><small>快节奏</small></button>
@@ -589,6 +595,12 @@ const I18N={
     modeArmorDuel:'🛡️ 装甲对决', modeArmorDuelSub:'双方只能出侦察车/坦克',
     modeArtilleryDuel:'💥 炮兵对决', modeArtilleryDuelSub:'双方只能出火炮/火箭炮',
     modeSiege:'🏰 坚守阵地', modeSiegeSub:'存活 15 回合，敌方持续刷新',
+    modeAcademy:'🎓 战术学院', modeAcademySub:'五个教学与挑战场景', scenarioLabel:'教学场景',
+    scBasics:'基础行动', scBasicsObj:'移动、攻击，并占领标记城镇',
+    scTerrain:'地形与克制', scTerrainObj:'利用森林、山地与重装兵消灭敌军',
+    scIndirect:'间接火力', scIndirectObj:'使用火炮在射程外消灭全部目标',
+    scTransport:'运兵突破', scTransportObj:'搭载步兵突破防线并占领目标城镇',
+    scSiege:'标准坚守', scSiegeObj:'守住总部并存活 15 回合',
     aiStyleLabel:'选择敌方 AI 风格：',
     aiBalanced:'🛡️ 稳健', aiBalancedSub:'不打亏本仗，会避险',
     aiAggressive:'🔥 激进', aiAggressiveSub:'不计代价追求击杀',
@@ -712,6 +724,12 @@ const I18N={
     modeArmorDuel:'🛡️ Armor Duel', modeArmorDuelSub:'Both sides: recon/tank only',
     modeArtilleryDuel:'💥 Artillery Duel', modeArtilleryDuelSub:'Both sides: artillery/rocket only',
     modeSiege:'🏰 Hold the Line', modeSiegeSub:'Survive 15 turns, enemy respawns endlessly',
+    modeAcademy:'🎓 Tactics Academy', modeAcademySub:'Five guided scenarios and challenges', scenarioLabel:'Tutorial scenario',
+    scBasics:'Core Actions', scBasicsObj:'Move, attack, and capture the marked city',
+    scTerrain:'Terrain & Counters', scTerrainObj:'Use forests, mountains, and heavies to defeat the enemy',
+    scIndirect:'Indirect Fire', scIndirectObj:'Use artillery range to destroy every target',
+    scTransport:'Transport Breakthrough', scTransportObj:'Carry infantry through the line and capture the target city',
+    scSiege:'Standard Holdout', scSiegeObj:'Defend your HQ and survive 15 turns',
     aiStyleLabel:'Choose enemy AI style:',
     aiBalanced:'🛡️ Balanced', aiBalancedSub:'No bad trades, plays it safe',
     aiAggressive:'🔥 Aggressive', aiAggressiveSub:'Chases kills at any cost',
@@ -869,13 +887,15 @@ function applyStaticTexts(){
   }
   set('gameModeLabel',T('gameModeLabel'));
   const modeBtns=document.querySelectorAll('#menu button[data-mode]');
-  if(modeBtns.length===5){
+  if(modeBtns.length===6){
     modeBtns[0].innerHTML=T('modeSkirmish')+'<br><small>'+T('modeSkirmishSub')+'</small>';
     modeBtns[1].innerHTML=T('modeInfantryDuel')+'<br><small>'+T('modeInfantryDuelSub')+'</small>';
     modeBtns[2].innerHTML=T('modeArmorDuel')+'<br><small>'+T('modeArmorDuelSub')+'</small>';
     modeBtns[3].innerHTML=T('modeArtilleryDuel')+'<br><small>'+T('modeArtilleryDuelSub')+'</small>';
     modeBtns[4].innerHTML=T('modeSiege')+'<br><small>'+T('modeSiegeSub')+'</small>';
+    modeBtns[5].innerHTML=T('modeAcademy')+'<br><small>'+T('modeAcademySub')+'</small>';
   }
+  updateScenarioMenu();updateScenarioBanner();
   set('aiStyleLabel',T('aiStyleLabel'));
   const aiBtns=document.querySelectorAll('#menu button[data-ai]');
   if(aiBtns.length===3){
@@ -1112,7 +1132,7 @@ let troopsChoice='none'; // 主菜单选中的初始部队数目档位：none/fe
 let sizeChoice=10; // 主菜单选中的地图规模，默认 10（原本点击尺寸按钮即开局，现改为先选后按「开始游戏」）
 let difficultyChoice='normal'; // 主菜单选中的敌方强度档位，newGame 时读取（makeUnit 按此给敌方单位 HP 加成）
 const MAP_GEN_VERSION=1;
-const SAVE_SCHEMA_VERSION=1;
+const SAVE_SCHEMA_VERSION=2;
 const SAVE_KEY='mini-advance-wars-save';
 const VALID_MAP_SIZES=[8,10,12,14,16];
 function createRng(seed){
@@ -1156,6 +1176,7 @@ const DIFFICULTY_TIERS={
   nightmare:{hpMult:1.5, incomeMult:1.5},
 };
 let gameModeChoice='skirmish'; // 主菜单选中的游戏模式，newGame 时写入 G.gameMode
+let scenarioChoice='basics';
 // 游戏模式：pool=null 表示遭遇战不限制兵种（沿用 TROOPS_TIERS 各档原有池子）；
 // 三种对决模式限制双方（含工厂生产）只能用列出的兵种，运兵车三种对决都不开放（无战斗力，对决模式里没有意义）
 const GAME_MODES={
@@ -1164,6 +1185,7 @@ const GAME_MODES={
   armorDuel:     {pool:['recon','tank']},
   artilleryDuel: {pool:['artillery','rocket']},
   siege:         {pool:null}, // 坚守阵地不限制玩家/初始兵种池，敌方刷新兵种池单独在 SIEGE 里定义
+  academy:       {pool:null},
 };
 // 当前对局允许的兵种列表（null=不限制，返回全部 UNIT_TYPES 键）；生产菜单、初始部队随机池、AI 造兵都统一走这个函数
 function allowedUnitTypes(){
@@ -1177,6 +1199,41 @@ const SIEGE={
   pool:['infantry','heavy','recon','artillery','engineer','medic','tank','rocket','transport'], // 复用 many 档兵种池
   citiesByTier:{none:0,few:2,mid:3,many:4}, // 我方初始部队档位 → 额外城市数量
 };
+const SCENARIOS={
+  basics:{title:'scBasics',objective:'scBasicsObj',size:8,seed:0xACAD0001,goal:{type:'capture',x:5,y:1},
+    tiles:[[1,6,'hq'],[5,1,'city'],[3,4,'forest'],[4,4,'forest']],units:[['P','infantry',1,5],['P','infantry',2,6],['E','infantry',5,3,6]]},
+  terrain:{title:'scTerrain',objective:'scTerrainObj',size:8,seed:0xACAD0002,goal:{type:'eliminate'},
+    tiles:[[1,6,'hq'],[2,4,'forest'],[3,4,'forest'],[2,3,'mountain'],[4,3,'mountain']],units:[['P','heavy',1,5],['P','infantry',2,5],['E','recon',5,3],['E','tank',6,2]]},
+  indirect:{title:'scIndirect',objective:'scIndirectObj',size:8,seed:0xACAD0003,goal:{type:'eliminate'},
+    tiles:[[1,6,'hq'],[2,6,'forest'],[4,4,'forest']],units:[['P','artillery',1,6],['P','infantry',2,5],['E','heavy',4,6],['E','infantry',5,4],['E','tank',6,2]]},
+  transport:{title:'scTransport',objective:'scTransportObj',size:8,seed:0xACAD0004,goal:{type:'capture',x:6,y:1},
+    tiles:[[1,6,'hq'],[6,1,'city'],[3,5,'river'],[3,4,'ford'],[3,3,'river'],[4,2,'forest'],[5,2,'forest']],units:[['P','transport',1,5],['P','infantry',2,5],['E','infantry',5,3],['E','recon',6,2]]},
+  siege:{title:'scSiege',objective:'scSiegeObj',size:8,seed:0xACAD0005,goal:{type:'survive',turns:15},
+    tiles:[[1,6,'hq'],[2,6,'city'],[1,5,'factory'],[3,5,'forest'],[4,4,'forest'],[3,3,'mountain']],units:[['P','infantry',1,5],['P','heavy',2,5],['P','artillery',2,6]]},
+};
+function updateScenarioMenu(){
+  const picker=document.getElementById('scenarioPicker');if(!picker)return;
+  picker.style.display=gameModeChoice==='academy'?'block':'none';
+  picker.setAttribute('aria-label',T('scenarioLabel'));
+  picker.innerHTML=Object.entries(SCENARIOS).map(([id,s])=>`<option value="${id}"${id===scenarioChoice?' selected':''}>${T(s.title)} — ${T(s.objective)}</option>`).join('');
+}
+function updateScenarioBanner(){
+  const banner=document.getElementById('scenarioBanner'),s=G&&G.scenario&&SCENARIOS[G.scenario.id];
+  if(!banner)return;
+  banner.style.display=s?'block':'none';
+  if(s){document.getElementById('scenarioTitle').textContent=T(s.title);document.getElementById('scenarioObjective').textContent=T(s.objective);}
+}
+function applyScenario(id){
+  const s=SCENARIOS[id];if(!s)return;
+  G.map=Array.from({length:s.size},()=>Array(s.size).fill('plain'));
+  for(const[x,y,t]of s.tiles)G.map[y][x]=t;
+  G.caps=new Map();
+  for(const[x,y,t]of s.tiles)if(CAPTURABLE.includes(t))G.caps.set(x+','+y,{owner:t==='hq'?'P':null,prog:t==='hq'?CAP_NEED:0});
+  G.units=s.units.map(([side,type,x,y,hp])=>{const u=makeUnit(side,type,x,y);if(hp)u.hp=Math.min(hp,u.maxHp);return u;});
+  G.scenario={id,goal:{...s.goal}};
+  G.funds={P:0,E:0};
+  if(s.goal.type==='survive')G.siege={nextWaveTurn:SIEGE.waveInterval};
+}
 const $=s=>document.querySelector(s);
 const board=$('#board');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -1434,7 +1491,7 @@ function createSaveDto(){
     game:{
       size:G.size,map:G.map,mapSeed:G.mapSeed,mapCode:G.mapCode,units:G.units,turn:G.turn,phase:G.phase,
       caps:[...G.caps.entries()],funds:G.funds,aiStyle:G.aiStyle,difficulty:G.difficulty,gameMode:G.gameMode,
-      troopsTier:G.troopsTier,siege:G.siege||null,
+      troopsTier:G.troopsTier,siege:G.siege||null,scenario:G.scenario||null,
     },
   };
 }
@@ -1471,12 +1528,13 @@ function restoreGame(dto=readSave()){
   gameRng=createRng(dto.gameRngState);
   mapRng=createRng(G.mapSeed);
   aiStyleChoice=G.aiStyle;difficultyChoice=G.difficulty;gameModeChoice=G.gameMode;troopsChoice=G.troopsTier||'none';sizeChoice=G.size;
+  if(G.scenario&&SCENARIOS[G.scenario.id])scenarioChoice=G.scenario.id;
   syncMenuChoices();
   prodFactory=null;
   board.style.setProperty('--n',G.size);fitBoard();
   $('#menu').classList.add('hidden');$('#overlay').classList.add('hidden');$('#prodDialog').classList.add('hidden');
   $('#log').innerHTML='';
-  updateAiStyleTag();SFX.start();BGM.start(G.phase);render();showInfo(null);
+  updateAiStyleTag();updateScenarioBanner();SFX.start();BGM.start(G.phase);render();showInfo(null);
   return true;
 }
 function syncMenuChoices(){
@@ -1707,6 +1765,17 @@ function checkEnd(){
   const p=G.units.some(u=>u.side==='P');
   const e=G.units.some(u=>u.side==='E');
   if(!p){G.over=true;showResult(false);return;} // 我方全灭永远直接战败，坚守阵地也不例外
+  if(G.scenario){
+    const goal=G.scenario.goal;
+    const home=[...G.caps].find(([key])=>{const[x,y]=key.split(',').map(Number);return G.map[y][x]==='hq';});
+    if(home&&home[1].owner==='E'){G.over=true;showResult(false,'hq');return;}
+    if(goal.type==='eliminate'&&!e){G.over=true;showResult(true);return;}
+    if(goal.type==='capture'){
+      const cap=G.caps.get(goal.x+','+goal.y);
+      if(cap&&cap.owner==='P'){G.over=true;showResult(true,'hq');return;}
+    }
+    return;
+  }
   // 歼灭全部敌军获胜：坚守阵地模式下敌方会无限刷新（含开局 0 部队的初始状态），这条路径必须禁用，否则要么开局即判胜、要么永远打不完
   if(G.gameMode!=='siege'&&!e){G.over=true;showResult(true);return;}
   // 总部占领：占领敌方总部直接获胜，己方总部被占直接战败（坚守阵地下敌方没有 HQ，这段自然不会触发）
@@ -2018,12 +2087,13 @@ async function startEnemyPhase(){
   }
   aiBuild(); // 敌方回合结束：在己方空工厂造兵（下回合行动，坚守阵地模式下敌方没有工厂，自然跳过）
   // 坚守阵地：每 waveInterval 回合刷新一波敌方单位，达到总回合数后即存活获胜
-  if(G.gameMode==='siege'&&G.siege){
+  if((G.gameMode==='siege'||G.scenario?.goal.type==='survive')&&G.siege){
     if(G.turn>=G.siege.nextWaveTurn){
       siegeWave();
       G.siege.nextWaveTurn+=SIEGE.waveInterval;
     }
-    if(G.turn+1>SIEGE.totalTurns){G.over=true;showResult(true,'survive');return;}
+    const total=G.scenario?.goal.turns||SIEGE.totalTurns;
+    if(G.turn+1>total){G.over=true;showResult(true,'survive');return;}
   }
   // 新回合：本方建筑回血（只有己方占领的建筑才回血）
   G.turn++;G.phase='P';G.busy=false;
@@ -2049,7 +2119,7 @@ function updateTop(){
 }
 function render(){
   if(!G)return;
-  updateTop();updateFunds();
+  updateTop();updateFunds();updateScenarioBanner();
   const moveSet=G.reach?G.reach.stoppable:null;
   // 选中时：攻击范围（从移动范围内任意落点可达的攻击格）；view 模式同样显示
   let zoneSet=null,atkSet=null;
@@ -2191,6 +2261,10 @@ function makeUnit(side,type,x,y){
          move:b.move,minR:b.minR,maxR:b.maxR,level:1,xp:0,acted:false};
 }
 function newGame(size,seed=freshSeed()){
+  if(gameModeChoice==='academy'){
+    const scenario=SCENARIOS[scenarioChoice]||SCENARIOS.basics;
+    size=scenario.size;seed=scenario.seed;
+  }
   seed=seed>>>0;
   mapRng=createRng(seed);
   gameRng=createRng((seed^0x9E3779B9)>>>0);
@@ -2247,6 +2321,7 @@ function newGame(size,seed=freshSeed()){
     const owner=ownFixed.has(k)?'P':enemyFixed.has(k)?'E':null;
     G.caps.set(k,{owner,prog:owner?CAP_NEED:0});
   }
+  if(gameModeChoice==='academy')applyScenario(scenarioChoice);
   if(isSiege)G.siege={nextWaveTurn:SIEGE.waveInterval}; // 下一次刷怪发生在第几回合的敌方阶段
   board.style.setProperty('--n',size);
   fitBoard();
@@ -2255,7 +2330,7 @@ function newGame(size,seed=freshSeed()){
   $('#log').innerHTML='';
   log(T('startLog'),'phase');
   collectIncome('P');collectIncome('E');updateFunds(); // 开局无资金，首回合立即按已拥有建筑数结算一次收入
-  updateAiStyleTag();
+  updateAiStyleTag();updateScenarioBanner();
   SFX.start();
   BGM.start('P'); // 开局播放我方主题 BGM
   render();showInfo(null);saveGame();
@@ -2281,6 +2356,7 @@ function toMenu(){
   BGM.stop(); // 返回菜单停止 BGM
   $('#overlay').classList.add('hidden');
   $('#menu').classList.remove('hidden');
+  const banner=document.getElementById('scenarioBanner');if(banner)banner.style.display='none';
 }
 
 // ================= 事件绑定 =================
@@ -2292,6 +2368,10 @@ document.querySelectorAll('#menu button[data-size]').forEach(b=>{
   });
 });
 $('#startGameBtn').addEventListener('click',()=>{
+  if(gameModeChoice==='academy'){
+    const scenario=SCENARIOS[scenarioChoice]||SCENARIOS.basics;
+    newGame(scenario.size,scenario.seed);return;
+  }
   const input=$('#mapCodeInput'),raw=input.value.trim();
   const parsed=raw?decodeMapCode(raw):{size:sizeChoice,seed:freshSeed()};
   if(!parsed){$('#mapCodeHint').textContent=T('mapCodeInvalid');return;}
@@ -2345,8 +2425,10 @@ document.querySelectorAll('#menu button[data-mode]').forEach(b=>{
   b.addEventListener('click',()=>{
     gameModeChoice=b.dataset.mode;
     document.querySelectorAll('#menu button[data-mode]').forEach(x=>x.classList.toggle('primary',x===b));
+    updateScenarioMenu();
   });
 });
+$('#scenarioPicker').addEventListener('change',e=>{scenarioChoice=e.target.value;});
 $('#againBtn').addEventListener('click',()=>newGame(G.size));
 $('#toMenuBtn').addEventListener('click',toMenu);
 $('#sndBtn').addEventListener('click',()=>{

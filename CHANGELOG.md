@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- A data-driven Tactics Academy with five replayable scenarios covering core actions, terrain and counters, indirect fire, transport breakthroughs, and a standard holdout
+- Bilingual in-game objective banners and scenario selection, with scenario identity and objectives preserved by autosaves
+- Regression coverage for scenario definitions, initialization, objectives, and save restoration
 - Seeded map generation with versioned, shareable map codes that reproduce identical terrain
 - Versioned automatic saves with Continue and Delete Save menu actions
 - Save restoration for units, funds, building capture progress, transports, game settings, siege state, and the future gameplay RNG sequence

@@ -132,6 +132,27 @@ try {
   if (missingKeys.length) fail(`i18n key mismatch: ${missingKeys.join(', ')}`);
   else ok('Chinese and English i18n keys match');
 
+  const scenariosValid = vm.runInContext(`Object.keys(SCENARIOS).length===5&&Object.values(SCENARIOS).every(s=>
+    VALID_MAP_SIZES.includes(s.size)&&Number.isInteger(s.seed)&&s.goal&&Array.isArray(s.tiles)&&Array.isArray(s.units)&&
+    s.units.every(u=>['P','E'].includes(u[0])&&UNIT_TYPES[u[1]]&&u[2]>=0&&u[2]<s.size&&u[3]>=0&&u[3]<s.size))`, sandbox);
+  if (!scenariosValid) fail('academy scenario definitions are invalid');
+  else ok('all five academy scenario definitions are structurally valid');
+
+  const scenarioStarts = vm.runInContext(`Object.keys(SCENARIOS).every(id=>{
+    gameModeChoice='academy';scenarioChoice=id;newGame(10);
+    return G.scenario.id===id&&G.size===SCENARIOS[id].size&&G.units.length===SCENARIOS[id].units.length;
+  })`, sandbox);
+  if (!scenarioStarts) fail('one or more academy scenarios failed to initialize');
+  else ok('all academy scenarios initialize from their data definitions');
+
+  const scenarioGoal = vm.runInContext(`
+    gameModeChoice='academy';scenarioChoice='basics';newGame(8);
+    const goal=G.scenario.goal;G.caps.get(goal.x+','+goal.y).owner='P';checkEnd();G.over;
+  `, sandbox);
+  if (!scenarioGoal) fail('scenario capture objective did not end the game');
+  else ok('scenario-specific capture objective ends the game');
+  vm.runInContext(`gameModeChoice='skirmish';`, sandbox);
+
   vm.runInContext(`
     newGame(8);
     G.map=Array.from({length:8},()=>Array(8).fill('plain'));
@@ -209,14 +230,14 @@ try {
   else ok('RNG state restoration preserves the future sequence');
 
   vm.runInContext(`
-    newGame(8,0x10203040);
+    gameModeChoice='academy';scenarioChoice='transport';newGame(8,0x10203040);
     G.turn=4;G.funds.P=777;G.units[0].hp=3;
     const savedRngState=gameRng.getState();saveGame();
     const expectedNext=gameRandom();
     G=null;restoreGame();
     restoredSnapshot={turn:G.turn,funds:G.funds.P,hp:G.units[0].hp,caps:G.caps instanceof Map,rng:gameRandom(),state:savedRngState};
   `, sandbox);
-  const saveRoundTrip = vm.runInContext(`restoredSnapshot.turn===4&&restoredSnapshot.funds===777&&restoredSnapshot.hp===3&&restoredSnapshot.caps&&restoredSnapshot.rng===expectedNext`, sandbox);
+  const saveRoundTrip = vm.runInContext(`restoredSnapshot.turn===4&&restoredSnapshot.funds===777&&restoredSnapshot.hp===3&&restoredSnapshot.caps&&restoredSnapshot.rng===expectedNext&&G.scenario.id==='transport'`, sandbox);
   if (!saveRoundTrip) fail('versioned save did not round-trip gameplay state and RNG');
   else ok('versioned save round-trips gameplay state, Map data, and RNG state');
 
