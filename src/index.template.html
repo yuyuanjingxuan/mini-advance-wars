@@ -48,69 +48,80 @@
 
 <div id="menu" class="overlay" role="dialog" aria-modal="true" aria-labelledby="menuTitle">
   <div class="dialog">
-    <h1 id="menuTitle">⚔️ 迷你高级战争</h1>
-    <p class="sub">回合制战棋 · 致敬 GBA《高级战争》· 零依赖即开即玩</p>
-    <p style="margin-bottom:10px"><span style="font-size:13px;color:var(--dim)">🌐 Language:</span> <button class="langBtn primary" data-lang="zh" style="padding:4px 12px;font-size:13px">中文</button> <button class="langBtn" data-lang="en" style="padding:4px 12px;font-size:13px">English</button></p>
-    <div class="help">
-      <p>🪖 <b>9 种兵种</b>：🪖步兵（多面手·可占领）· 🛡️重装兵（高攻高防·克制载具）· 🚙侦察车（高速突袭）· 火炮（射程 2-3）· 🔧工程师（占领×1.5+修理）· ⚕️军医（治疗）· 坦克（突击主力）· 🚀火箭炮（射程 3-5）· 🚚运兵车（搭载步兵类）</p>
-      <p>💣 <b>目标</b>：消灭全部敌军，或占领敌方<b>总部</b>！点击己方单位 → 点<b>蓝格</b>移动 → 点<b>红框敌人</b>攻击。</p>
-      <p>🟠<b>橙格</b>=攻击范围（虚线），🔵<b>蓝格</b>=移动范围。再点一次选中单位=取消选择；或点侧栏「⏳ 待机」原地结束行动。</p>
-      <p>🌲森林 / ⛰️山地提供<b>防御加成</b>但移动缓慢，🌊河流无法通行，🏙️城镇/🏭工厂/🚩总部在回合开始时回复 2 HP。<b>每个兵种在不同地形的移动力不同</b>（参考高级战争）：步兵擅长山地，履带单位不能进山，轮胎单位怕森林。</p>
-      <p>🚩<b>占领建筑</b>：只有步兵/重装兵/工程师能占领（城镇/工厂/总部，工程师 1.5 倍速度）。站上建筑后选择<b>「占领」动作</b>积累进度（进度=当前 HP×倍率，满 20 占领，<b>离开进度清零</b>）。<b>占领敌方总部直接获胜</b>！敌军同样会占领，被夺走的建筑不再为你回血。</p>
-      <p>🖱️ 选中单位后，鼠标悬停会显示<b>移动路径箭头</b>（绿格+箭头指示方向）；点击敌军可查看其<b>移动/攻击范围</b>。</p>
-      <p>💥 有命中与会心一击；⬆️ 战斗获得经验并<b>升级</b>——敌军同样会升级，速战速决！🎵 对战有 BGM：我方明快进行曲，敌方紧张小调。</p>
-      <p>💰 <b>经济与生产</b>：开局无初始资金，首回合立即按已拥有建筑结算收入（每座 +50）。点击<b>己方空工厂</b>打开生产菜单，花钱生产新单位（当回合待机）。敌军也会攒钱造兵，注意扩张经济！</p>
+    <div class="menu-head">
+      <div>
+        <h1 id="menuTitle">⚔️ 迷你高级战争</h1>
+        <p class="sub">回合制战棋 · 致敬 GBA《高级战争》· 零依赖即开即玩</p>
+      </div>
+      <div class="language-picker"><span>🌐 Language</span><button class="langBtn primary" data-lang="zh">中文</button><button class="langBtn" data-lang="en">English</button></div>
     </div>
-    <p style="margin:16px 0 4px" id="gameModeLabel">选择游戏模式：</p>
-    <div class="sizes" style="flex-wrap:wrap">
+    <div class="quick-guide" aria-label="快速上手">
+      <span>① 选择模式与地图</span><span>② 点击己方单位与蓝格移动</span><span>③ 攻击敌军或占领敌方总部</span>
+    </div>
+    <section class="menu-section menu-section-primary" aria-labelledby="gameModeLabel">
+      <h2 id="gameModeLabel">选择游戏模式</h2>
+      <div class="sizes mode-options">
       <button data-mode="skirmish" class="primary">⚔️ 遭遇战<br><small>标准对局，兵种不限</small></button>
       <button data-mode="infantryDuel">🪖 步兵对决<br><small>双方只能出非载具单位</small></button>
       <button data-mode="armorDuel">🛡️ 装甲对决<br><small>双方只能出侦察车/坦克</small></button>
       <button data-mode="artilleryDuel">💥 炮兵对决<br><small>双方只能出火炮/火箭炮</small></button>
       <button data-mode="siege">🏰 坚守阵地<br><small>存活 15 回合，敌方持续刷新</small></button>
       <button data-mode="academy">🎓 战术学院<br><small>五个教学与挑战场景</small></button>
+      </div>
+      <select id="scenarioPicker" aria-label="教学场景"></select>
+    </section>
+    <section class="menu-section" aria-labelledby="mapSizeLabel">
+      <h2 id="mapSizeLabel">选择地图规模（随机对称地图）</h2>
+      <div class="sizes compact-options">
+        <button data-size="8">小 8×8<br><small>快节奏</small></button>
+        <button data-size="10" class="primary">中 10×10<br><small>标准</small></button>
+        <button data-size="12">大 12×12<br><small>大地图</small></button>
+        <button data-size="14">特大 14×14<br><small>超大地图</small></button>
+        <button data-size="16">巨型 16×16<br><small>史诗规模</small></button>
+      </div>
+      <div class="map-code-row">
+        <label id="mapCodeLabel" for="mapCodeInput">地图码（留空则随机）</label>
+        <input id="mapCodeInput" maxlength="20" placeholder="MAW-M1-10-7F3A91C2">
+        <button id="randomMapBtn">🎲 随机地图码</button>
+      </div>
+      <p id="mapCodeHint" class="field-hint"></p>
+    </section>
+    <details class="menu-section advanced-options">
+      <summary id="advancedLabel">高级对局设置</summary>
+      <div class="advanced-grid">
+        <fieldset><legend id="aiStyleLabel">选择敌方 AI 风格</legend>
+          <div class="sizes compact-options">
+            <button data-ai="balanced" class="primary">🛡️ 稳健<br><small>不打亏本仗，会避险</small></button>
+            <button data-ai="aggressive">🔥 激进<br><small>不计代价追求击杀</small></button>
+            <button data-ai="defensive">🏰 防守<br><small>占城据守，拖你犯错</small></button>
+          </div>
+        </fieldset>
+        <fieldset><legend id="difficultyLabel">选择敌方强度</legend>
+          <div class="sizes compact-options">
+            <button data-diff="trivial">😴 白痴<br><small>敌方 HP/收入 ×0.8</small></button>
+            <button data-diff="easy">🙂 简单<br><small>敌方 HP/收入 ×0.9</small></button>
+            <button data-diff="normal" class="primary">⚖️ 普通<br><small>敌方 HP/收入 ×1.0</small></button>
+            <button data-diff="hard">🔥 困难<br><small>敌方 HP/收入 ×1.1</small></button>
+            <button data-diff="hell">💀 地狱<br><small>敌方 HP/收入 ×1.2</small></button>
+            <button data-diff="nightmare">☠️ 噩梦<br><small>敌方 HP/收入 ×1.5</small></button>
+          </div>
+        </fieldset>
+        <fieldset><legend id="troopsLabel">选择初始部队数目</legend>
+          <div class="sizes compact-options">
+            <button data-troops="none" class="primary">🚫 无<br><small>0 个单位，纯经济开局</small></button>
+            <button data-troops="few">🪖 少<br><small>3 个单位</small></button>
+            <button data-troops="mid">⚔️ 中<br><small>6 个单位</small></button>
+            <button data-troops="many">🎖️ 多<br><small>9 个单位</small></button>
+          </div>
+        </fieldset>
+      </div>
+    </details>
+    <div class="menu-actions">
+      <button id="menuHelpBtn">📖 详细说明（单位 / 颜色图例）</button>
+      <span id="saveActions"><button id="continueBtn" class="primary">▶️ 继续游戏</button><button id="deleteSaveBtn">🗑️ 删除存档</button></span>
+      <button id="startGameBtn" class="primary">⚔️ 选择好了，开始游戏！</button>
     </div>
-    <select id="scenarioPicker" aria-label="教学场景"></select>
-    <p style="margin:16px 0 4px">选择地图规模（随机对称地图）：</p>
-    <div class="sizes" style="flex-wrap:wrap">
-      <button data-size="8">小 8×8<br><small>快节奏</small></button>
-      <button data-size="10" class="primary">中 10×10<br><small>标准</small></button>
-      <button data-size="12">大 12×12<br><small>大地图</small></button>
-      <button data-size="14">特大 14×14<br><small>超大地图</small></button>
-      <button data-size="16">巨型 16×16<br><small>史诗规模</small></button>
-    </div>
-    <p style="margin:12px 0 4px" id="mapCodeLabel">地图码（留空则随机）：</p>
-    <p style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-      <input id="mapCodeInput" maxlength="20" placeholder="MAW-M1-10-7F3A91C2" style="padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:#111827;color:var(--text);font:inherit;text-transform:uppercase">
-      <button id="randomMapBtn">🎲 随机地图码</button>
-    </p>
-    <p id="mapCodeHint" style="font-size:12px;color:var(--dim)"></p>
-    <p style="margin:16px 0 4px" id="aiStyleLabel">选择敌方 AI 风格：</p>
-    <div class="sizes">
-      <button data-ai="balanced" class="primary">🛡️ 稳健<br><small>不打亏本仗，会避险</small></button>
-      <button data-ai="aggressive">🔥 激进<br><small>不计代价追求击杀</small></button>
-      <button data-ai="defensive">🏰 防守<br><small>占城据守，拖你犯错</small></button>
-    </div>
-    <p style="margin:16px 0 4px" id="difficultyLabel">选择敌方强度：</p>
-    <div class="sizes" style="flex-wrap:wrap">
-      <button data-diff="trivial">😴 白痴<br><small>敌方 HP/收入 ×0.8</small></button>
-      <button data-diff="easy">🙂 简单<br><small>敌方 HP/收入 ×0.9</small></button>
-      <button data-diff="normal" class="primary">⚖️ 普通<br><small>敌方 HP/收入 ×1.0</small></button>
-      <button data-diff="hard">🔥 困难<br><small>敌方 HP/收入 ×1.1</small></button>
-      <button data-diff="hell">💀 地狱<br><small>敌方 HP/收入 ×1.2</small></button>
-      <button data-diff="nightmare">☠️ 噩梦<br><small>敌方 HP/收入 ×1.5</small></button>
-    </div>
-    <p style="margin:16px 0 4px" id="troopsLabel">选择初始部队数目：</p>
-    <div class="sizes">
-      <button data-troops="none" class="primary">🚫 无<br><small>0 个单位，纯经济开局</small></button>
-      <button data-troops="few">🪖 少<br><small>3 个单位</small></button>
-      <button data-troops="mid">⚔️ 中<br><small>6 个单位</small></button>
-      <button data-troops="many">🎖️ 多<br><small>9 个单位</small></button>
-    </div>
-    <p style="margin-top:14px"><button id="menuHelpBtn">📖 详细说明（单位 / 颜色图例）</button></p>
-    <p id="saveActions" style="margin-top:14px;display:none;gap:8px;justify-content:center"><button id="continueBtn" class="primary">▶️ 继续游戏</button><button id="deleteSaveBtn">🗑️ 删除存档</button></p>
-    <p style="margin-top:14px"><button id="startGameBtn" class="primary" style="padding:12px 32px;font-size:17px">⚔️ 选择好了，开始游戏！</button></p>
-    <p style="margin-top:16px;font-size:11px;color:var(--dim)">Created by <a href="https://github.com/yuyuanjingxuan" target="_blank" rel="noopener" style="color:var(--dim)">@yuyuanjingxuan</a></p>
+    <p class="menu-credit">Created by <a href="https://github.com/yuyuanjingxuan" target="_blank" rel="noopener">@yuyuanjingxuan</a></p>
   </div>
 </div>
 

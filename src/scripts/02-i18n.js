@@ -47,6 +47,7 @@ const I18N={
     troopsFew:'🪖 少', troopsFewSub:'3 个单位',
     troopsMid:'⚔️ 中', troopsMidSub:'6 个单位',
     troopsMany:'🎖️ 多', troopsManySub:'9 个单位',
+    quick1:'① 选择模式与地图', quick2:'② 点击己方单位与蓝格移动', quick3:'③ 攻击敌军或占领敌方总部', advancedLabel:'高级对局设置',
     detailHelp:'📖 详细说明（单位 / 颜色图例）',
     startGameBtn:'⚔️ 选择好了，开始游戏！',
     mapCodeLabel:'地图码（留空则随机）：', randomMapBtn:'🎲 随机地图码', mapCodeInvalid:'地图码无效，请使用当前版本的完整地图码。',
@@ -176,6 +177,7 @@ const I18N={
     troopsFew:'🪖 Few', troopsFewSub:'3 units',
     troopsMid:'⚔️ Medium', troopsMidSub:'6 units',
     troopsMany:'🎖️ Many', troopsManySub:'9 units',
+    quick1:'① Pick a mode and map', quick2:'② Select a unit and move on blue tiles', quick3:'③ Defeat the enemy or capture HQ', advancedLabel:'Advanced match settings',
     detailHelp:'📖 Details (units / color legend)',
     startGameBtn:'⚔️ Ready — Start Game!',
     mapCodeLabel:'Map code (blank = random):', randomMapBtn:'🎲 Random Map Code', mapCodeInvalid:'Invalid map code. Enter a complete code for the current version.',
@@ -302,11 +304,9 @@ function applyStaticTexts(){
   // 菜单
   const menuTitle=document.querySelector('#menu .dialog h1');if(menuTitle)menuTitle.textContent=T('title');
   const menuSub=document.querySelector('#menu .dialog .sub');if(menuSub)menuSub.textContent=T('sub');
-  const mParas=document.querySelectorAll('#menu .help p');
-  const mKeys=['m1','m2','m3','m4','m5','m6','m7','m8'];
-  mParas.forEach((p,i)=>{if(mKeys[i])p.innerHTML=T(mKeys[i]);});
-  const sizePs=document.querySelectorAll('#menu p');
-  for(const p of sizePs){if(p.textContent.includes('地图规模')||p.textContent.includes('map size')||p.textContent.includes('Choose map'))p.innerHTML=T('mapSize');}
+  const quickGuide=document.querySelectorAll('#menu .quick-guide span');
+  ['quick1','quick2','quick3'].forEach((key,i)=>{if(quickGuide[i])quickGuide[i].textContent=T(key);});
+  set('mapSizeLabel',T('mapSize'));set('advancedLabel',T('advancedLabel'));
   const sizeBtns=document.querySelectorAll('#menu button[data-size]');
   if(sizeBtns.length===5){
     sizeBtns[0].innerHTML=T('sizeS')+'<br><small>'+T('sizeSsub')+'</small>';

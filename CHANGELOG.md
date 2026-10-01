@@ -34,6 +34,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - The committed `index.html` is now generated from an HTML template, CSS, and four ordered classic scripts while retaining `file://` compatibility and zero runtime dependencies
 - Expanded the zero-dependency CI script with regression checks for bilingual key parity, indirect-fire planning, AI action priority, enemy building healing, and HQ capture victory
+- Reorganized the opening menu around a short quick-start guide, clearer mode/map sections, and collapsible advanced match settings
 
 ## [1.0.1] - 2026-09-25
 

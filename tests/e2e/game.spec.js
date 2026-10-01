@@ -26,6 +26,15 @@ test('language preference persists after reload', async ({ page }) => {
   await expect(page.locator('.langBtn[data-lang="en"]')).toHaveAttribute('aria-pressed', 'true');
 });
 
+test('opening menu keeps advanced options collapsed', async ({ page }) => {
+  await expect(page.locator('#menu')).toBeVisible();
+  await expect(page.locator('.quick-guide')).toBeVisible();
+  await expect(page.locator('.advanced-options')).not.toHaveAttribute('open', '');
+  await expect(page.locator('[data-ai="balanced"]')).not.toBeVisible();
+  await page.locator('.advanced-options summary').click();
+  await expect(page.locator('[data-ai="balanced"]')).toBeVisible();
+});
+
 test('mobile board remains usable and audio settings persist independently', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#bgmVolume').fill('30');
