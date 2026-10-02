@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-02
+
+### Fixed
+
+- Completed Chinese/English Story-mode coverage for all Ashen Ring mission acts, titles, dates, briefings, triggered dialogue, ending choices, and related battle UI text
+- Made Story ending choices, action labels, tooltips, and accessibility labels refresh immediately when switching languages
+- Added browser regression coverage for the English campaign briefing, dialogue, and finale choice
+
 ## [1.1.0] - 2026-10-01
 
 ### Added
@@ -85,5 +93,6 @@ First stable release. Zero-dependency, single-file, turn-based strategy game ins
 - Riders disembarking from a transport are no longer stuck permanently "acted" and unable to move afterward
 
 [1.1.0]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.1.0
+[1.2.1]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.2.1
 [1.0.1]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.0.1
 [1.0.0]: https://github.com/yuyuanjingxuan/mini-advance-wars/releases/tag/v1.0.0
