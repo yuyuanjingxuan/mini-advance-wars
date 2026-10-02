@@ -62,7 +62,7 @@ test('story mission opens briefing, starts dialogue, and resumes from autosave',
   await expect(page.locator('#scenarioPicker')).toBeVisible();
   await expect(page.locator('#mapSettings')).toBeHidden();
   await expect(page.locator('#advancedSettings')).toBeHidden();
-  await expect(page.locator('#scenarioPicker option')).toHaveCount(3);
+  await expect(page.locator('#scenarioPicker option')).toHaveCount(18);
   await expect(page.locator('#scenarioPicker option').nth(1)).toBeDisabled();
 
   await page.getByRole('button', { name: /开始游戏/ }).click();
@@ -105,9 +105,9 @@ test('story victory unlocks the next mission without erasing campaign progress',
   await expect(page.getByRole('dialog', { name: /战后报告/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /下一任务/ })).toBeVisible();
   await page.getByRole('button', { name: /下一任务/ }).click();
-  await expect(page.getByRole('dialog', { name: /越界/ })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: /寻常的早晨/ })).toBeVisible();
   const progress = await page.evaluate(() => JSON.parse(localStorage.getItem('mini-advance-wars-campaign')));
   expect(progress.completed).toContain(0);
-  expect(progress.unlocked).toContain(3);
+  expect(progress.unlocked).toContain(1);
   expect(await page.evaluate(() => localStorage.getItem('mini-advance-wars-save'))).toBeNull();
 });

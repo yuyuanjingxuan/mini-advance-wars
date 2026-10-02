@@ -169,17 +169,25 @@ try {
   if (!scenarioStarts) fail('one or more academy scenarios failed to initialize');
   else ok('all academy scenarios initialize from their data definitions');
 
-  const storyDefsValid = vm.runInContext(`STORY_ORDER.join(',')==='0,3,6'&&STORY_ORDER.every(id=>{
+  const storyDefsValid = vm.runInContext(`STORY_ORDER.join(',')==='0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17'&&STORY_ORDER.every(id=>{
     const m=MISSION_DEFS[id];return m&&m.id===id&&VALID_MAP_SIZES.includes(m.size)&&Number.isInteger(m.seed)&&
       Array.isArray(m.tiles)&&m.tiles.every(t=>t[0]>=0&&t[0]<m.size&&t[1]>=0&&t[1]<m.size&&TERRAINS[t[2]])&&
-      Array.isArray(m.units.P)&&Array.isArray(m.events)&&m.events.every(e=>e.id&&e.on&&Array.isArray(e.do)&&e.do.every(a=>['showDialog','removeUnits','spawnMirror','setAiStyle','setObjective'].includes(a.type)));
+      Array.isArray(m.units.P)&&Array.isArray(m.events)&&m.events.every(e=>e.id&&e.on&&Array.isArray(e.do)&&e.do.every(a=>['showDialog','removeUnits','spawnMirror','setAiStyle','setObjective','appendBattleLog','setMissionFlag','unlockUnit','lockUnit','setUnitHp','spawnUnits','retreatUnit','setTileOwner','winMission','failMission'].includes(a.type)));
   })`, sandbox);
   if (!storyDefsValid) fail('story mission definitions or event actions are invalid');
-  else ok('story missions 0, 3, and 6 use valid declarative data and whitelisted actions');
+  else ok('all 18 story missions use valid declarative data and whitelisted actions');
 
-  const storyStarts = vm.runInContext(`STORY_ORDER.every(id=>{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:[0,3,6],completed:[],endings:[],best:{},lastMission:id}));return startStoryMission(id)&&G.story.missionId===id&&G.size===MISSION_DEFS[id].size&&G.gameMode==='story';})`, sandbox);
+  const storyLifecycleTriggers = vm.runInContext(`
+    matchesStoryTrigger({roundEnd:5},'roundEnd',{round:5})&&
+    !matchesStoryTrigger({roundEnd:5},'roundEnd',{round:4})&&
+    matchesStoryTrigger({enemyPhaseStart:true},'enemyPhaseStart',{round:7});
+  `, sandbox);
+  if (!storyLifecycleTriggers) fail('story lifecycle triggers did not honor phase and round data');
+  else ok('story lifecycle triggers support numbered rounds and phases');
+
+  const storyStarts = vm.runInContext(`STORY_ORDER.every(id=>{localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:STORY_ORDER,completed:[],endings:[],best:{},lastMission:id}));return startStoryMission(id)&&G.story.missionId===id&&G.size===MISSION_DEFS[id].size&&G.gameMode==='story';})`, sandbox);
   if (!storyStarts) fail('one or more story missions failed to initialize');
-  else ok('story missions 0, 3, and 6 initialize from mission definitions');
+  else ok('all 18 story missions initialize from mission definitions');
 
   const noStoryXp = vm.runInContext(`startStoryMission(0);const u=G.units[0],before=[u.level,u.xp,u.atk,u.maxHp].join(',');gainXp(u,999);before===[u.level,u.xp,u.atk,u.maxHp].join(',')`, sandbox);
   if (!noStoryXp) fail('story mode allowed XP or leveling');
@@ -228,10 +236,19 @@ try {
   const campaignResult = vm.runInContext(`
     localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:[0],completed:[],endings:[],best:{},lastMission:0}));
     startStoryMission(0);G.over=true;G.resultWin=true;G.resultHow=undefined;G.story.playerLosses=2;renderResult();
-    STORY_ORDER[STORY_ORDER.indexOf(G.story.missionId)+1]===3&&G.story.playerLosses===2;
+    STORY_ORDER[STORY_ORDER.indexOf(G.story.missionId)+1]===1&&G.story.playerLosses===2;
   `, sandbox);
   if (!campaignResult) fail('story result state did not identify the next mission or tracked losses');
   else ok('story victory state identifies the next mission and tracked losses');
+
+  const endingPersistence = vm.runInContext(`
+    localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:STORY_ORDER,completed:[],endings:[],best:{},lastMission:17}));
+    startStoryMission(17);G.resultHow='ash';completeCampaignMission(17,14,0);
+    const first=readCampaignProgress();G.resultHow='ash';completeCampaignMission(17,16,2);
+    first.endings.includes('ash')&&readCampaignProgress().endings.filter(e=>e==='ash').length===1;
+  `, sandbox);
+  if (!endingPersistence) fail('story ending choice was not persisted immutably');
+  else ok('story ending choice persists without duplicate entries');
 
   const scenarioGoal = vm.runInContext(`
     gameModeChoice='academy';scenarioChoice='basics';newGame(8);
@@ -330,7 +347,7 @@ try {
   else ok('versioned save round-trips gameplay state, Map data, and RNG state');
 
   const storySaveRoundTrip = vm.runInContext(`
-    localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:[0,3,6],completed:[],endings:[],best:{},lastMission:3}));
+    localStorage.setItem(CAMPAIGN_KEY,JSON.stringify({schemaVersion:1,unlocked:STORY_ORDER,completed:[],endings:[],best:{},lastMission:3}));
     startStoryMission(3);G.story.firedEventIds=['m3-r1'];saveGame();G=null;restoreGame();G.gameMode==='story'&&G.story.missionId===3&&G.story.firedEventIds[0]==='m3-r1';
   `, sandbox);
   if (!storySaveRoundTrip) fail('story runtime did not round-trip through battle autosave');
