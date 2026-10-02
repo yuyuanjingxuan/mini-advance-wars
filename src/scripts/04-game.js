@@ -90,7 +90,7 @@ const SCENARIOS={
   siege:{title:'scSiege',objective:'scSiegeObj',size:8,seed:0xACAD0005,goal:{type:'survive',turns:15},
     tiles:[[1,6,'hq'],[2,6,'city'],[1,5,'factory'],[3,5,'forest'],[4,4,'forest'],[3,3,'mountain']],units:[['P','infantry',1,5],['P','heavy',2,5],['P','artillery',2,6]]},
 };
-const STORY_ORDER=[0,3,6];
+const STORY_ORDER=Array.from({length:18},(_,id)=>id);
 const S=(zh,en)=>({zh,en});
 const MISSION_DEFS={
   0:{id:0,act:S('序章','Prologue'),title:S('第三百年的操练','The Three-Hundredth Drill'),when:S('静历三百年 三月初五 · 第七锚塔操练场','S.R. 300, Third Month, Day 5 · Anchor Seven Drill Ground'),size:8,seed:0xA5000000,aiStyle:'balanced',difficulty:'normal',economy:{income:false,playerProduction:false,enemyProduction:false},
@@ -104,7 +104,7 @@ const MISSION_DEFS={
     briefing:[["严峥","Yan Zheng",S('命令：越过边境，拿下朔国第三前哨。','Orders: cross the border and take Shuo Third Outpost.')],["卫长庚","Wei Changgeng",S('元帅，越界意味着三百年来第一次对别的国家开战。','Marshal, crossing the line means the first war between nations in three hundred years.')],["严峥","Yan Zheng",S('我知道。这是命令。','I know. That is an order.')]],
     objective:S('占领朔国第三前哨总部。','Capture Shuo Third Outpost HQ.'),failure:S('我方全灭或总部被占。','All player units lost or your HQ captured.'),intel:S('朔军据险防守；第 4 回合局势可能改变。','Shuo is entrenched; the situation may change on round 4.'),
     tiles:[[1,10,'hq','P'],[2,10,'factory','P'],[10,1,'hq','E'],[9,1,'city','E'],[10,2,'city','E'],[7,1,'forest'],[8,1,'mountain'],[6,2,'forest'],[7,2,'forest'],[8,2,'mountain'],[7,3,'water'],[8,3,'plain'],[9,3,'water'],[6,3,'water'],[5,3,'water']],
-    units:{P:[['infantry',1,9],['infantry',2,9],['infantry',2,10],['heavy',1,8],['heavy',2,8],['tank',3,9],['artillery',3,10]],E:[['tank',10,2,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3,criticalRule:'retreatAtOneHp'}],['infantry',9,2],['infantry',10,3],['infantry',8,2],['artillery',9,3]]},objectives:[{kind:'captureHq'}],failures:['allDead','hqLost'],
+    units:{P:[['infantry',1,9],['infantry',2,9],['infantry',2,10],['heavy',1,8],['heavy',2,8],['tank',3,9],['artillery',3,10]],E:[['tank',10,2,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3,criticalRule:'holdAtOneHp'}],['infantry',9,2],['infantry',10,3],['infantry',8,2],['artillery',9,3]]},objectives:[{kind:'captureHq'}],failures:['allDead','hqLost'],
     events:[{id:'m3-r1',on:{roundStart:1},do:[{type:'showDialog',lines:[["霍岚","Huo Lan",S('衡国的指挥官，你越界了。退回去，我不想开第一枪。','Heng commander, you crossed the line. Turn back. I do not want to fire the first shot.')]]}]},{id:'m3-r4',on:{roundStart:4},do:[{type:'removeUnits',factionTag:'shuo'},{type:'spawnMirror'},{type:'setAiStyle',value:'balanced'},{type:'setObjective',value:{kind:'eliminate'}},{type:'showDialog',lines:[["霍岚","Huo Lan",S('你也看见了？那些东西是冲着你来的。朔国撤了。','You see them too? Those things came for you. Shuo is withdrawing.')],["苏檀","Su Tan",S('协议记录了一次镜像事件。它复制的是我们。','The Accord recorded a mirror event. It copied us.')]]}]}],debrief:S('朔国撤走后，苏檀确认镜像部队出现的时刻与我军越界只差十一秒。严峥的电报只有三个字：做得好。','After Shuo withdrew, Su Tan confirmed the mirror force appeared eleven seconds after the crossing. Yan Zheng sent only three words: well done.')},
   6:{id:6,act:S('第二幕 · 镜子里的国家','Act II · The Nation in the Mirror'),title:S('第七营','The Seventh Battalion'),when:S('静历三百年 三月二十 · 第七锚塔西侧山地','S.R. 300, Third Month, Day 20 · Western Mountains'),size:14,seed:0xA5000006,aiStyle:'balanced',difficulty:'normal',economy:{income:false,playerProduction:false,enemyProduction:false},
     briefing:[["卫长庚","Wei Changgeng",S('敌人第一次打出了旗号：衡国第七营。那是三百年前的番号。','For the first time, the enemy raised a banner: Heng Seventh Battalion, a designation three centuries old.')],["苏檀","Su Tan",S('他们的指挥官叫卫苍。','Their commander calls himself Wei Cang.')],["卫长庚","Wei Changgeng",S('我家族谱第一页就是这个名字。指挥官，这一仗我得上。','That name is on the first page of my family register. Commander, I must fight this battle.')]],
@@ -113,6 +113,29 @@ const MISSION_DEFS={
     units:{P:[['heavy',1,11,{rank:'hero',characterId:'weiChanggeng',missionRef:'weiChanggeng',level:3,criticalRule:'failOnDefeat'}],['infantry',2,11],['infantry',1,10],['infantry',2,10],['heavy',3,11],['artillery',3,12],['medic',1,12],['engineer',3,10]],E:'mirror',mirrorReplace:{weiChanggeng:{type:'heavy',rank:'boss',characterId:'weiCang',missionRef:'weiCang',level:3,criticalRule:'retreatOnDefeat'}}},objectives:[{kind:'defeatUnit',unitRef:'weiCang'}],failures:[{kind:'unitDefeated',unitRef:'weiChanggeng'},'allDead','hqLost'],
     events:[{id:'m6-r1',on:{roundStart:1},do:[{type:'showDialog',lines:[["卫苍","Wei Cang",S('第七营卫苍在此。你们是哪一路的援军，为什么不回应军令？','Wei Cang of the Seventh Battalion. Which relief force are you, and why do you ignore orders?')]]}]},{id:'m6-r4',on:{roundStart:4},do:[{type:'showDialog',lines:[["卫长庚","Wei Changgeng",S('卫苍！我是卫家第十二代，卫长庚！','Wei Cang! I am Wei Changgeng, twelfth generation of the Wei family!')],["卫苍","Wei Cang",S('我没有第十二代。我儿子还不到三岁。','There is no twelfth generation. My son is not yet three.')]]}]}],debrief:S('苏檀核对了旗号与阵亡名册：他们不是复制品，而是三百年前真正的第七营。我们之所以与他们一样，是因为边境军团照着他们的手册操练了三百年。','Su Tan checked the banner and casualty rolls: they are not copies, but the true Seventh Battalion from three centuries ago. We mirror them because the Marchguard trained from their manual for three hundred years.')},
 };
+// Compact declarative builders keep the full campaign catalog readable while the
+// resulting mission objects remain plain serializable data.
+const storyEconomy=(income=false,playerProduction=false,enemyProduction=false)=>({income,playerProduction,enemyProduction});
+const storyTiles=(size,extra=[])=>[[1,size-2,'hq','P'],[2,size-2,'factory','P'],[1,size-3,'city','P'],[size-2,1,'hq','E'],[size-3,1,'factory','E'],[size-2,2,'city','E'],[Math.floor(size/2)-1,Math.floor(size/2),'forest'],[Math.floor(size/2),Math.floor(size/2)-1,'forest'],...extra];
+const storyBriefing=(speaker,english,line)=>[[speaker,english,S(line,line)]];
+const storyMission=(id,act,title,size,units,extra={})=>({id,act:S(act,act),title:S(title,title),when:S(`静历三百年 · ${title}`,`S.R. 300 · ${title}`),size,seed:(0xA5000000+id)>>>0,aiStyle:'balanced',difficulty:'normal',economy:storyEconomy(),briefing:storyBriefing('卫长庚','Wei Changgeng','指挥官，任务开始。'),objective:S('完成主要目标。','Complete the primary objective.'),failure:S('我方全灭或总部被占。','All player units lost or your HQ captured.'),intel:S('任务设施和人物状态会改变战局。','Mission facilities and character state can change the battle.'),tiles:storyTiles(size),units,objectives:[{kind:'eliminateOrCaptureHq'}],failures:['allDead','hqLost'],events:[],debrief:S('战斗结束了，但灰烬之环的谜团仍在延伸。','The battle is over, but the mystery of the Ashen Ring continues.'),...extra});
+Object.assign(MISSION_DEFS,{
+  1:storyMission(1,'第一幕 · 静默之后','寻常的早晨',10,{P:[['infantry',1,7],['infantry',2,7],['heavy',1,6],['artillery',2,8]],E:'mirror'},{difficulty:'trivial',tiles:storyTiles(10,[[4,0,'water'],[4,1,'water'],[4,3,'water'],[4,4,'plain'],[4,5,'water'],[4,7,'water'],[5,2,'forest'],[5,7,'forest']]),objectives:[{kind:'eliminate'}],events:[{id:'m1-r2',on:{roundStart:2},do:[{type:'showDialog',lines:storyBriefing('卫长庚','Wei Changgeng','他们站的位置跟咱们一模一样。')}]},{id:'m1-first',on:{firstEnemyDefeated:true},do:[{type:'appendBattleLog',value:S('被击毁的敌军化成了灰。','The destroyed enemy turns to ash.')}]}]}),
+  2:storyMission(2,'第一幕 · 静默之后','对称的敌人',12,{P:[['infantry',1,9],['infantry',2,9],['infantry',3,9],['heavy',1,8],['recon',2,8],['medic',3,8]],E:'mirror',extraE:[['infantry',9,2,{rank:'elite',missionRef:'officer',level:3,criticalRule:'retreatOnDefeat'}]]},{difficulty:'easy',tiles:storyTiles(12,[[4,7,'city','P',{tag:'villageA'}],[5,7,'city','P',{tag:'villageB'}],[6,7,'city','P',{tag:'villageC'}],[7,4,'city','E'],[6,4,'city','E'],[5,4,'city','E'],[5,5,'mountain'],[6,5,'mountain']]),objectives:[{kind:'defeatUnit',unitRef:'officer'}],failures:[{kind:'allTagsLost',tags:['villageA','villageB','villageC']},'allDead','hqLost'],events:[{id:'m2-officer-low',on:{unitHpBelow:{unitRef:'officer',ratio:.5}},do:[{type:'showDialog',lines:storyBriefing('敌方军官','Enemy Officer','第七营……不退。')}]}]}),
+  4:storyMission(4,'第一幕 · 静默之后','截获的低语',12,{P:[['engineer',1,9],['engineer',2,9],['infantry',3,9],['infantry',1,8],['heavy',2,8],['artillery',3,8],['recon',2,10]],E:'mirror'},{aiStyle:'aggressive',tiles:storyTiles(12,[[6,6,'city',null,{tag:'relay',label:'中继站',icon:'📡'}],[5,6,'forest'],[7,6,'forest']]),objectives:[{kind:'captureAndHold',tag:'relay',rounds:3}],failures:[{kind:'tagLostBeforeObjective',tag:'relay'},'allDead','hqLost'],events:[{id:'m4-cap',on:{capture:{tag:'relay',toOwner:'P'}},do:[{type:'showDialog',lines:storyBriefing('苏檀','Su Tan','接上了。信号很弱，给我时间。')}]},{id:'m4-h1',on:{tagHeldRoundEnd:{tag:'relay',count:1}},do:[{type:'appendBattleLog',value:S('……阈值……东北方向……超出……','…threshold… northeast… exceeded…')}]},{id:'m4-h2',on:{tagHeldRoundEnd:{tag:'relay',count:2}},do:[{type:'appendBattleLog',value:S('……第六阶段……锚塔七……补偿……','…phase six… Anchor Seven… compensation…')}]},{id:'m4-h3',on:{tagHeldRoundEnd:{tag:'relay',count:3}},do:[{type:'showDialog',lines:storyBriefing('苏檀','Su Tan','协议已确认非对称。执行第七阶段。署名：闻。')}]}]}),
+  5:storyMission(5,'第二幕 · 镜子里的国家','装甲条款',12,{P:[['tank',1,9],['tank',2,9],['recon',1,8],['recon',2,8]],E:'mirror',extraP:[['tank',3,9,{rank:'elite',factionTag:'greyFlag'}],['tank',3,8,{rank:'elite',factionTag:'greyFlag'}]],extraE:[['tank',9,2],['tank',8,2]]},{aiStyle:'defensive',rule:{actionTypes:['tank','recon']},tiles:storyTiles(12,[[5,4,'water'],[5,5,'plain'],[5,6,'water'],[6,4,'water'],[6,6,'plain']]),events:[{id:'m5-r3',on:{roundStart:3},do:[{type:'showDialog',lines:storyBriefing('苏檀','Su Tan','对面比我们多两辆坦克。')}] }]}),
+  7:storyMission(7,'第二幕 · 镜子里的国家','镜子里的国家',14,{P:[['recon',1,11,{missionRef:'reconA'}],['recon',2,11,{missionRef:'reconB'}],['transport',1,10],['infantry',2,10],['infantry',3,10],['heavy',1,9]],E:[['tank',12,2,{rank:'boss',characterId:'qiuYe',missionRef:'qiuYe',level:4}],['tank',11,2],['rocket',12,3],['infantry',10,3],['infantry',11,3],['infantry',12,4],['infantry',10,4],['heavy',11,4]]},{aiStyle:'defensive',difficulty:'hard',economy:storyEconomy(true,false,true),tiles:storyTiles(14,[[8,6,'mountain',null,{tag:'lookout',label:'观测点'}],[5,8,'water'],[6,7,'water'],[7,6,'water']]),objectives:[{kind:'unitOnTag',tag:'lookout',unitTypes:['recon']}],failures:[{kind:'allUnitsDefeated',refs:['reconA','reconB']},'allDead'],events:[{id:'m7-lookout',on:{unitEnterTag:{tag:'lookout',unitTypes:['recon']}},do:[{type:'setObjective',value:{kind:'unitOnTag',tag:'home',unitTypes:['recon']}},{type:'setAiStyle',value:'aggressive'},{type:'showDialog',lines:storyBriefing('苏檀','Su Tan','那是严峥元帅的私人旗。撤回来！')}]}]}),
+  8:storyMission(8,'第二幕 · 镜子里的国家','坚壁',10,{P:[['infantry',1,7],['infantry',2,7],['heavy',1,6],['heavy',2,6],['artillery',3,8],['engineer',2,8],['medic',3,7]],E:[]},{difficulty:'hard',tiles:storyTiles(10,[[0,6,'mountain'],[0,7,'mountain'],[2,6,'mountain'],[4,5,'mountain']]),objectives:[{kind:'survive',round:15}],waves:{interval:3,spawns:[[8,1],[9,1],[8,2]],types:['infantry','heavy','recon','artillery','tank'],count:3},events:[{id:'m8-r5',on:{roundEnd:5},do:[{type:'appendBattleLog',value:S('锚塔发出一段未经授权的加密信号。','The Anchor Tower emits an unauthorized encrypted signal.')}]}]}),
+  9:storyMission(9,'第二幕 · 镜子里的国家','两个边境',14,{P:[['infantry',1,11],['infantry',2,11],['heavy',1,10],['heavy',2,10],['tank',3,11],['artillery',3,10],['transport',2,12],['medic',1,12],['heavy',3,12,{rank:'hero',characterId:'weiChanggeng',missionRef:'weiChanggeng',level:3}]],E:'mirror',extraP:[['tank',7,4,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3,hpRatio:.6,locked:true,factionTag:'shuo'}],['tank',8,4,{hpRatio:.5,locked:true,factionTag:'shuo'}]],extraE:[['infantry',7,3,{factionTag:'oldArmyRemnants'}],['infantry',8,3,{factionTag:'oldArmyRemnants'}],['heavy',7,2,{factionTag:'oldArmyRemnants'}]]},{aiStyle:'aggressive',difficulty:'hard',tiles:storyTiles(14,[[7,4,'city','P',{tag:'rescue'}],[6,4,'plain',null,{tag:'rescue'}],[8,4,'plain',null,{tag:'rescue'}]]),objectives:[{kind:'unitOnTag',tag:'rescue'}],failures:[{kind:'unitDefeated',unitRef:'huoLan'},'allDead','hqLost'],events:[{id:'m9-rescue',on:{unitEnterTag:{tag:'rescue'}},do:[{type:'unlockUnit',unitRef:'huoLan'},{type:'setObjective',value:{kind:'eliminateOrSurvive',round:16}},{type:'showDialog',lines:storyBriefing('霍岚','Huo Lan','我欠你一次。朔国人记账很清楚。')}]}]}),
+  10:storyMission(10,'第三幕 · 创立者手稿','创立者手稿',14,{P:[['infantry',1,11],['infantry',2,11],['heavy',1,10],['tank',2,10],['artillery',3,11],['recon',3,10],['transport',1,12],['heavy',2,12,{rank:'hero',characterId:'weiChanggeng',missionRef:'weiChanggeng',level:3}],['tank',3,12,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3}]],E:[['tank',12,2,{rank:'boss',characterId:'qiuYe',missionRef:'qiuYe',level:4}],['tank',11,2],['infantry',10,2],['infantry',11,3],['infantry',12,3],['engineer',10,3],['rocket',12,4]]},{aiStyle:'aggressive',difficulty:'hard',tiles:storyTiles(14,[[9,7,'city',null,{tag:'archive',label:'旧档案馆',icon:'📜'}],[7,7,'forest'],[8,7,'forest'],[10,7,'forest']]),objectives:[{kind:'captureAndHold',tag:'archive',rounds:1}],failures:[{kind:'deadline',round:11,tag:'archive'},'allDead','hqLost'],events:[{id:'m10-su',on:{roundStart:3},do:[{type:'spawnUnits',side:'P',units:[['engineer',6,7,{rank:'hero',characterId:'suTan',missionRef:'suTan',level:2,criticalRule:'retreatAtOneHp'}]]},{type:'showDialog',lines:storyBriefing('苏檀','Su Tan','我不是来求原谅的。我只是来开门。')}]}]}),
+  11:storyMission(11,'第三幕 · 创立者手稿','叛军',14,{P:[['heavy',1,11,{rank:'hero',characterId:'weiChanggeng',missionRef:'weiChanggeng',level:3,traits:['weiChanggeng']}],['tank',2,11,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3}],['engineer',3,11,{rank:'hero',characterId:'suTan',missionRef:'suTan',level:2}],['infantry',1,10],['infantry',2,10],['heavy',3,10],['heavy',1,9],['artillery',2,9],['rocket',3,9],['medic',1,12]],E:[['tank',12,2,{rank:'boss',characterId:'qiuYe',missionRef:'qiuYe',level:4}],['tank',11,2],['heavy',10,2],['heavy',11,3],['infantry',12,3],['infantry',10,3],['infantry',12,4],['artillery',11,4],['artillery',10,4]]},{aiStyle:'aggressive',difficulty:'hell',economy:storyEconomy(true,true,true),objectives:[{kind:'eliminateOrSurvive',round:12}],failures:[{kind:'unitDefeated',unitRef:'weiChanggeng'},'allDead','hqLost'],events:[{id:'m11-qiu-retreat',on:{unitHpBelow:{unitRef:'qiuYe',ratio:.3}},do:[{type:'retreatUnit',unitRef:'qiuYe'},{type:'winMission',how:'retreat'}]}]}),
+  12:storyMission(12,'第三幕 · 创立者手稿','誓词',14,{P:[['heavy',1,11,{rank:'hero',characterId:'weiChanggeng',missionRef:'weiChanggeng',level:3}],['infantry',2,11],['infantry',3,11],['infantry',1,10],['heavy',2,10],['medic',3,10],['medic',1,9],['artillery',2,9]],E:'mirror',mirrorReplace:{weiChanggeng:{type:'heavy',rank:'boss',characterId:'weiCang',missionRef:'weiCang',level:4,criticalRule:'protectedFailAtOneHp',locked:true}}},{aiStyle:'defensive',tiles:storyTiles(14,[[11,2,'city','E',{tag:'weiCang'}],[10,2,'plain',null,{tag:'weiCang'}],[11,3,'plain',null,{tag:'weiCang'}],[12,2,'plain',null,{tag:'weiCang'}]]),objectives:[{kind:'unitOnTag',tag:'weiCang',unitRef:'weiChanggeng'}],failures:[{kind:'unitDefeated',unitRef:'weiChanggeng'},{kind:'unitDefeated',unitRef:'weiCang'},'allDead'],events:[{id:'m12-near',on:{unitEnterTag:{tag:'weiCang',unitRef:'weiChanggeng'}},do:[{type:'winMission',how:'escort'}]}]}),
+  13:storyMission(13,'第三幕 · 创立者手稿','第七阶段',16,{P:[['artillery',1,13],['artillery',2,13],['artillery',3,13],['rocket',1,12],['rocket',2,12]],E:'mirror'},{aiStyle:'defensive',difficulty:'hell',rule:{attackTypes:['artillery','rocket']},tiles:storyTiles(16,[[8,1,'water'],[8,2,'water'],[8,3,'plain'],[8,4,'water'],[8,5,'water'],[8,6,'water'],[8,7,'water'],[8,8,'water'],[8,9,'water'],[8,10,'water'],[8,11,'plain'],[8,12,'water']]),objectives:[{kind:'defeatUnit',unitRef:'qiuYe'}],events:[{id:'m13-qiu',on:{roundStart:1},do:[{type:'spawnUnits',side:'E',units:[['rocket',13,3,{rank:'boss',characterId:'qiuYe',missionRef:'qiuYe',level:4}]]}]}]}),
+  14:storyMission(14,'第四幕 · 灰烬之环','十二锚点',14,{P:[['heavy',1,11,{rank:'hero',characterId:'weiChanggeng',missionRef:'weiChanggeng',level:3}],['engineer',2,11,{rank:'hero',characterId:'suTan',missionRef:'suTan',level:2}],['infantry',3,11],['infantry',1,10],['infantry',2,10],['heavy',3,10],['medic',1,9],['medic',2,9]],E:'mirror'},{aiStyle:'aggressive',difficulty:'hard',rule:{immobileTypes:['recon','tank','artillery','rocket','transport']},tiles:storyTiles(14,[[7,7,'city',null,{tag:'gate',label:'外环闸门',icon:'🚪'}],[6,7,'mountain'],[8,7,'mountain']]),objectives:[{kind:'survive',round:12}],failures:[{kind:'unitDefeated',unitRef:'weiChanggeng'},{kind:'tagLostBeforeObjective',tag:'gate'},{kind:'deadline',round:12,flag:'gateRelieved',value:true},'allDead'],events:[{id:'m14-gate',on:{capture:{tag:'gate',toOwner:'P'}},do:[{type:'showDialog',lines:storyBriefing('卫长庚','Wei Changgeng','闸门到手了。让我站上去。')}]}]}),
+  15:storyMission(15,'第四幕 · 灰烬之环','镜中人',16,{P:[['engineer',1,13,{rank:'hero',characterId:'suTan',missionRef:'suTan',level:2}],['tank',2,13,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3}],['infantry',3,13],['infantry',1,12],['heavy',2,12],['heavy',3,12],['tank',1,11],['artillery',2,11],['rocket',3,11],['medic',1,10]],E:'mirror'},{aiStyle:'balanced',difficulty:'hell',objectives:[{kind:'eliminateOrCaptureHq'}]}),
+  16:storyMission(16,'第四幕 · 灰烬之环','大元帅',16,{P:[['engineer',1,13,{rank:'hero',characterId:'suTan',missionRef:'suTan',level:2}],['tank',2,13,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3}],['infantry',3,13],['infantry',1,12],['infantry',2,12],['heavy',3,12],['heavy',1,11],['tank',2,11],['tank',3,11],['artillery',1,10],['rocket',2,10],['engineer',3,10]],E:[['tank',14,1,{rank:'boss',characterId:'yanZheng',missionRef:'yanZheng',level:5}],['tank',13,2],['tank',14,2],['heavy',12,2],['heavy',13,3],['rocket',14,3],['rocket',12,3],['artillery',13,4],['infantry',14,4],['infantry',12,4]]},{aiStyle:'defensive',difficulty:'hell',economy:storyEconomy(true,true,true),objectives:[{kind:'defeatUnit',unitRef:'yanZheng'}],events:[{id:'m16-half',on:{unitHpBelow:{unitRef:'yanZheng',ratio:.5}},do:[{type:'setAiStyle',value:'aggressive'},{type:'showDialog',lines:storyBriefing('严峥','Yan Zheng','那就让我看看，你想要什么结局。')}]}]}),
+  17:storyMission(17,'第四幕 · 灰烬之环','灰烬之环',16,{P:[['engineer',1,13,{rank:'hero',characterId:'suTan',missionRef:'suTan',level:2}],['tank',2,13,{rank:'hero',characterId:'huoLan',missionRef:'huoLan',level:3}],['infantry',3,13],['infantry',1,12],['infantry',2,12],['heavy',3,12],['heavy',1,11],['tank',2,11],['tank',3,11],['artillery',1,10],['rocket',2,10],['medic',3,10],['engineer',1,9]],E:'mirror'},{aiStyle:'aggressive',difficulty:'nightmare',tiles:storyTiles(16,[[13,2,'hq','E',{tag:'core',label:'核心',icon:'💠'}],[12,2,'mountain'],[14,2,'mountain'],[13,1,'mountain'],[13,3,'mountain']]),objectives:[{kind:'survive',round:14,ending:'ring'}],waves:{interval:3,spawns:[[0,0],[15,0],[0,15],[15,15]],types:['infantry','heavy','tank','artillery','rocket'],count:4},events:[{id:'m17-core',on:{unitEnterTag:{tag:'core'}},do:[{type:'appendBattleLog',value:S('闻渊：你想好了吗？','Wen Yuan: Have you decided?')}]}]})
+});
 const txt=value=>value&&typeof value==='object'?(value[LANG]||value.zh):String(value||'');
 function defaultCampaignProgress(){return{schemaVersion:CAMPAIGN_SCHEMA_VERSION,unlocked:[0],completed:[],endings:[],best:{},lastMission:0};}
 function readCampaignProgress(){
@@ -122,6 +145,8 @@ function saveCampaignProgress(p){try{localStorage.setItem(CAMPAIGN_KEY,JSON.stri
 function completeCampaignMission(id,turns,losses){
   const p=readCampaignProgress();if(!p.completed.includes(id))p.completed.push(id);
   const next=STORY_ORDER[STORY_ORDER.indexOf(id)+1];if(next!==undefined&&!p.unlocked.includes(next))p.unlocked.push(next);
+  const ending=G?.resultHow;
+  if(id===17&&['ash','ring'].includes(ending)&&!p.endings.includes(ending))p.endings.push(ending);
   const old=p.best[id];if(!old||turns<old.turns||(turns===old.turns&&losses<old.losses))p.best[id]={turns,losses};
   p.lastMission=next===undefined?id:next;saveCampaignProgress(p);return p;
 }
@@ -170,15 +195,23 @@ function storyUnitFrom(def,side,mirrorSize,replace){
   return makeUnit(side,type,x,y,meta);
 }
 function deployStoryUnits(m){
-  const pDefs=m.units.P,Gp=pDefs.map(d=>storyUnitFrom(d,'P'));
+  const pDefs=m.units.P,Gp=[...pDefs,...(m.units.extraP||[])].map(d=>storyUnitFrom(d,'P'));
   const eDefs=m.units.E==='mirror'?pDefs:m.units.E;
-  const Ge=eDefs.map(d=>storyUnitFrom(d,'E',m.units.E==='mirror'?m.size:0,m.units.mirrorReplace));
+  const Ge=[...eDefs,...(m.units.extraE||[])].map(d=>storyUnitFrom(d,'E',m.units.E==='mirror'?m.size:0,m.units.mirrorReplace));
   if(m.id===3)Ge.forEach(u=>u.factionTag='shuo');
   G.units=[...Gp,...Ge];
 }
 function buildStoryMap(m){
-  G.map=Array.from({length:m.size},()=>Array(m.size).fill('plain'));G.caps=new Map();
-  for(const[x,y,t,owner]of m.tiles){G.map[y][x]=t;if(CAPTURABLE.includes(t))G.caps.set(capKey(x,y),{owner:owner||null,prog:owner?CAP_NEED:0});}
+  G.map=Array.from({length:m.size},()=>Array(m.size).fill('plain'));G.caps=new Map();G.storyTiles=new Map();
+  for(const[x,y,t,owner,meta]of m.tiles){
+    G.map[y][x]=t;
+    if(meta)G.storyTiles.set(capKey(x,y),{...meta});
+    if(CAPTURABLE.includes(t))G.caps.set(capKey(x,y),{owner:owner||null,prog:owner?CAP_NEED:0});
+  }
+  // Every player HQ is a valid home return area unless a mission defines a more specific tag.
+  for(const[k,cap]of G.caps)if(cap.owner==='P'){
+    const[x,y]=k.split(',').map(Number);if(G.map[y][x]==='hq'&&!G.storyTiles.has(k))G.storyTiles.set(k,{tag:'home'});
+  }
 }
 function showStoryLines(lines){
   const box=$('#storyDialogueLines');box.innerHTML=lines.map(([zhName,enName,line])=>`<div class="story-line"><i class="story-badge">${(LANG==='zh'?zhName:enName).slice(0,1)}</i><div><b>${LANG==='zh'?zhName:enName}</b><span>${txt(line)}</span></div></div>`).join('');
@@ -193,18 +226,60 @@ function showStoryBriefing(m){
 function startStoryMission(id){
   const m=MISSION_DEFS[id];if(!m||!readCampaignProgress().unlocked.includes(id))return false;
   const seed=m.seed>>>0;mapRng=createRng(seed);gameRng=createRng((seed^0x9E3779B9)>>>0);uid=0;
-  G={size:m.size,map:[],mapSeed:seed,mapCode:encodeMapCode(m.size,seed),units:[],turn:1,phase:'P',sel:null,reach:null,hover:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:0,E:0},aiStyle:m.aiStyle,difficulty:m.difficulty,gameMode:'story',troopsTier:'none',story:{missionId:id,objective:{...m.objectives[0]},firedEventIds:[],initialPlayerUnits:m.units.P.length,playerLosses:0}};
+  G={size:m.size,map:[],mapSeed:seed,mapCode:encodeMapCode(m.size,seed),units:[],turn:1,phase:'P',sel:null,reach:null,hover:null,mode:'idle',busy:false,over:false,caps:new Map(),funds:{P:0,E:0},aiStyle:m.aiStyle,difficulty:m.difficulty,gameMode:'story',troopsTier:'none',story:{missionId:id,objective:{...m.objectives[0]},firedEventIds:[],flags:{},holdCounts:{},initialPlayerUnits:(m.units.P||[]).length,playerLosses:0}};
   buildStoryMap(m);deployStoryUnits(m);board.style.setProperty('--n',m.size);fitBoard();
   $('#menu').classList.add('hidden');$('#storyBriefing').classList.add('hidden');$('#overlay').classList.add('hidden');$('#log').innerHTML='';
   log(T('startLog'),'phase');updateAiStyleTag();updateScenarioBanner();SFX.start();BGM.start('P');render();showInfo(null);saveGame();runStoryEvents('roundStart',{round:1});return true;
 }
 function storyUnit(ref){return G.units.find(u=>u.missionRef===ref);}
+function storyTileAt(x,y){return G.storyTiles&&G.storyTiles.get(capKey(x,y));}
+function storyTagOwner(tag){
+  for(const[k,meta]of G.storyTiles||[])if(meta.tag===tag)return G.caps.get(k)?.owner||null;
+  return null;
+}
+function storyUnitMatches(u,rule){return !!u&&(!rule.unitRef||u.missionRef===rule.unitRef)&&(!rule.unitTypes||rule.unitTypes.includes(u.type));}
+function storyRule(){return G?.gameMode==='story'?MISSION_DEFS[G.story.missionId].rule:null;}
+function storyUnitMayAct(u){
+  const rule=storyRule();
+  if(!rule||u.side!=='P')return true;
+  if(rule.actionTypes&&!rule.actionTypes.includes(u.type))return false;
+  if(rule.immobileTypes?.includes(u.type))return false;
+  return true;
+}
+function storyUnitMayAttack(u){const rule=storyRule();return u.side!=='P'||!rule?.attackTypes||rule.attackTypes.includes(u.type);}
+function canRelieveGate(u){return G?.gameMode==='story'&&G.story.missionId===14&&u.missionRef==='weiChanggeng'&&!G.story.flags.gateRelieved&&storyTileAt(u.x,u.y)?.tag==='gate'&&storyTagOwner('gate')==='P';}
+async function relieveGate(u){
+  if(!canRelieveGate(u))return;
+  G.story.flags.gateRelieved=true;u.locked=true;
+  await finishUnitAction(u);
+  log(LANG==='zh'?'卫长庚接防外环闸门，直到战斗结束。':'Wei Changgeng relieves the Outer Ring Gate until the battle ends.','phase');
+  saveGame();
+}
+function chooseStoryEnding(ending){
+  if(!G||G.gameMode!=='story'||G.story.missionId!==17||G.over)return;
+  G.story.flags.endingChoice=ending;
+  closeDialog($('#storyChoice'));
+  G.over=true;
+  showResult(true,ending);
+}
+function declineCoreChoice(){closeDialog($('#storyChoice'));G.busy=false;render();}
+function offerCoreChoice(){
+  if(G.story.flags.coreChoiceShown||G.story.flags.endingChoice)return;
+  G.story.flags.coreChoiceShown=true;
+  G.busy=true;
+  $('#storyChoiceText').textContent=LANG==='zh'?'闻渊：核心就在这里。占领它，将以灰烬重写秩序；封存它，则坚持到第十四回合。':'Wen Yuan: The core is here. Claim it to rewrite the order in ash, or seal it and hold until round fourteen.';
+  openDialog($('#storyChoice'));
+}
 function matchesStoryTrigger(on,trigger,data){
   if(!Object.prototype.hasOwnProperty.call(on,trigger))return false;
   if(trigger==='roundStart')return on.roundStart===data.round;
-  if(['playerPhaseEnd','enemyPhaseStart','enemyPhaseEnd','roundEnd'].includes(trigger))return on[trigger]===true;
+  if(['playerPhaseEnd','enemyPhaseStart','enemyPhaseEnd','roundEnd'].includes(trigger))return on[trigger]===true||on[trigger]===data.round;
   if(['unitRetreat','unitDefeated','unitRemoved'].includes(trigger))return on[trigger]===data.unitRef;
-  if(trigger==='capture'){const c=on.capture;return c&&['x','y','terrain','toOwner'].every(k=>c[k]===undefined||c[k]===data[k]);}
+  if(trigger==='firstEnemyDefeated')return on.firstEnemyDefeated===true&&data.first===true;
+  if(trigger==='unitHpBelow'){const r=on.unitHpBelow;return r&&data.unitRef===r.unitRef&&data.ratio<=r.ratio;}
+  if(trigger==='unitEnterTag'){const r=on.unitEnterTag;return r&&data.tag===r.tag&&storyUnitMatches(data.unit,r);}
+  if(trigger==='tagHeldRoundEnd'){const r=on.tagHeldRoundEnd;return r&&data.tag===r.tag&&data.count===r.count;}
+  if(trigger==='capture'){const c=on.capture;return c&&['x','y','terrain','toOwner','tag'].every(k=>c[k]===undefined||c[k]===data[k]);}
   return false;
 }
 async function runStoryEvents(trigger,data={}){
@@ -221,6 +296,22 @@ async function runStoryEvents(trigger,data={}){
         G.units.push(...survivors.map(u=>{const v=makeUnit('E',u.type,G.size-1-u.x,G.size-1-u.y,{level:u.level,rank:u.rank});v.hp=Math.min(v.maxHp,u.hp);v.missionRef=`mirror-${u.id}`;return v;}));
       }else if(action.type==='setAiStyle')G.aiStyle=action.value;
       else if(action.type==='setObjective')G.story.objective={...action.value};
+      else if(action.type==='appendBattleLog')log(txt(action.value),'info');
+      else if(action.type==='setMissionFlag')G.story.flags[action.key]=action.value===undefined?true:action.value;
+      else if(action.type==='unlockUnit'){const u=storyUnit(action.unitRef);if(u)u.locked=false;}
+      else if(action.type==='lockUnit'){const u=storyUnit(action.unitRef);if(u)u.locked=true;}
+      else if(action.type==='setUnitHp'){const u=storyUnit(action.unitRef);if(u)u.hp=Math.max(1,Math.min(u.maxHp,action.hp));}
+      else if(action.type==='spawnUnits')for(const def of action.units||[]){const side=action.side||'E';G.units.push(storyUnitFrom(def,side));}
+      else if(action.type==='retreatUnit'){
+        const u=storyUnit(action.unitRef);
+        if(u)G.units=G.units.filter(v=>v.id!==u.id);
+        await runStoryEvents('unitRetreat',{unitRef:action.unitRef});
+      }else if(action.type==='setTileOwner'){
+        const cap=G.caps.get(capKey(action.x,action.y));
+        if(cap)cap.owner=action.owner;
+      }
+      else if(action.type==='winMission'){G.over=true;showResult(true,action.how);return;}
+      else if(action.type==='failMission'){G.over=true;showResult(false,action.how);return;}
     }
     render();updateAiStyleTag();saveGame();
   }
@@ -228,11 +319,33 @@ async function runStoryEvents(trigger,data={}){
 function checkStoryEnd(){
   const m=MISSION_DEFS[G.story.missionId],players=G.units.filter(u=>u.side==='P'),enemy=G.units.filter(u=>u.side==='E');
   const hqOwner=owner=>[...G.caps].some(([key,c])=>{const[x,y]=key.split(',').map(Number);return G.map[y][x]==='hq'&&c.owner===owner;});
-  const failed=m.failures.some(f=>f==='allDead'?!players.length:f==='hqLost'?!hqOwner('P'):f.kind==='unitDefeated'&&!storyUnit(f.unitRef));
+  const failed=m.failures.some(f=>{
+    if(f==='allDead')return!players.length;
+    if(f==='hqLost')return!hqOwner('P');
+    if(f.kind==='unitDefeated')return!storyUnit(f.unitRef);
+    if(f.kind==='allUnitsDefeated')return f.refs.every(ref=>!storyUnit(ref));
+    if(f.kind==='tagLostBeforeObjective')return G.story.flags[`${f.tag}Captured`]===true&&storyTagOwner(f.tag)!=='P';
+    if(f.kind==='allTagsLost')return f.tags.every(tag=>storyTagOwner(tag)!=='P');
+    if(f.kind==='deadline'&&G.turn>=f.round){
+      if(f.tag)return storyTagOwner(f.tag)!==(f.owner||'P');
+      if(f.flag)return G.story.flags[f.flag]!==f.value;
+      return true;
+    }
+    return false;
+  });
   if(failed){G.over=true;showResult(false);return;}
   const o=G.story.objective;
-  const won=o.kind==='eliminateOrCaptureHq'?(!enemy.length||!hqOwner('E')):o.kind==='captureHq'?!hqOwner('E'):o.kind==='eliminate'?!enemy.length:o.kind==='defeatUnit'&&!storyUnit(o.unitRef);
-  if(won){G.over=true;showResult(true,o.kind==='captureHq'?'hq':undefined);}
+  const onTag=(tag,types,unitRef)=>players.some(u=>storyUnitMatches(u,{unitTypes:types,unitRef})&&storyTileAt(u.x,u.y)?.tag===tag);
+  const won=o.kind==='eliminateOrCaptureHq'?(!enemy.length||!hqOwner('E'))
+    :o.kind==='captureHq'?!hqOwner('E')
+    :o.kind==='eliminate'?!enemy.length
+    :o.kind==='defeatUnit'?!storyUnit(o.unitRef)
+    :o.kind==='unitOnTag'?onTag(o.tag,o.unitTypes,o.unitRef)
+    :o.kind==='captureAndHold'?(G.story.holdCounts[o.tag]||0)>=o.rounds
+    :o.kind==='survive'?G.story.flags[`survived-${o.round}`]===true
+    :o.kind==='eliminateOrSurvive'?!enemy.length||G.story.flags[`survived-${o.round}`]===true
+    :false;
+  if(won){G.over=true;showResult(true,o.ending||(o.kind==='captureHq'?'hq':undefined));}
 }
 const $=s=>document.querySelector(s);
 const board=$('#board');
@@ -260,13 +373,15 @@ function calcDamage(att,dfd,fromX,fromY,luck=1){
 function capKey(x,y){return x+','+y;}
 function capAt(x,y){return G.caps?G.caps.get(capKey(x,y))||null:null;}
 // 单位执行占领动作：积累占领进度（进度 = 单位当前 HP，工程师×1.5；步兵/重装兵/工程师可占领）
-function tryCapture(u){
+async function tryCapture(u){
   if(!CAPTURABLE.includes(G.map[u.y][u.x]))return;
   if(!CAPTURERS.includes(u.type))return;
   const k=capKey(u.x,u.y);
   const cap=G.caps.get(k);
   if(cap&&cap.owner===u.side)return; // 已是本方城镇
-  const gain=Math.round(u.hp*(CAP_MULT[u.type]||1)); // 占领速度倍率（工程师 1.5）
+  const storyTile=storyTileAt(u.x,u.y);
+  const storyBonus=G.gameMode==='story'&&u.characterId==='suTan'&&storyTile?.tag?1.5:1;
+  const gain=Math.round(u.hp*(CAP_MULT[u.type]||1)*storyBonus); // 苏檀对任务设施额外提高 50% 效率
   // progSide 记录当前这份未完成进度是哪一方在累积；换人（被敌方开始占）才清零重算，同一方跨回合累计
   const prog=(cap&&cap.progSide===u.side?cap.prog:0)+gain;
   if(prog>=CAP_NEED){
@@ -275,6 +390,11 @@ function tryCapture(u){
     SFX.capture();
     log(`${sideName(u.side)} ${UNIT_TYPES[u.type].name} ${u.side==='P'?T('capVerb'):T('takeVerb')} (${u.x},${u.y})！`,'level');
     gainXp(u,8); // 占领成功 +8 经验（辅助单位的升级途径）
+    if(G.gameMode==='story'){
+      G.story.flags[`${storyTile?.tag||k}Captured`]=u.side==='P';
+      if(storyTile?.tag&&u.side==='P')G.story.flags[`${storyTile.tag}CapturedRound`]=G.turn;
+      await runStoryEvents('capture',{x:u.x,y:u.y,terrain:G.map[u.y][u.x],toOwner:u.side,tag:storyTile?.tag,unit:u});
+    }
   }else{
     // 未完成占领：owner 保持不变（中立仍是 undefined，已属他方仍是原 owner），只记录进行中的 progSide/prog
     G.caps.set(k,{owner:cap?cap.owner:undefined,prog,progSide:u.side,by:u.id});
@@ -382,7 +502,7 @@ window.addEventListener('resize',()=>{
   fitBoardTimer=setTimeout(fitBoard,150); // 防抖，避免拖拽窗口时高频重算
 });
 function collectIncome(side){
-  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy.income)return;
+  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy?.income)return;
   const n=countOwned(side);
   if(!n)return;
   // 敌方强度：难度档位同时放大敌方收入（跟 HP 倍率同一档位、同一数值），我方恒定 ×1.0
@@ -402,7 +522,7 @@ function healOwnedUnits(side){
 }
 // AI 建造：敌方回合结束时在己方空工厂造兵（新单位下回合行动）
 function aiBuild(){
-  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy.enemyProduction)return;
+  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy?.enemyProduction)return;
   if(G.units.filter(u=>u.side==='E').length>=MAX_SIDE_UNITS)return;
   const factories=[];
   for(let y=0;y<G.size;y++)for(let x=0;x<G.size;x++){
@@ -460,7 +580,7 @@ function openDialog(dialog,trigger=document.activeElement){
 }
 function closeDialog(dialog){dialog.classList.add('hidden');dialogTrigger?.focus?.();dialogTrigger=null;}
 function openProdMenu(x,y){
-  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy.playerProduction)return;
+  if(G.gameMode==='story'&&!MISSION_DEFS[G.story.missionId].economy?.playerProduction)return;
   prodFactory={x,y};
   $('#prodFunds').textContent=T('prodFunds')(G.funds.P);
   const list=$('#prodList');
@@ -502,6 +622,7 @@ function createSaveDto(){
       size:G.size,map:G.map,mapSeed:G.mapSeed,mapCode:G.mapCode,units:G.units,turn:G.turn,phase:G.phase,
       caps:[...G.caps.entries()],funds:G.funds,aiStyle:G.aiStyle,difficulty:G.difficulty,gameMode:G.gameMode,
       troopsTier:G.troopsTier,siege:G.siege||null,scenario:G.scenario||null,story:G.story||null,
+      storyTiles:G.storyTiles?[...G.storyTiles.entries()]:null,
     },
   };
 }
@@ -510,6 +631,7 @@ function validateSaveDto(dto){
   return!!(dto&&dto.schema===SAVE_SCHEMA_VERSION&&Number.isInteger(dto.uid)&&Number.isInteger(dto.gameRngState)&&g&&
     VALID_MAP_SIZES.includes(g.size)&&Array.isArray(g.map)&&g.map.length===g.size&&g.map.every(row=>Array.isArray(row)&&row.length===g.size)&&
     Array.isArray(g.units)&&Array.isArray(g.caps)&&g.funds&&['P','E'].includes(g.phase)&&decodeMapCode(g.mapCode)&&
+    (g.storyTiles===null||g.storyTiles===undefined||Array.isArray(g.storyTiles))&&
     g.mapSeed===decodeMapCode(g.mapCode).seed&&g.size===decodeMapCode(g.mapCode).size);
 }
 function readSave(){
@@ -532,7 +654,7 @@ function updateSaveActions(){
 function restoreGame(dto=readSave()){
   if(!validateSaveDto(dto))return false;
   const s=dto.game;
-  G={...s,caps:new Map(s.caps),sel:null,reach:null,hover:null,mode:'idle',busy:false,over:false};
+  G={...s,caps:new Map(s.caps),storyTiles:s.storyTiles?new Map(s.storyTiles):new Map(),sel:null,reach:null,hover:null,mode:'idle',busy:false,over:false};
   if(!G.siege)delete G.siege;
   uid=Math.max(dto.uid,...G.units.map(u=>u.id||0));
   gameRng=createRng(dto.gameRngState);
@@ -735,14 +857,23 @@ async function resolveHit(a,d,counterMult){
   let dmg=Math.round(calcDamage(a,d,a.x,a.y,0.85+gameRandom()*0.3)*counterMult);
   if(crit)dmg=Math.round(dmg*CRIT_MULT);
   dmg=Math.max(1,dmg);
+  if(G.gameMode==='story'&&d.traits?.includes('weiChanggeng')&&d.side==='P'&&G.phase==='E'){
+    const cap=capAt(d.x,d.y),onFriendlyBuilding=CAPTURABLE.includes(G.map[d.y][d.x])&&cap?.owner==='P';
+    if(onFriendlyBuilding&&!G.story.flags.weiChanggengBraced){dmg=Math.max(1,dmg-1);G.story.flags.weiChanggengBraced=true;}
+  }
   const storyRule=G.gameMode==='story'&&d.criticalRule;
-  d.hp=Math.max(storyRule==='retreatAtOneHp'?1:0,d.hp-dmg);
+  const protectedRule=['holdAtOneHp','retreatAtOneHp','protectedFailAtOneHp'].includes(storyRule);
+  d.hp=Math.max(protectedRule?1:0,d.hp-dmg);
   render();
   floatText(d.x,d.y,'-'+dmg+(crit?' 会心!':''),crit?'crit':'dmg');
   crit?SFX.crit():SFX.hit();
   await sleep(320);
   gainXp(a,8);
-  if(storyRule==='retreatAtOneHp'&&d.hp===1){
+  if(G.gameMode==='story'&&d.missionRef)await runStoryEvents('unitHpBelow',{unitRef:d.missionRef,ratio:d.hp/d.maxHp,unit:d});
+  if(storyRule==='protectedFailAtOneHp'&&d.hp===1){
+    await runStoryEvents('unitRetreat',{unitRef:d.missionRef});
+    G.over=true;showResult(false,'protected');
+  }else if(storyRule==='retreatAtOneHp'&&d.hp===1){
     G.units=G.units.filter(u=>u.id!==d.id);render();
     await runStoryEvents('unitRetreat',{unitRef:d.missionRef});
   }else if(d.hp<=0){
@@ -756,6 +887,9 @@ async function resolveHit(a,d,counterMult){
     if(rider)log(T('cargoLostLog')(rider.type),'kill');
     render();
     if(G.gameMode==='story'){
+      const first=d.side==='E'&&!G.story.flags.firstEnemyDefeated;
+      if(first)G.story.flags.firstEnemyDefeated=true;
+      await runStoryEvents('firstEnemyDefeated',{first,unitRef:d.missionRef,unit:d});
       await runStoryEvents(storyRule==='retreatOnDefeat'?'unitRetreat':'unitDefeated',{unitRef:d.missionRef});
       await runStoryEvents('unitRemoved',{unitRef:d.missionRef});
     }
@@ -829,21 +963,24 @@ async function animateMove(u,path){
 }
 
 // ================= 玩家操作 =================
-function select(u){G.sel=u;G.mode='selected';G.reach=bfsReach(u);SFX.select();render();showInfo(u);}
+function select(u){
+  if(u.locked||!storyUnitMayAct(u))return;
+  G.sel=u;G.mode='selected';G.reach=bfsReach(u);SFX.select();render();showInfo(u);
+}
 function deselect(){G.sel=null;G.reach=null;G.mode='idle';render();}
 // 查看模式：点击敌军（或已行动单位）查看其移动/攻击范围，不能操作
 function viewUnit(u){G.sel=u;G.mode='view';G.reach=bfsReach(u);SFX.select();render();showInfo(u);}
 // 结束当前单位行动并收尾（可选执行一个原地动作：占领/修理/治疗）
-function finishUnitAction(u,action){
+async function finishUnitAction(u,action){
   u.acted=true;
-  if(action)action(u);
+  if(action)await action(u);
   else log(T('waitLog')(u.type),'dim');
   G.sel=null;G.reach=null;G.mode='idle';
   checkEnd();
   if(!G.over){render();showInfo(null);saveGame();}
 }
-function waitUnit(){ if(G.sel)finishUnitAction(G.sel); }
-function captureAction(){ if(G.sel)finishUnitAction(G.sel,tryCapture); }
+async function waitUnit(){ if(G.sel)await finishUnitAction(G.sel); }
+async function captureAction(){ if(G.sel)await finishUnitAction(G.sel,tryCapture); }
 // 修理/治疗/下车都需要玩家点选目标：进入专属选择模式，棋盘高亮可选目标，点击后才真正执行
 function repairAction(){ if(G.sel){G.mode='repair';render();showInfo(G.sel);} }
 function healAction(){ if(G.sel){G.mode='heal';render();showInfo(G.sel);} }
@@ -864,8 +1001,9 @@ function updateActionBtns(){
   if(!active){box.style.display='none';box.innerHTML='';waitBtn.style.display='none';return;}
   const u=G.sel;
   let html='';
-  if(targetsFrom(u,u.x,u.y).length&&(!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE))
+  if(storyUnitMayAttack(u)&&targetsFrom(u,u.x,u.y).length&&(!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE))
     html+=`<button data-act="attack">${T('actAttack')}</button>`;
+  if(canRelieveGate(u))html+='<button data-act="relieve">接防闸门</button>';
   if(canCapture(u))html+=`<button data-act="capture">${T('actCapture')}</button>`;
   if(canRepair(u))html+=`<button data-act="repair">${T('actRepair')}</button>`;
   if(canHeal(u))html+=`<button data-act="heal">${T('actHeal')}</button>`;
@@ -874,17 +1012,19 @@ function updateActionBtns(){
   box.style.display=html?'flex':'none';
   waitBtn.style.display='block';
 }
-$('#actionBtns').addEventListener('click',e=>{
+$('#actionBtns').addEventListener('click',async e=>{
   const btn=e.target.closest('button[data-act]');
   if(!btn||!G||!G.sel||G.busy||G.over||G.phase!=='P')return;
   const act=btn.dataset.act;
   if(act==='attack'){G.mode='attack';render();showInfo(G.sel);}
-  else if(act==='capture')captureAction();
+  else if(act==='relieve')await relieveGate(G.sel);
+  else if(act==='capture')await captureAction();
   else if(act==='repair')repairAction();
   else if(act==='heal')healAction();
   else if(act==='unload')unloadAction();
 });
 async function playerMove(u,x,y){
+  if(!storyUnitMayAct(u))return;
   G.busy=true;
   const fx=u.x,fy=u.y; // 记录出发格（用于离开城镇时清零占领进度）
   const path=pathTo(G.reach,x,y);
@@ -893,19 +1033,25 @@ async function playerMove(u,x,y){
   await animateMove(u,path);
   G.busy=false;
   resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
+  if(G.gameMode==='story'){
+    const tag=storyTileAt(u.x,u.y)?.tag;
+    await runStoryEvents('unitEnterTag',{tag,unit:u});
+    if(tag==='core')offerCoreChoice();
+  }
   // 落点是己方空运兵车：直接上车，乘客不再单独占格、不能再行动
   const carrier=G.units.find(v=>v.id!==u.id&&v.type==='transport'&&v.side===u.side&&v.x===u.x&&v.y===u.y);
   if(carrier&&RIDERS.includes(u.type)){
-    finishUnitAction(u,v=>{v.aboard=carrier.id;log(T('loadLog')(v.type),'dim');});
+    await finishUnitAction(u,v=>{v.aboard=carrier.id;log(T('loadLog')(v.type),'dim');});
     return;
   }
   // 移动后不自动执行占领/修理/治疗/攻击，交由动作按钮组给玩家选择；若无可选动作则直接待机结束
   G.mode='acting';G.sel=u;G.reach=null;render();showInfo(u);
-  const hasAction=targetsFrom(u,u.x,u.y).length&&(!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE)
+  const hasAction=storyUnitMayAttack(u)&&targetsFrom(u,u.x,u.y).length&&(!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE)
     ||canCapture(u)||canRepair(u)||canHeal(u)||canUnload(u);
-  if(!hasAction)finishUnitAction(u);
+  if(!hasAction)await finishUnitAction(u);
 }
 async function playerAttack(a,d){
+  if(!storyUnitMayAct(a)||!storyUnitMayAttack(a))return;
   G.busy=true;G.reach=null;G.mode='idle';render();
   await doAttack(a,d);
   if(a.hp>0)a.acted=true;
@@ -936,7 +1082,7 @@ board.addEventListener('click',async e=>{
   if(G.mode==='selected'||G.mode==='attack'||G.mode==='acting'||G.mode==='view'){
     const sel=G.sel;
     if(u&&u.id===sel.id){deselect();showInfo(u);return;} // 再点一次=取消选择（可继续查看）
-    if((G.mode==='selected'||G.mode==='attack'||G.mode==='acting')&&u&&u.side==='E'&&targetsFrom(sel,sel.x,sel.y).includes(u)){await playerAttack(sel,u);return;}
+    if((G.mode==='selected'||G.mode==='attack'||G.mode==='acting')&&storyUnitMayAttack(sel)&&u&&u.side==='E'&&targetsFrom(sel,sel.x,sel.y).includes(u)){await playerAttack(sel,u);return;}
     // 工程师/军医选中后直接点相邻己方可修/可治单位＝快捷触发修理/治疗（无需先点"修理"/"治疗"按钮）
     if((G.mode==='selected'||G.mode==='acting')&&u&&u.side===sel.side&&u.id!==sel.id){
       if(sel.type==='engineer'&&repairTargets(sel).includes(u)){finishUnitAction(sel,v=>tryRepair(v,u));return;}
@@ -1065,6 +1211,7 @@ function aiMainActionKind(u,target,canFire=true){
   return'wait';
 }
 async function aiAct(u){
+  if(u.locked||!storyUnitMayAct(u)){u.acted=true;return;}
   G.sel=u;render();showInfo(u);
   await sleep(200);
   const plan=aiPlan(u);
@@ -1075,16 +1222,20 @@ async function aiAct(u){
       SFX.move(u.type);
       await animateMove(u,path);
       resetCaptureOnLeave(u,fx,fy); // 离开城镇：占领进度清零
+      if(G.gameMode==='story'){
+        const tag=storyTileAt(u.x,u.y)?.tag;
+        await runStoryEvents('unitEnterTag',{tag,unit:u});
+      }
     }
     const t=plan.target;
     // 间接打击单位（火炮/火箭炮）移动后不能开火，只能原地开火；注意 u.x/u.y 此时已是移动后坐标，须与出发格 fx/fy 比较
     const canFire=!(NO_MOVE_FIRE.includes(u.type)&&!ARTILLERY_MOVE_FIRE&&(fx!==u.x||fy!==u.y));
     const action=aiMainActionKind(u,t,canFire);
-    if(action==='attack'){
+    if(action==='attack'&&storyUnitMayAttack(u)){
       await doAttack(u,t);
     }
     // 与玩家一致：攻击、占领、修理、治疗每回合只能选择一个主动作。
-    else if(action==='capture')tryCapture(u);
+    else if(action==='capture')await tryCapture(u);
     else if(action==='repair')tryRepair(u);
     else if(action==='heal')tryHeal(u);
   }
@@ -1095,16 +1246,17 @@ async function aiAct(u){
 }
 async function startEnemyPhase(){
   G.busy=true;deselect();
-  await runStoryEvents('playerPhaseEnd',{});
+  await runStoryEvents('playerPhaseEnd',{round:G.turn});
   if(G.over)return;
   G.phase='E';
+  if(G.gameMode==='story')G.story.flags.weiChanggengBraced=false;
   BGM.setSide('E'); // 敌方回合切换为敌方主题
   render();updateTop();
   log(T('phaseLog')(G.turn,T('phaseE')),'phase');
   SFX.turn();
   collectIncome('E');updateFunds(); // 敌方建筑收入
   healOwnedUnits('E'); // 敌方同样在自己回合开始时由所属建筑回复 2 HP
-  await runStoryEvents('enemyPhaseStart',{});
+  await runStoryEvents('enemyPhaseStart',{round:G.turn});
   await sleep(450);
   for(const u of G.units.filter(v=>v.side==='E'&&!v.aboard)){
     if(u.hp<=0||G.over)continue;
@@ -1114,8 +1266,32 @@ async function startEnemyPhase(){
     await sleep(220);
   }
   aiBuild(); // 敌方回合结束：在己方空工厂造兵（下回合行动，坚守阵地模式下敌方没有工厂，自然跳过）
-  await runStoryEvents('enemyPhaseEnd',{});
-  await runStoryEvents('roundEnd',{});
+  await runStoryEvents('enemyPhaseEnd',{round:G.turn});
+  await runStoryEvents('roundEnd',{round:G.turn});
+  if(G.gameMode==='story'){
+    for(const[k,meta]of G.storyTiles||[]){
+      if(!meta.tag)continue;
+      const cap=G.caps.get(k);
+      const capturedRound=G.story.flags[`${meta.tag}CapturedRound`];
+      const held=cap?.owner==='P'&&(capturedRound===undefined||G.turn>capturedRound);
+      G.story.holdCounts[meta.tag]=held?(G.story.holdCounts[meta.tag]||0)+1:0;
+      await runStoryEvents('tagHeldRoundEnd',{tag:meta.tag,count:G.story.holdCounts[meta.tag]});
+    }
+    const objective=G.story.objective;
+    if(objective.kind==='survive'||objective.kind==='eliminateOrSurvive'){
+      const coreSecure=G.story.missionId!==17||storyTagOwner('core')!=='P';
+      const playerHqIntact=[...G.caps].some(([key,cap])=>{const[x,y]=key.split(',').map(Number);return G.map[y][x]==='hq'&&cap.owner==='P';});
+      G.story.flags[`survived-${objective.round}`]=G.turn>=objective.round&&coreSecure&&playerHqIntact;
+    }
+    const mission=MISSION_DEFS[G.story.missionId];
+    if(mission.waves&&G.turn%mission.waves.interval===0){
+      const spots=mission.waves.spawns.filter(([x,y])=>!unitAt(x,y));
+      const types=mission.waves.types||SIEGE.pool;
+      spots.slice(0,mission.waves.count||spots.length).forEach(([x,y],i)=>G.units.push(makeUnit('E',types[i%types.length],x,y)));
+    }
+    checkStoryEnd();
+    if(G.over)return;
+  }
   // 坚守阵地：每 waveInterval 回合刷新一波敌方单位，达到总回合数后即存活获胜
   if((G.gameMode==='siege'||G.scenario?.goal.type==='survive')&&G.siege){
     if(G.turn>=G.siege.nextWaveTurn){
@@ -1295,8 +1471,9 @@ function makeUnit(side,type,x,y,meta={}){
   const mult=side==='E'?(DIFFICULTY_TIERS[G&&G.difficulty]||DIFFICULTY_TIERS.normal).hpMult:1;
   const maxHp=Math.max(1,Math.round(b.hp*mult));
     const level=Math.max(1,meta.level||1),bonus=level-1,storyMaxHp=maxHp+bonus*2;
-    return{id:++uid,side,type,x,y,hp:storyMaxHp,maxHp:storyMaxHp,atk:b.atk+bonus,def:b.def+bonus,
-      move:b.move,minR:b.minR,maxR:b.maxR,level,xp:0,acted:false,rank:meta.rank||'regular',characterId:meta.characterId||null,missionRef:meta.missionRef||null,criticalRule:meta.criticalRule||null,factionTag:meta.factionTag||null};
+    const hp=Math.max(1,Math.min(storyMaxHp,meta.hp||Math.round(storyMaxHp*(meta.hpRatio||1))));
+    return{id:++uid,side,type,x,y,hp,maxHp:storyMaxHp,atk:b.atk+bonus,def:b.def+bonus,
+      move:b.move,minR:b.minR,maxR:b.maxR,level,xp:0,acted:false,rank:meta.rank||'regular',characterId:meta.characterId||null,missionRef:meta.missionRef||null,criticalRule:meta.criticalRule||null,factionTag:meta.factionTag||null,locked:!!meta.locked,traits:meta.traits||[],aiOrder:meta.aiOrder||null};
 }
 function newGame(size,seed=freshSeed()){
     if(gameModeChoice==='story'){startStoryMission(missionChoice);return;}
@@ -1483,6 +1660,8 @@ document.querySelectorAll('#menu button[data-mode]').forEach(b=>{
 $('#scenarioPicker').addEventListener('change',e=>{if(gameModeChoice==='story')missionChoice=+e.target.value;else scenarioChoice=e.target.value;});
 $('#storyBriefingBack').addEventListener('click',()=>{closeDialog($('#storyBriefing'));openDialog($('#menu'));});
 $('#storyBriefingStart').addEventListener('click',()=>startStoryMission(missionChoice));
+$('#storyChoiceAsh').addEventListener('click',()=>chooseStoryEnding('ash'));
+$('#storyChoiceRing').addEventListener('click',declineCoreChoice);
 $('#againBtn').addEventListener('click',()=>{
   if(G.gameMode!=='story'){newGame(G.size);return;}
   const current=G.story.missionId,next=STORY_ORDER[STORY_ORDER.indexOf(current)+1];
