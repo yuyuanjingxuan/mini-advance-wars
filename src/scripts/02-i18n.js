@@ -28,7 +28,8 @@ const I18N={
     modeAcademy:'🎓 战术学院', modeAcademySub:'五个教学与挑战场景', scenarioLabel:'教学场景',
     modeStory:'📜 灰烬之环', modeStorySub:'固定关卡的剧情战役', storyScenarioLabel:'故事任务', storyLocked:'尚未解锁', storyCompleted:'已完成',
     storyPrimaryLabel:'主要目标', storyFailureLabel:'失败条件', storyIntelLabel:'情报', storyStart:'开始作战', storyBack:'返回选关', storyContinue:'继续', storyComms:'战场通讯',
-    storyRetry:'重新开始', storyNext:'下一任务', storyDebrief:'战后报告', storyLosses:(n)=>`我方损失：${n} 个单位`,
+    storyRetry:'重新开始', storyNext:'下一任务', storyDebrief:'战后报告', storyLosses:(n)=>`我方损失：${n} 个单位`, storyChoiceTitle:'灰烬之环', storyChoiceRing:'封存核心', storyChoiceAsh:'占领核心',
+    actRelieveGate:'接防闸门', xp:'经验', crit:'会心!', aiStyleTooltip:'敌方 AI 风格', mapCodeTooltip:'地图码', soundTooltip:'音效开关', helpTooltip:'单位与规则说明', battlefieldLabel:'战场', quickGuideLabel:'快速上手',
     scBasics:'基础行动', scBasicsObj:'移动、攻击，并占领标记城镇',
     scTerrain:'地形与克制', scTerrainObj:'利用森林、山地与重装兵消灭敌军',
     scIndirect:'间接火力', scIndirectObj:'使用火炮在射程外消灭全部目标',
@@ -161,7 +162,8 @@ const I18N={
     modeAcademy:'🎓 Tactics Academy', modeAcademySub:'Five guided scenarios and challenges', scenarioLabel:'Tutorial scenario',
     modeStory:'📜 The Ashen Ring', modeStorySub:'A fixed-mission story campaign', storyScenarioLabel:'Story mission', storyLocked:'Locked', storyCompleted:'Completed',
     storyPrimaryLabel:'Primary Objective', storyFailureLabel:'Failure Conditions', storyIntelLabel:'Intel', storyStart:'Begin Operation', storyBack:'Mission Select', storyContinue:'Continue', storyComms:'Battlefield Transmission',
-    storyRetry:'Restart Mission', storyNext:'Next Mission', storyDebrief:'After-action Report', storyLosses:(n)=>`Units lost: ${n}`,
+    storyRetry:'Restart Mission', storyNext:'Next Mission', storyDebrief:'After-action Report', storyLosses:(n)=>`Units lost: ${n}`, storyChoiceTitle:'The Ashen Ring', storyChoiceRing:'Seal the Core', storyChoiceAsh:'Claim the Core',
+    actRelieveGate:'Relieve the Gate', xp:'XP', crit:'Critical!', aiStyleTooltip:'Enemy AI style', mapCodeTooltip:'Map code', soundTooltip:'Sound toggle', helpTooltip:'Unit and rules guide', battlefieldLabel:'Battlefield', quickGuideLabel:'Quick start',
     scBasics:'Core Actions', scBasicsObj:'Move, attack, and capture the marked city',
     scTerrain:'Terrain & Counters', scTerrainObj:'Use forests, mountains, and heavies to defeat the enemy',
     scIndirect:'Indirect Fire', scIndirectObj:'Use artillery range to destroy every target',
@@ -300,6 +302,10 @@ function applyStaticTexts(){
     tl.appendChild(document.createTextNode(T('turnSuffix')));
   }
   set('sndBtn',muted?'🔇':'🔊');
+  const title=(id,key)=>{const el=document.getElementById(id);if(el)el.title=T(key);};
+  title('aiStyleTag','aiStyleTooltip');title('mapCodeTag','mapCodeTooltip');title('sndBtn','soundTooltip');title('helpBtn','helpTooltip');
+  const battlefield=document.getElementById('board');if(battlefield)battlefield.setAttribute('aria-label',T('battlefieldLabel'));
+  const quickGuideLabel=document.querySelector('#menu .quick-guide');if(quickGuideLabel)quickGuideLabel.setAttribute('aria-label',T('quickGuideLabel'));
   set('menuBtn',T('menu'));set('endTurn',T('endTurn'));
   set('helpBtn','❓ '+T('help'));
   const pl=document.getElementById('phaseLabel');if(pl&&G)pl.textContent=G.phase==='P'?T('phaseP'):T('phaseE');
@@ -357,6 +363,7 @@ function applyStaticTexts(){
   set('continueBtn',T('continueBtn'));set('deleteSaveBtn',T('deleteSaveBtn'));
   set('storyPrimaryLabel',T('storyPrimaryLabel'));set('storyFailureLabel',T('storyFailureLabel'));set('storyIntelLabel',T('storyIntelLabel'));
   set('storyBriefingStart',T('storyStart'));set('storyBriefingBack',T('storyBack'));set('storyDialogueTitle',T('storyComms'));set('storyDialogueContinue',T('storyContinue'));
+  set('storyChoiceTitle',T('storyChoiceTitle'));set('storyChoiceRing',T('storyChoiceRing'));set('storyChoiceAsh',T('storyChoiceAsh'));
   const mapCodeHint=document.getElementById('mapCodeHint');
   if(mapCodeHint&&G?.mapCode)mapCodeHint.textContent=T('mapCodeReady')(G.mapCode);
   updateSaveActions();

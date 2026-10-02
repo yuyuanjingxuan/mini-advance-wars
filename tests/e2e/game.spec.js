@@ -111,3 +111,32 @@ test('story victory unlocks the next mission without erasing campaign progress',
   expect(progress.unlocked).toContain(1);
   expect(await page.evaluate(() => localStorage.getItem('mini-advance-wars-save'))).toBeNull();
 });
+
+test('Ashen Ring briefing and core choice are fully localized in English', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem('mini-advance-wars-campaign', JSON.stringify({ schemaVersion: 1, unlocked: [0, 1, 17], completed: [], endings: [], best: {}, lastMission: 1 }));
+  });
+  await page.reload();
+  await page.locator('.langBtn[data-lang="en"]').click();
+  await page.getByRole('button', { name: /The Ashen Ring/ }).click();
+  await expect(page.locator('#scenarioPicker option').nth(1)).toHaveText(/An Ordinary Morning/);
+  await page.locator('#scenarioPicker').selectOption('1');
+  await page.getByRole('button', { name: /Start Game/ }).click();
+  await expect(page.getByRole('dialog', { name: /An Ordinary Morning/ })).toBeVisible();
+  await expect(page.locator('#storyAct')).toHaveText(/Act I/);
+  await expect(page.locator('#storyBriefingLines')).not.toContainText(/[\u4E00-\u9FFF]/);
+  await page.getByRole('button', { name: /Begin Operation/ }).click();
+  await page.evaluate(() => { void runStoryEvents('roundStart', { round: 2 }); });
+  await expect(page.getByRole('dialog', { name: /Battlefield Transmission/ })).toBeVisible();
+  await expect(page.locator('#storyDialogueLines')).not.toContainText(/[\u4E00-\u9FFF]/);
+  await page.getByRole('button', { name: /^Continue$/ }).click();
+
+  await page.evaluate(() => {
+    G.story.missionId = 17;
+    G.story.flags = {};
+    offerCoreChoice();
+  });
+  await expect(page.getByRole('dialog', { name: /The Ashen Ring/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Seal the Core/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Claim the Core/ })).toBeVisible();
+});

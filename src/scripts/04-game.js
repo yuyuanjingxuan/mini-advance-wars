@@ -117,8 +117,14 @@ const MISSION_DEFS={
 // resulting mission objects remain plain serializable data.
 const storyEconomy=(income=false,playerProduction=false,enemyProduction=false)=>({income,playerProduction,enemyProduction});
 const storyTiles=(size,extra=[])=>[[1,size-2,'hq','P'],[2,size-2,'factory','P'],[1,size-3,'city','P'],[size-2,1,'hq','E'],[size-3,1,'factory','E'],[size-2,2,'city','E'],[Math.floor(size/2)-1,Math.floor(size/2),'forest'],[Math.floor(size/2),Math.floor(size/2)-1,'forest'],...extra];
-const storyBriefing=(speaker,english,line)=>[[speaker,english,S(line,line)]];
-const storyMission=(id,act,title,size,units,extra={})=>({id,act:S(act,act),title:S(title,title),when:S(`静历三百年 · ${title}`,`S.R. 300 · ${title}`),size,seed:(0xA5000000+id)>>>0,aiStyle:'balanced',difficulty:'normal',economy:storyEconomy(),briefing:storyBriefing('卫长庚','Wei Changgeng','指挥官，任务开始。'),objective:S('完成主要目标。','Complete the primary objective.'),failure:S('我方全灭或总部被占。','All player units lost or your HQ captured.'),intel:S('任务设施和人物状态会改变战局。','Mission facilities and character state can change the battle.'),tiles:storyTiles(size),units,objectives:[{kind:'eliminateOrCaptureHq'}],failures:['allDead','hqLost'],events:[],debrief:S('战斗结束了，但灰烬之环的谜团仍在延伸。','The battle is over, but the mystery of the Ashen Ring continues.'),...extra});
+const STORY_EN={
+  '第一幕 · 静默之后':'Act I · After the Silence','第二幕 · 镜子里的国家':'Act II · The Nation in the Mirror','第三幕 · 创立者手稿':'Act III · The Founder’s Manuscript','第四幕 · 灰烬之环':'Act IV · The Ashen Ring',
+  '寻常的早晨':'An Ordinary Morning','对称的敌人':'The Symmetrical Enemy','截获的低语':'Intercepted Whispers','装甲条款':'The Armor Clause','镜子里的国家':'The Nation in the Mirror','坚壁':'Stonewall','两个边境':'Two Borders','创立者手稿':'The Founder’s Manuscript','叛军':'The Mutineers','誓词':'The Oath','第七阶段':'Phase Seven','十二锚点':'The Twelve Anchors','镜中人':'The Person in the Mirror','大元帅':'The Grand Marshal','灰烬之环':'The Ashen Ring',
+  '指挥官，任务开始。':'Commander, the operation begins.','他们站的位置跟咱们一模一样。':'They are standing in exactly the same places as we are.','第七营……不退。':'The Seventh Battalion… does not retreat.','接上了。信号很弱，给我时间。':'Connected. The signal is weak; give me time.','协议已确认非对称。执行第七阶段。署名：闻。':'The Accord confirms the asymmetry. Execute Phase Seven. Signed: Wen.','对面比我们多两辆坦克。':'They have two more tanks than we do.','那是严峥元帅的私人旗。撤回来！':'That is Marshal Yan Zheng’s personal banner. Fall back!','我欠你一次。朔国人记账很清楚。':'I owe you one. People of Shuo keep careful accounts.','我不是来求原谅的。我只是来开门。':'I did not come to ask forgiveness. I came to open the door.','闸门到手了。让我站上去。':'The gate is ours. Let me take the watch.','那就让我看看，你想要什么结局。':'Then let me see what ending you want.'
+};
+const storyText=(zh)=>S(zh,STORY_EN[zh]||zh);
+const storyBriefing=(speaker,english,line)=>[[speaker,english,storyText(line)]];
+const storyMission=(id,act,title,size,units,extra={})=>{const localizedAct=storyText(act),localizedTitle=storyText(title);return{id,act:localizedAct,title:localizedTitle,when:S(`静历三百年 · ${title}`,`S.R. 300 · ${localizedTitle.en}`),size,seed:(0xA5000000+id)>>>0,aiStyle:'balanced',difficulty:'normal',economy:storyEconomy(),briefing:storyBriefing('卫长庚','Wei Changgeng','指挥官，任务开始。'),objective:S('完成主要目标。','Complete the primary objective.'),failure:S('我方全灭或总部被占。','All player units lost or your HQ captured.'),intel:S('任务设施和人物状态会改变战局。','Mission facilities and character state can change the battle.'),tiles:storyTiles(size),units,objectives:[{kind:'eliminateOrCaptureHq'}],failures:['allDead','hqLost'],events:[],debrief:S('战斗结束了，但灰烬之环的谜团仍在延伸。','The battle is over, but the mystery of the Ashen Ring continues.'),...extra};};
 Object.assign(MISSION_DEFS,{
   1:storyMission(1,'第一幕 · 静默之后','寻常的早晨',10,{P:[['infantry',1,7],['infantry',2,7],['heavy',1,6],['artillery',2,8]],E:'mirror'},{difficulty:'trivial',tiles:storyTiles(10,[[4,0,'water'],[4,1,'water'],[4,3,'water'],[4,4,'plain'],[4,5,'water'],[4,7,'water'],[5,2,'forest'],[5,7,'forest']]),objectives:[{kind:'eliminate'}],events:[{id:'m1-r2',on:{roundStart:2},do:[{type:'showDialog',lines:storyBriefing('卫长庚','Wei Changgeng','他们站的位置跟咱们一模一样。')}]},{id:'m1-first',on:{firstEnemyDefeated:true},do:[{type:'appendBattleLog',value:S('被击毁的敌军化成了灰。','The destroyed enemy turns to ash.')}]}]}),
   2:storyMission(2,'第一幕 · 静默之后','对称的敌人',12,{P:[['infantry',1,9],['infantry',2,9],['infantry',3,9],['heavy',1,8],['recon',2,8],['medic',3,8]],E:'mirror',extraE:[['infantry',9,2,{rank:'elite',missionRef:'officer',level:3,criticalRule:'retreatOnDefeat'}]]},{difficulty:'easy',tiles:storyTiles(12,[[4,7,'city','P',{tag:'villageA'}],[5,7,'city','P',{tag:'villageB'}],[6,7,'city','P',{tag:'villageC'}],[7,4,'city','E'],[6,4,'city','E'],[5,4,'city','E'],[5,5,'mountain'],[6,5,'mountain']]),objectives:[{kind:'defeatUnit',unitRef:'officer'}],failures:[{kind:'allTagsLost',tags:['villageA','villageB','villageC']},'allDead','hqLost'],events:[{id:'m2-officer-low',on:{unitHpBelow:{unitRef:'officer',ratio:.5}},do:[{type:'showDialog',lines:storyBriefing('敌方军官','Enemy Officer','第七营……不退。')}]}]}),
@@ -865,7 +871,7 @@ async function resolveHit(a,d,counterMult){
   const protectedRule=['holdAtOneHp','retreatAtOneHp','protectedFailAtOneHp'].includes(storyRule);
   d.hp=Math.max(protectedRule?1:0,d.hp-dmg);
   render();
-  floatText(d.x,d.y,'-'+dmg+(crit?' 会心!':''),crit?'crit':'dmg');
+  floatText(d.x,d.y,'-'+dmg+(crit?` ${T('crit')}`:''),crit?'crit':'dmg');
   crit?SFX.crit():SFX.hit();
   await sleep(320);
   gainXp(a,8);
@@ -1003,7 +1009,7 @@ function updateActionBtns(){
   let html='';
   if(storyUnitMayAttack(u)&&targetsFrom(u,u.x,u.y).length&&(!NO_MOVE_FIRE.includes(u.type)||ARTILLERY_MOVE_FIRE))
     html+=`<button data-act="attack">${T('actAttack')}</button>`;
-  if(canRelieveGate(u))html+='<button data-act="relieve">接防闸门</button>';
+  if(canRelieveGate(u))html+=`<button data-act="relieve">${T('actRelieveGate')}</button>`;
   if(canCapture(u))html+=`<button data-act="capture">${T('actCapture')}</button>`;
   if(canRepair(u))html+=`<button data-act="repair">${T('actRepair')}</button>`;
   if(canHeal(u))html+=`<button data-act="heal">${T('actHeal')}</button>`;
@@ -1443,7 +1449,7 @@ function showInfo(u){
     <div class="uhead"><span class="uemoji">${uicon}</span>
       <span><span class="uname">${b.name}</span><span class="uside ${u.side==='P'?'p':'e'}">${sideName(u.side)} Lv.${u.level}</span></span>
     </div>
-    <div style="font-size:12px;color:var(--dim)">HP ${u.hp}/${u.maxHp}${G.gameMode==='story'?'':'　经验 '+u.xp+'/'+(30+(u.level-1)*10)}</div>
+    <div style="font-size:12px;color:var(--dim)">HP ${u.hp}/${u.maxHp}${G.gameMode==='story'?'':`　${T('xp')} ${u.xp}/${30+(u.level-1)*10}`}</div>
     <div class="statbar"><b class="${hc}" style="width:${Math.round(ratio*100)}%"></b></div>
     <div class="stats">
       <span>${T('thAtk')} <b>${u.atk}</b></span><span>${T('thDef')} <b>${u.def}</b></span>
